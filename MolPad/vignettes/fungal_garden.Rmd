@@ -1,0 +1,39 @@
+---
+title: "fungal_garden"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fungal_garden}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(pkg)
+data(fungal_full_example)
+```
+
+```{r}
+types <- c("Peptide", "Metbolite", "Lipid")
+processed_data <- pre_process(fungal_dlist, typenameList = types)
+clusters <- gClusters(processed_data, ncluster = 15)
+network <- gNetwork(clusters, nto = 7)
+
+network
+```
+
+```{r}
+gNetwork_view(network)
+gDashboard(
+  processed_data,
+  clusters,
+  pathway,
+  network
+)
+```
