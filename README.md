@@ -7,6 +7,9 @@ MolPad provides a visualization dashboard tool for understanding the dynamics of
 
 \includegraphics[]{image/screenshot.png}
 
+<img src="https://github.com/KaiyanM/MolPad/tree/main/image/flow.png" width="630" height="252"/></a>  
+
+
 ## Installation
 
 ```{r, eval = FALSE}
@@ -17,3 +20,4 @@ install.packages("MolPad")
 ## Usage
 
 
+\includegraphics[]{image/flow.png}
