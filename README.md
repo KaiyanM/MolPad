@@ -9,6 +9,12 @@ MolPad provides a visualization dashboard tool for understanding the dynamics of
 <img src="https://github.com/KaiyanM/MolPad/blob/main/image/screenshot.png" /></a>  
 
 
+
+https://github.com/KaiyanM/MolPad/assets/108436174/eeb09056-9b1c-4a4b-8b5d-88cc8ac199c9
+
+
+
+
 ## Installation
 
 ```{r, eval = FALSE}
