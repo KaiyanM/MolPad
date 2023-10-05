@@ -8,8 +8,9 @@ MolPad provides a visualization dashboard tool for understanding the dynamics of
 
 https://github.com/KaiyanM/MolPad/assets/108436174/eeb09056-9b1c-4a4b-8b5d-88cc8ac199c9
 
-<img src="https://github.com/KaiyanM/MolPad/blob/main/image/flow.png" width="330"/></a>  
-
+<p align="center">
+  <img src="https://github.com/KaiyanM/MolPad/blob/main/image/flow.png" width="450"/></a>  
+</p>
 
 
 ## Installation
