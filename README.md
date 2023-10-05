@@ -1,4 +1,4 @@
-# MolPad
+# MolPad  <img src="image/logo.png" align="right" height="138" /></a>
 Multi-Omics Longitudinal Pattern Dynamic Dashboard with Network
 
 ## Overview
