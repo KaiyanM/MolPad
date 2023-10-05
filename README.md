@@ -1,4 +1,4 @@
-# MolPad  <img src="image/logo.png" align="right" height="138" /></a>
+# MolPad  <img src="https://github.com/KaiyanM/MolPad/blob/main/image/logo.png" align="right" height="138" /></a>
 Multi-Omics Longitudinal Pattern Dynamic Dashboard with Network
 
 ## Overview
