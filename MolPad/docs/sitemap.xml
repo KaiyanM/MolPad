@@ -1,81 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/404.html</loc>
   </url>
   <url>
-    <loc>/Readme.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/Readme.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/test_vignette.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/articles/test_vignette.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/authors.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/index.html</loc>
   </url>
   <url>
-    <loc>/reference/assignvalue.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/assignvalue.html</loc>
   </url>
   <url>
-    <loc>/reference/gClusters.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/cheese.html</loc>
   </url>
   <url>
-    <loc>/reference/gDashboard.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/fungal_garden.html</loc>
   </url>
   <url>
-    <loc>/reference/gMainData.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gClusters.html</loc>
   </url>
   <url>
-    <loc>/reference/gNetwork.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gDashboard.html</loc>
   </url>
   <url>
-    <loc>/reference/gNetwork_view.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gMainData.html</loc>
   </url>
   <url>
-    <loc>/reference/gPathway.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gNetwork.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gNetwork_view.html</loc>
   </url>
   <url>
-    <loc>/reference/make_line_plot.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gPathway.html</loc>
   </url>
   <url>
-    <loc>/reference/make_stackbar_plot.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/make_the_graph.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/make_line_plot.html</loc>
   </url>
   <url>
-    <loc>/reference/make_the_table.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/make_stackbar_plot.html</loc>
   </url>
   <url>
-    <loc>/reference/mass_produce_lm__.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/make_the_graph.html</loc>
   </url>
   <url>
-    <loc>/reference/name_mlp.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/make_the_table.html</loc>
   </url>
   <url>
-    <loc>/reference/pipe.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/mass_produce_lm__.html</loc>
   </url>
   <url>
-    <loc>/reference/pre_process.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/name_mlp.html</loc>
   </url>
   <url>
-    <loc>/reference/ptw_process.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/pipe.html</loc>
   </url>
   <url>
-    <loc>/reference/scale_by_row__.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/pre_process.html</loc>
   </url>
   <url>
-    <loc>/reference/stuff.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/ptw_process.html</loc>
   </url>
   <url>
-    <loc>/reference/transpose_dataframe__.html</loc>
+    <loc>https://kaiyanm.github.io/MolPad/reference/scale_by_row__.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/stuff.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/transpose_dataframe__.html</loc>
   </url>
 </urlset>

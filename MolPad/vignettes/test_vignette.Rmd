@@ -15,7 +15,5 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(pkg)
+library(MolPad)
 ```
-
-## test

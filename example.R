@@ -1,7 +1,7 @@
 #-----------------------update package----------------------
 library(devtools)
 
-
+setwd("/Users/hazelma/Documents/GitHub/MolPad")
 create("MolPad")
 document("MolPad") #important: generate man
 
@@ -21,4 +21,27 @@ networkres
 gDashboard(a,b,pathway,networkres,dashboardtitle = "MolPad Dashboard","ko_term")
 
 #-----------------------run cheese----------------------
+#-------- process cheese12 data--------
+
+chee <- merge(c12,t12[,c("ID","kingdom")],by="ID")
+colnames(chee)[12] <- 'type'
+chee$type[is.na(chee$type)] <- "Other"
+chee[,1:11] <- scale_by_row__(chee[,1:11])
+
+#if the number does not change, then remove the feature
+chee <- na.omit(chee)
+
+#----------------------
+cluschee <- gClusters(chee,ncluster = 10,elbow.max=15)
+networkchee <- gNetwork(cluschee,ntop = 3)
+
+pathchee <- merge(f12,t12,by="ID") %>%
+  rename("taxonomic.scope" = "phylum") %>%
+  rename("Pathway" = "kingdom")
+
+
+gDashboard(chee,cluschee,pathchee,networkchee,dashboardtitle = "Test","KEGG_ID")
+
+#-----
+
 

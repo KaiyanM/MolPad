@@ -8,24 +8,11 @@ document("pkg") #important: generate man
 library("pkg")
 
 #-------- load data--------
-data("cheese12")
-#-----------------------merge----------------------
+data("cheese")
 
-
-#-----------------------run fungal garden----------------------
-data("sample3")
-
-a <- pre_process(samples,typenameList = c("Peptide","Metabolite","Lipid"))
-b <- gClusters(a,ncluster = 12)
-networkres <- gNetwork(b,ntop = 3)
-
-gNetwork_view(networkres)
-networkres
-gDashboard(a,b,pathway,networkres,dashboardtitle = "MolPad Dashboard","ko_term")
-#______________
 #-------- process cheese12 data--------
 
-chee <- merge(c12,t12[,c("ID","phylum")],by="ID")
+chee <- merge(c12,t12[,c("ID","kingdom")],by="ID")
 colnames(chee)[12] <- 'type'
 chee$type[is.na(chee$type)] <- "Other"
 chee[,1:11] <- scale_by_row__(chee[,1:11])

@@ -2,7 +2,9 @@ pandoc: 2.19.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  fungal_garden: fungal_garden.html
   test_vignette: test_vignette.html
-last_built: 2023-10-09T16:53Z
+last_built: 2023-10-09T17:23Z
+urls:
+  reference: https://kaiyanm.github.io/MolPad/reference
+  article: https://kaiyanm.github.io/MolPad/articles
 

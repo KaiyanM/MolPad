@@ -12,6 +12,13 @@ library(usethis)
 use_vignette("test_vignette")
 rmarkdown::render("vignettes/test_vignette.Rmd")
 
-setwd(paste0(getwd(),"/pkg"))
+setwd(paste0(getwd(),"/MolPad"))
 pkgdown::build_site()
 
+getwd()
+
+setwd("/Users/hazelma/Documents/GitHub/MolPad/MolPad")
+
+#----
+
+usethis::use_pkgdown_github_pages()
