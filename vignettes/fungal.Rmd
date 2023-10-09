@@ -55,7 +55,7 @@ Users could also view more details of the results with the following function:
 
 # Run Dashboard
 Name the title and declare the annotation, and then run the dashboard.
-```{r}
+```{r,eval=FALSE}
 gDashboard(a,b,pathway,networkres,
            dashboardtitle = "MolPad Dashboard",
            annotation="ko_term")
