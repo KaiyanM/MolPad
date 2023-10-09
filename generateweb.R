@@ -17,7 +17,7 @@ pkgdown::build_site()
 
 getwd()
 
-setwd("/Users/hazelma/Documents/GitHub/MolPad/MolPad")
+setwd("/Users/hazelma/Documents/GitHub/MolPad")
 
 #----
 
