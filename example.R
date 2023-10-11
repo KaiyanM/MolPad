@@ -2,7 +2,7 @@
 library(devtools)
 
 setwd("/Users/hazelma/Documents/GitHub")
-create("MolPad")
+#create("MolPad")
 document("MolPad") #important: generate man
 
 
@@ -11,6 +11,7 @@ library("MolPad")
 
 #-----------------------run fungal garden----------------------
 data("fungal_garden")
+class(cheesedata)
 a <- pre_process(fungal_dlist,typenameList = c("Peptide","Metabolite","Lipid"))
 b <- gClusters(a,ncluster = 15)
 

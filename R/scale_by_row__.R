@@ -12,8 +12,8 @@
 #' scale_by_row__(fungal[[3]])
 #' @export
 scale_by_row__ <- function(data){
-  d <- as.data.frame(t(apply(data[,-1], 1, scale)))
-  d <- cbind(data[,1], d)
-  colnames(d) <- colnames(data)
-  d
+  to_scale <- data[,(unlist(lapply(data, is.numeric)))&(names(data) %in% c("ID","id","Id")==FALSE)]
+  scaled <- as.data.frame(t(apply(to_scale, 1, scale)))
+  data[,(unlist(lapply(data, is.numeric)))&(names(data) %in% c("ID","id","Id")==FALSE)] <- scaled
+  data
 }

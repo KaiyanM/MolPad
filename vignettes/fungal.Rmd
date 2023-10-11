@@ -2,7 +2,7 @@
 title: "Fungal Garden"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{test_vignette}
+  %\VignetteIndexEntry{Fungal Garden}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,8 +23,12 @@ library(MolPad)
 Fungal gardens serve as an external digestive system for the fungus-growing ant, with mutualistic fungi in the genus Leucoagaricus converting the plant substrate into energy. This dataset is collected from soil sample of the fungal garden that gradually infected over time by a pathogenic fungus, Escovopsis. The goal is to study the dynamic system and analyzed the bacterial taxa present in this system to capture the community shifts and map the detected activity in space.
 ```{r}
 data("fungal_garden")
-head(fungal_dlist)
-head(pathway)
+# 'fungal_garden' is a list of 3:
+head(fungal_dlist[[1]],3)
+head(fungal_dlist[[2]],3)
+head(fungal_dlist[[3]],3)
+# 'pathway' has all the annotation information
+head(pathway,3)
 ```
 
 # Preprocess
@@ -32,14 +36,16 @@ head(pathway)
 We first reshape the datalist into our standard format. The type column is to describe datasets from the input, and if not specified, the type will be auto-filled with "dataset 1", "dataset 2", etc.
 ```{r}
 a <- pre_process(fungal_dlist,typenameList = c("Peptide","Metabolite","Lipid"))
-head(a)
+# The following dataset is our standard input:
+head(a,3)
 ```
 
 ## cluster input
 Then we generate clusters from the long dataset above. The number of clusters can be adjusted according to the elbow method plot in `b[[2]]`, where we picked one close to the inflection point.
 ```{r}
 b <- gClusters(a,ncluster = 15)
-b[[1]]
+#b[[1]] has all the cluster level information, includes: cluster, center, totss, withinss, betweens, size, iter, and ifault.
+#b[[2]] is the WSS plot for different number of clusters.
 b[[2]]
 ```
 ## network input
@@ -49,8 +55,8 @@ networkres <- gNetwork(b,ntop = 5)
 ```
 
 Users could also view more details of the results with the following function:
-```{r}
-#gNetwork_view(networkres)
+```{r,fig.height=9}
+gNetwork_view(networkres)
 ```
 
 # Run Dashboard

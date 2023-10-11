@@ -19,28 +19,44 @@
 #' @export
 pre_process <- function(dataList, typenameList = NULL, replaceNA = TRUE,
                         scale = TRUE, autoColName = "Day_") {
-  # set default type names
-  if (is.null(typenameList)) {
-    typenameList <- paste0("Dataset_", seq_along(dataList))
-  }
-  for (i in seq_along(dataList)) {
-    # set uniform column names
-    if (is.null(autoColName)) {
-      colnames(dataList[[i]]) <- c("ID", paste0(autoColName, 1:(ncol(dataList[[i]]) - 1)))
+  if(class(dataList) == "list"){
+    # set default type names
+    if (is.null(typenameList)) {
+      typenameList <- paste0("Dataset_", seq_along(dataList))
     }
-    # replace NA with 0
+    for (i in seq_along(dataList)) {
+      # set uniform column names
+      if (is.null(autoColName)) {
+        colnames(dataList[[i]]) <- c("ID", paste0(autoColName, 1:(ncol(dataList[[i]]) - 1)))
+      }
+      # replace NA with 0
+      if (replaceNA) {
+        dataList[[i]][is.na(dataList[[i]])] <- 0
+      }
+      # scale by feature (by row)
+      if (scale) {
+        dataList[[i]] <- scale_by_row__(dataList[[i]])
+      }
+      # add type name to corresponding data
+      dataList[[i]]$type <- rep(typenameList[i], nrow(dataList[[i]]))
+    }
+    
+    dataList |>
+      bind_rows() |>
+      mutate(ID = as.factor(ID))
+  }
+  
+  if (class(dataList) == "data.frame") {
+    dataList$type[is.na(dataList$type)] <- "Other"
     if (replaceNA) {
-      dataList[[i]][is.na(dataList[[i]])] <- 0
+      dataList[is.na(dataList)] <- 0
     }
-    # scale by feature (by row)
-    if (scale) {
-      dataList[[i]] <- scale_by_row__(dataList[[i]])
+    if(scale){
+      dataList <- scale_by_row__(dataList) |> na.omit()
     }
-    # add type name to corresponding data
-    dataList[[i]]$type <- rep(typenameList[i], nrow(dataList[[i]]))
+    dataList
   }
-
-  dataList |>
-    bind_rows() |>
-    mutate(ID = as.factor(ID))
+  else{
+    print("'dataList' can only be a list of datasets or a single dataset.")
+  }
 }

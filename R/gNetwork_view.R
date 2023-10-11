@@ -15,8 +15,8 @@
 gNetwork_view <- function(data) {
   options(repr.plot.width = 9, repr.plot.height = 15)
   data %>%
-    ggplot(aes(Var.Names, weight)) +
-    geom_segment(aes(xend = Var.Names, y = 0, yend = weight), color = "skyblue") +
+    ggplot(aes(var_names, weight)) +
+    geom_segment(aes(xend = var_names, y = 0, yend = weight), color = "skyblue") +
     geom_point(aes(size = IncNodePurity), color = "blue", alpha = 0.6) +
     theme_light() +
     coord_flip() +
