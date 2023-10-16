@@ -10,9 +10,14 @@
 #' head(nao_ptw)
 #' @importFrom dplyr bind_rows mutate filter group_by ungroup
 #' @export
-ptw_process <- function(ptw, ko_term) {
+ptw_process <- function(ptw, id_type) {
   nao_ptw <- na.omit(ptw)
-  nao_ptw[, ko_term] <- paste0("https://www.kegg.jp/entry/", nao_ptw[, ko_term])
-  nao_ptw[, ko_term] <- paste0("<a href='", nao_ptw[, ko_term], "' target='_blank'>", nao_ptw[, ko_term], "</a>")
+  if(id_type == "KEGG"){
+    nao_ptw[, "web_id"] <- paste0("https://www.kegg.jp/entry/", nao_ptw[, "web_id"])
+  }else if(id_type == "GO"){
+    nao_ptw[, "web_id"] <- paste0("https://www.ebi.ac.uk/QuickGO/term/", nao_ptw[, "web_id"])
+  }
+  nao_ptw[, "web_id"] <- paste0("<a href='", nao_ptw[, "web_id"], "' target='_blank'>", nao_ptw[, "web_id"], "</a>")
   nao_ptw
 }
+

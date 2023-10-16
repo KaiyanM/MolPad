@@ -38,33 +38,31 @@ cheesedata <- cheese %>%
   rename(type=kingdom) %>%
   pre_process()
 
+
+```
+
+```{r}
 #-----------------------run cheese----------------------
 #-------- process cheese12 data--------
-
-
-
-chee <- merge(c12,t12[,c("ID","kingdom")],by="ID")
-colnames(chee)[12] <- 'type'
-
-chee$type[is.na(chee$type)] <- "Other"
-chee[,1:11] <- scale_by_row__(chee[,1:11])
-
-#if the number does not change, then remove the feature
-chee <- na.omit(chee)
 
 #----------------------
 cluschee <- gClusters(cheesedata,ncluster = 10,elbow.max=15)
 networkchee <- gNetwork(cluschee,ntop = 3)
 
+#到时候加一个选kegg的
+'''
 pathchee <- annotations %>%
   rename("taxonomic.scope" = "class") %>%
   rename("Pathway" = "phylum")
+'''
+
+pathchee <- gAnnotation(annotations,phylum,class,KEGG_ID)
 
 #问题：第一个pathway显示不对,估计是gdashboard开头的问题
 
-annotations
 
-gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test","KEGG_ID")
+
+gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test","KEGG")
 
 #-----
 

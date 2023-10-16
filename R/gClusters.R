@@ -31,6 +31,7 @@
 #'
 #' @importFrom ggplot2 ggplot geom_line aes labs
 #' @importFrom purrr map_dbl
+#' @importFrom dplyr select
 #' @export
 gClusters <- function(data, ncluster = 20, elbow.max = 50, ...) {
   runlist <- seq(from = 1, to = elbow.max, length.out = 5)

@@ -6,7 +6,7 @@
 \title{pre_process}
 \usage{
 pre_process(
-  dataList,
+  data,
   typenameList = NULL,
   replaceNA = TRUE,
   scale = TRUE,
@@ -14,7 +14,7 @@ pre_process(
 )
 }
 \arguments{
-\item{dataList}{A list of datasets. Note that for each dataset, the first columns should be ID and the rest columns are Time1, Time2, ...}
+\item{data}{A list of datasets. Note that for each dataset, the first columns should be ID and the rest columns are Time1, Time2, ...}
 
 \item{typenameList}{A vector of dataset names.}
 

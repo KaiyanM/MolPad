@@ -23,13 +23,14 @@
 #' @export
 gDashboard <- function(data, clusters, pathway, networkres,
                        dashboardtitle = "MolPad Dashboard", 
-                       annotation = "ko_term") {
+                       id_type = "KEGG") {
   ptw <- gPathway(pathway, data, clusters)
   dfgroup_long <- gMainData(data, clusters, ptw)
 
-  nao_ptw <- ptw_process(ptw, annotation)
-  uni_t <- unique(dfgroup_long$taxonomic.scope)
-  uni_ptw <- unique(nao_ptw$Pathway)[!is.na(unique(nao_ptw$Pathway))]
+  nao_ptw <- ptw_process(ptw, id_type)
+  
+  uni_t <- unique(pathway$taxonomic.scope)
+  uni_ptw <- unique(pathway$Pathway)
   css <- readLines(system.file("dashboard.css", package = "MolPad"))
 
   app <- list(

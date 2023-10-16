@@ -8,7 +8,7 @@
 A dataframe and a weblink column name
 }
 \usage{
-ptw_process(ptw, ko_term)
+ptw_process(ptw, id_type)
 }
 \description{
 Generate the cleaned version of the pathway for the dashboard.

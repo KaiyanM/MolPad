@@ -14,7 +14,7 @@ gDashboard(
   pathway,
   networkres,
   dashboardtitle = "MolPad Dashboard",
-  annotation = "ko_term"
+  id_type = "KEGG"
 )
 }
 \arguments{

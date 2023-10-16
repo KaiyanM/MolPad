@@ -11,15 +11,15 @@ library("MolPad")
 
 #-----------------------run fungal garden----------------------
 data("fungal_garden")
-class(cheesedata)
+
 a <- pre_process(fungal_dlist,typenameList = c("Peptide","Metabolite","Lipid"))
 b <- gClusters(a,ncluster = 15)
 
 networkres <- gNetwork(b,ntop = 5)
-b[[2]]
-gNetwork_view(networkres)
-networkres
-gDashboard(a,b,pathway,networkres,dashboardtitle = "MolPad Dashboard","ko_term")
+
+pathway <- gAnnotation(pathway,Pathway,taxonomic.scope,ko_term)
+
+gDashboard(a,b,pathway,networkres,dashboardtitle = "MolPad Dashboard","web_id")
 
 #-----------------------run cheese----------------------
 #-------- process cheese12 data--------
