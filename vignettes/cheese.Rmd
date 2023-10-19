@@ -33,9 +33,9 @@ save(cheese,annotations,file="cheese.RData")
 ```{r}
 data("cheese")
 
-cheesedata <- cheese %>%
-  mutate(annotations["kingdom"]) %>%
-  rename(type=kingdom) %>%
+cheesedata <- cheese |>
+  mutate(annotations["kingdom"]) |>
+  rename(type=kingdom) |>
   pre_process()
 
 

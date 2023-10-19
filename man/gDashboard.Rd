@@ -10,8 +10,8 @@ scale()
 \usage{
 gDashboard(
   data,
-  clusters,
-  pathway,
+  cluster,
+  annotation,
   networkres,
   dashboardtitle = "MolPad Dashboard",
   id_type = "KEGG"
@@ -20,21 +20,18 @@ gDashboard(
 \arguments{
 \item{data}{The output of \code{pre_process()}}
 
-\item{clusters}{The output of \code{gClusters()}}
+\item{cluster}{The output of \code{gClusters()}}
 
-\item{pathway}{A dataframe. The columns must include "ID", "taxonomic.scope",
-and "Pathway".}
+\item{annotation}{A string. Choose a column in your dataset to add links for.}
 
 \item{networkres}{The output of \code{gNetwork}}
 
 \item{dashboardtitle}{A string.}
-
-\item{annotation}{A string. Choose a column in your dataset to add links for.}
 }
 \description{
 Run shiny dashboard.
 }
 \examples{
 data(FuncExample)
-gDashboard(a, b, pathway, networkres, dashboardtitle = "My Title")
+gDashboard(a, b, annotation, networkres, dashboardtitle = "My Title")
 }

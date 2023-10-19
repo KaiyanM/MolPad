@@ -19,7 +19,7 @@ networkres <- gNetwork(b,ntop = 5)
 
 pathway <- gAnnotation(pathway,Pathway,taxonomic.scope,ko_term)
 
-gDashboard(a,b,pathway,networkres,dashboardtitle = "MolPad Dashboard","web_id")
+gDashboard(a,b,pathway,networkres,dashboardtitle = "MolPad Dashboard","KEGG")
 
 #-----------------------run cheese----------------------
 #-------- process cheese12 data--------

@@ -6,8 +6,8 @@
 #' @name gDashboard
 #'
 #' @param data The output of `pre_process()`
-#' @param clusters The output of `gClusters()`
-#' @param pathway A dataframe. The columns must include "ID", "taxonomic.scope",
+#' @param cluster The output of `gClusters()`
+#' @param annotation A dataframe. The columns must include "ID", "taxonomic.scope",
 #' and "Pathway".
 #' @param networkres The output of `gNetwork`
 #' @param dashboardtitle A string.
@@ -16,21 +16,19 @@
 #' @source scale()
 #' @examples
 #' data(FuncExample)
-#' gDashboard(a, b, pathway, networkres, dashboardtitle = "My Title")
+#' gDashboard(a, b, annotation, networkres, dashboardtitle = "My Title")
 #' @importFrom shinydashboard dashboardHeader dashboardSidebar sidebarMenu menuItem
 #' @importFrom shiny observe runApp fluidRow
 #' @importFrom DT renderDataTable datatable dataTableOutput
 #' @export
-gDashboard <- function(data, clusters, pathway, networkres,
+gDashboard <- function(data, cluster, annotation, networkres,
                        dashboardtitle = "MolPad Dashboard", 
                        id_type = "KEGG") {
-  ptw <- gPathway(pathway, data, clusters)
-  dfgroup_long <- gMainData(data, clusters, ptw)
-
-  nao_ptw <- ptw_process(ptw, id_type)
   
-  uni_t <- unique(pathway$taxonomic.scope)
-  uni_ptw <- unique(pathway$Pathway)
+  reshaped_df <- reshape_for_make_functions(data, cluster, annotation, id_type)
+
+  uni_t <- unique(annotation$taxonomic.scope)
+  uni_ptw <- unique(annotation$Pathway)
   css <- readLines(system.file("dashboard.css", package = "MolPad"))
 
   app <- list(
@@ -86,7 +84,7 @@ gDashboard <- function(data, clusters, pathway, networkres,
       function(input, output, session) {
         P1 <- reactive(
           make_the_graph(
-            ptw,
+            reshaped_df$output_graphptw,
             networkres,
             input$obs,
             input$s_ptw
@@ -104,7 +102,7 @@ gDashboard <- function(data, clusters, pathway, networkres,
 
         taxa_selected <- reactive({
           if (is.null(input$s_tax)) {
-            unique(dfgroup_long$taxonomic.scope)
+            uni_t #unique(reshaped_df$output_maindata$taxonomic.scope)
           } else {
             input$s_tax
           }
@@ -112,7 +110,7 @@ gDashboard <- function(data, clusters, pathway, networkres,
 
         output$plot2 <- renderPlot(
           make_line_plot(
-            dfgroup_long,
+            reshaped_df$output_maindata,
             group_names_selected(),
             taxa_selected()
           )
@@ -133,7 +131,7 @@ gDashboard <- function(data, clusters, pathway, networkres,
 
         output$plot3 <- renderPlot(
           make_stackbar_plot(
-            dfgroup_long,
+            reshaped_df$output_maindata,
             group_names_selected(),
             taxa_selected()
           )
@@ -149,12 +147,12 @@ gDashboard <- function(data, clusters, pathway, networkres,
 
         info_filt <- reactive({
           if (is.null((input$plot_brush$xmin))) {
-            nao_ptw[nao_ptw$cluster %in% coords_filt()[, 1], ][1:10, ]
+            reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[, 1], ][1:10, ]
           } else {
             if (is.null(input$s_tax)) {
-              nao_ptw[nao_ptw$cluster %in% coords_filt()[, 1], ]
+              reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[, 1], ]
             } else {
-              nao_ptw[nao_ptw$cluster %in% coords_filt()[, 1], ] |> filter(taxonomic.scope %in% input$s_tax)
+              reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[, 1], ] |> filter(taxonomic.scope %in% input$s_tax)
             }
           }
         })
