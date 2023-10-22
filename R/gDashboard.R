@@ -23,9 +23,9 @@
 #' @export
 gDashboard <- function(data, cluster, annotation, networkres,
                        dashboardtitle = "MolPad Dashboard", 
-                       id_type = "KEGG") {
+                       id_colname, id_type) {
   
-  reshaped_df <- reshape_for_make_functions(data, cluster, annotation, id_type)
+  reshaped_df <- reshape_for_make_functions(data, cluster, annotation,id_colname, id_type)
 
   uni_t <- unique(annotation$taxonomic.scope)
   uni_ptw <- unique(annotation$Pathway)
@@ -161,7 +161,9 @@ gDashboard <- function(data, cluster, annotation, networkres,
           info_filt2 <- info_filt() |>
             filter(Pathway %in% input$s_p) |>
             select(-c("Pathway"))
-          datatable(info_filt2, escape = FALSE, options = list(pageLength = 5))
+          datatable(info_filt2, escape = FALSE, options = list(pageLength = 5,
+                                                               scrollX=TRUE,
+                                                               autoWidth=TRUE))
         })
 
         brushed_grp <- reactive({

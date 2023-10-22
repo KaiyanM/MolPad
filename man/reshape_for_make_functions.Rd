@@ -8,7 +8,7 @@
 scale()
 }
 \usage{
-reshape_for_make_functions(data, cluster, annotation, id_type)
+reshape_for_make_functions(data, cluster, annotation, id_colname, id_type)
 }
 \arguments{
 \item{data}{The output of \code{pre_process()}}

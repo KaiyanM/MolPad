@@ -95,11 +95,90 @@ networkchee <- gNetwork(cluschee,ntop = 3)
 pathchee <- gAnnotation(annotations,phylum,class,KEGG_ID)
 
 
-gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test","KEGG")
+gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test",id_colname = c("GO_ID","web_id"),id_type = c("GO","KEGG"))
 
 #-----
 
 ```
+```{r}
+test<-pathchee[1:13,]
+test$GO_ID
+
+match_database <- function(data,id_colname,id_type){
+  if(length(id_colname)!=length(id_type)){
+    print("id_colname and id_type must have the same length.")
+  }else{
+    for (i in 1:length(id_colname)) {
+      data[[id_colname[i]]] <-  paste_URL(data[[id_colname[i]]],id_type[i])
+    }
+    data
+  }
+}
+
+rm(match_database)
+test1 <- c("kk","uu")
+test1[1]
+match_database(test,id_colname = c("GO_ID","web_id"),id_type = c("GO","KEGG"))
+
+str_extract_all(test$GO_ID,"GO:\\d{7}")
+paste_URL(test$GO_ID,"GO")
+
+output_tableview$web_id <- paste_URL(output_tableview$web_id,id_type)
+```
+
+
+```{r}
+test<-pathchee[1:10,c(1,3)]
+test
+
+gsub("K\\d{5}","link",test$web_id)
+grep("K\\d{5}",test$web_id,value=TRUE)
+
+paste0("<a href='", output_tableview$web_id, "' target='_blank'>", output_tableview$web_id, "</a>")
+
+
+str_extract(test$web_id,"K\\d{5}")
+
+test1 <- test$web_id[7]
+test1
+length(str_extract_all(test$web_id,"K\\d{5}")[[7]])
+library(stringr)
+paste0("<a href='",str_extract_all(test$web_id,"K\\d{5}"),"' target='_blank'>","</a>")
+
+paste_URL <- function(x,id_type){
+  output_list <- c()
+  if(id_type=="KEGG"){
+    extract_multiple_id <- str_extract_all(x,"K\\d{5}")
+    link <- "https://www.kegg.jp/entry/"
+  }else if(id_type=="GO"){
+    extract_multiple_id <- str_extract_all(x,"GO:\\d{7}")
+    link <- "https://www.ebi.ac.uk/QuickGO/term/"
+  }else{
+    print("ID must be one of the following: KEGG, GO")
+  }
+  for (i in 1:length(extract_multiple_id)) {
+    if(length(extract_multiple_id[[i]]) != 0){
+      for (j in 1:length(extract_multiple_id[[i]])) {
+        extract_multiple_id[[i]][j] <- paste0("<a href='",link,extract_multiple_id[[i]][j],"' target='_blank'>",extract_multiple_id[[i]][j],"</a>")
+      }
+      output_list[i] <- paste(extract_multiple_id[[i]], collapse = '<br/>')
+    }
+  }
+  output_list
+}
+
+rm(paste_URL)
+test$web_id 
+  
+paste_URL(test$web_id,"KEGG")
+
+test
+
+test
+lapply(test$web_id, paste_URL)
+```
+
+
 
 ```{r}
 test <- gPathway(pathchee, cheesedata, cluschee)

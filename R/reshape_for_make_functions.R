@@ -15,7 +15,7 @@
 
 
 #' @export
-reshape_for_make_functions <- function(data, cluster, annotation, id_type) {
+reshape_for_make_functions <- function(data, cluster, annotation, id_colname, id_type) {
   
   data_cluster <- data |>
     mutate(cluster = paste0("Group_", cluster[[1]]$cluster)) 
@@ -35,18 +35,15 @@ reshape_for_make_functions <- function(data, cluster, annotation, id_type) {
     mutate(day = factor(day, levels = colnames(data)[c(-1, -ncol(data))])) |>
     left_join(select(annotation, ID, taxonomic.scope), by = "ID")
   
-  output_tableview <- output_graphptw 
+  output_tableview <- output_graphptw |>
     #na.omit()
-    
-  if(id_type == "KEGG"){
-    output_tableview[, "web_id"] <- paste0("https://www.kegg.jp/entry/", output_tableview[, "web_id"])
-  }else if(id_type == "GO"){
-    output_tableview[, "web_id"] <- paste0("https://www.ebi.ac.uk/QuickGO/term/", output_tableview[, "web_id"])
-  }
-  output_tableview[, "web_id"] <- paste0("<a href='", output_tableview[, "web_id"], "' target='_blank'>", output_tableview[, "web_id"], "</a>")
+    match_database(id_colname,id_type)
+  
+
+  #output_tableview$web_id <- paste_URL(output_tableview$web_id,id_type)
   
   list(output_graphptw = output_graphptw,
        output_maindata = output_maindata,
        output_tableview = output_tableview)
-  
+
 }

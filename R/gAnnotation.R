@@ -21,13 +21,11 @@
 #' @importFrom tidyr replace_na
 #' @importFrom dplyr rename mutate_at
 #' @export
-gAnnotation <- function(data,first_order,second_order,identifier) {
+gAnnotation <- function(data,first_order,second_order) {
   strings <- c(as.character(substitute(first_order)), 
-               as.character(substitute(second_order)),
-               as.character(substitute(identifier)))
+               as.character(substitute(second_order)))
   data %>%
     dplyr::rename("Pathway" = strings[1],
-           "taxonomic.scope" = strings[2],
-           "web_id" = strings[3]) %>%
+           "taxonomic.scope" = strings[2]) %>%
     dplyr::mutate_at(c("Pathway","taxonomic.scope"), ~replace_na(.,"Unknown"))
 }
