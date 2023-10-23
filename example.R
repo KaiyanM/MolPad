@@ -45,4 +45,3 @@ gDashboard(chee,cluschee,pathchee,networkchee,dashboardtitle = "Test","KEGG_ID")
 
 #-----
 
-

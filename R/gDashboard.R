@@ -17,7 +17,7 @@
 #' @examples
 #' data(FuncExample)
 #' gDashboard(a, b, annotation, networkres, dashboardtitle = "My Title")
-#' @importFrom shinydashboard dashboardHeader dashboardSidebar sidebarMenu menuItem
+#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar sidebarMenu menuItem
 #' @importFrom shiny observe runApp fluidRow
 #' @importFrom DT renderDataTable datatable dataTableOutput
 #' @export
@@ -33,7 +33,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
 
   app <- list(
     ui =
-      dashboardPage(
+      shinydashboard::dashboardPage(
         dashboardHeader(title = dashboardtitle, titleWidth = 350),
         dashboardSidebar(
           width = 100,
@@ -42,7 +42,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
             menuItem("Info", tabName = "widgets", icon = icon("eye"))
           )
         ),
-        dashboardBody(
+        shinydashboard::dashboardBody(
           tags$style(HTML(css)),
           tabItems(
             tabItem(

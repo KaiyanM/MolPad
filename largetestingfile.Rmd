@@ -86,20 +86,67 @@ library(MolPad)
 
 cheesedata <- cheese |>
   dplyr::mutate(annotations["kingdom"]) |>
-  dplyr::rename(type=kingdom) |>
+  dplyr::rename(type=kingdom) |> 
   pre_process()
 
+
 cluschee <- gClusters(cheesedata,ncluster = 10,elbow.max=15)
+
 networkchee <- gNetwork(cluschee,ntop = 3)
 
-pathchee <- gAnnotation(annotations,phylum,class,KEGG_ID)
+pathchee <- gAnnotation(annotations,phylum,class)
 
-
-gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test",id_colname = c("GO_ID","web_id"),id_type = c("GO","KEGG"))
+gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test",id_colname = c("GO_ID"),id_type = c("GO"))
 
 #-----
+library(shiny)
 
 ```
+
+
+```{r}
+reshape_for_make_functions1 <- function(data, cluster, annotation, id_colname, id_type) {
+  
+  data_cluster <- data |>
+    mutate(cluster = paste0("Group_", cluster[[1]]$cluster)) 
+  
+  #ptw: id cluster columns in annotation
+  output_graphptw <- data_cluster |>
+    select(c("ID", "cluster")) |>
+    merge(annotation, by = "ID", all.x = TRUE)
+  
+  #dfgroup_long: id type cluster day value taxonomic.scope
+  output_maindata <- data_cluster |>
+    pivot_longer(
+      c(-ID, -cluster, -type),
+      names_to = "day",
+      values_to = "value"
+    ) |>
+    mutate(day = factor(day, levels = colnames(data)[c(-1, -ncol(data))])) |>
+    left_join(select(annotation, ID, taxonomic.scope), by = "ID")
+  
+  output_tableview <- output_graphptw 
+    #na.omit()
+    #match_database(id_colname,id_type)
+  
+
+  #output_tableview$web_id <- paste_URL(output_tableview$web_id,id_type)
+  
+  list(output_graphptw = output_graphptw,
+       output_maindata = output_maindata,
+       output_tableview = output_tableview)
+
+}
+
+test <- reshape_for_make_functions1(cheesedata,cluschee,pathchee,id_colname = c("GO_ID","web_id"),id_type = c("GO","KEGG"))[[3]]
+test[["GO_ID"]]
+
+match_database(test[["KEGG_ID"]],id_type="KEGG")
+
+paste_URL(test[["KEGG_ID"]],id_type="KEGG")
+```
+
+
 ```{r}
 test<-pathchee[1:13,]
 test$GO_ID
@@ -395,3 +442,33 @@ gDashboard2 <- function(data, clusters, pathway, networkres,
 reshape_for_make_functions(cheesedata,cluschee,pathchee,"KEGG")
 
 ```
+
+# write test
+```{r}
+set.seed(123)
+sample <- sample(1:10000,100)
+sample
+
+test_data <- cheese[sample,c(1:5)]
+test_annotations <- annotations[sample,c(1:3,4:7)]
+
+
+test_data <- test_data |>
+  dplyr::mutate(test_annotations["kingdom"]) |>
+  dplyr::rename(type=kingdom)
+
+test_data_processed <- test_data |>
+  pre_process()
+
+test_clus_res <- gClusters(test_data_processed,ncluster = 10,elbow.max=15)
+test_net_res <- gNetwork(test_clus_res,ntop = 3)
+test_net_res
+test_net_res <- na.omit(test_net_res)
+
+test_annotations_processed <- gAnnotation(test_annotations,phylum,class)
+test_annotations_processed
+test_clus_res
+gDashboard(test_data_processed,test_clus_res,test_annotations_processed,test_net_res,dashboardtitle = "Test",id_colname = c("GO_ID","web_id"),id_type = c("GO","KEGG"))
+#99-pathway error
+```
+

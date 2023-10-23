@@ -21,7 +21,8 @@ paste_URL <- function(x,id_type){
   }else{
     print("ID must be one of the following: KEGG, GO")
   }
-  for (i in 1:length(extract_multiple_id)) {
+  #print(length(extract_multiple_id))
+  for (i in 1:length(x)) {
     if(length(extract_multiple_id[[i]]) != 0){
       for (j in 1:length(extract_multiple_id[[i]])) {
         extract_multiple_id[[i]][j] <- paste0("<a href='",link,extract_multiple_id[[i]][j],"' target='_blank'>",extract_multiple_id[[i]][j],"</a>")
