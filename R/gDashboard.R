@@ -17,8 +17,8 @@
 #' @examples
 #' data(FuncExample)
 #' gDashboard(a, b, annotation, networkres, dashboardtitle = "My Title")
-#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar sidebarMenu menuItem
-#' @importFrom shiny observe runApp fluidRow
+#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar sidebarMenu menuItem tabItems tabItem box
+#' @importFrom shiny observe runApp fluidRow icon tags HTML column selectInput sliderInput plotOutput brushOpts h2
 #' @importFrom DT renderDataTable datatable dataTableOutput
 #' @export
 gDashboard <- function(data, cluster, annotation, networkres,
@@ -38,8 +38,8 @@ gDashboard <- function(data, cluster, annotation, networkres,
         dashboardSidebar(
           width = 100,
           sidebarMenu(
-            menuItem("Main", tabName = "dashboard", icon = icon("dashboard")),
-            menuItem("Info", tabName = "widgets", icon = icon("eye"))
+            menuItem("Main", tabName = "dashboard", icon = shiny::icon("gauge-high")),
+            menuItem("Info", tabName = "widgets", icon = shiny::icon("eye"))
           )
         ),
         shinydashboard::dashboardBody(
@@ -51,8 +51,8 @@ gDashboard <- function(data, cluster, annotation, networkres,
                 box(column(4, selectInput("s_ptw", "Select a Functional Annotation:", uni_ptw)),
                   column(7, sliderInput("obs", "Importance Score:",
                     min = 0,
-                    max = round(quantile(abs(networkres$weight))[4], 1),
-                    value = round(quantile(abs(networkres$weight))[3], 1)
+                    max = round(quantile(abs(networkres$weight),na.rm=TRUE)[4], 1),
+                    value = round(quantile(abs(networkres$weight),na.rm=TRUE)[3], 1)
                   )),
                   plotOutput("plot", brush = brushOpts("plot_brush", fill = "#bd9fb7", stroke = "#85056d", opacity = 0.3), height = 410),
                   width = 7, height = 550

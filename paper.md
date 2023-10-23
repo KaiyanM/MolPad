@@ -50,6 +50,7 @@ In response to the above issues, previous studies on multi-omics visualization t
 
 Our package provides a visualization dashboard tool for understanding the dynamics of molecular co-expression in microbiome multi-omics. The main idea for addressing the issue is to first use a cluster network to overview multi-omic relationships and then support interactivity to zoom into specific features of interest. We designed a focus-plu-context analysis strategy that links to online curated annotations. Specifically, we have access to a cluster-level network, a bar plot of taxonomic composition, a line plot of data modalities, and a table for each pathway, as illustrated in Figure \ref{fig:dashboard}. Besides, we have the processing functions with the whole pipeline for generating the dashboard wrapped up in the package, so it is also beginner-friendly for students with less R programming experience. 
 
+![alt text](image/dashboard.png "Title")
 
 \begin{figure}
 \centering
@@ -63,6 +64,7 @@ A: cluster-level network, B: taxonomic-level bar plot, C:  a type-level line plo
 \end{figure}
 
 
+![alt text](image/flow.png "Title"){width=500}
 
 \begin{figure}
 \centering
@@ -105,6 +107,8 @@ Besides the data type we mentioned above, our methods allow three levels of info
 # Network Construction
 
 To depict the longitudinal changes, we first cluster trajectories across all molecular features and then reorganize the clusters into a network graph. As in Fig \ref{fig:dashboard} part A, here, we scaled all the time series to extract only the changing patterns and apply K-means for ordination. We use a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each group and run a random forest regression for each group centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
+
+![alt text](image/pattern.png "Title")
 
 \begin{figure}
 \centering

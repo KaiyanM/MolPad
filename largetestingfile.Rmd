@@ -82,6 +82,7 @@ save(cheese,annotations,file="cheese.RData")
 # 2
 ```{r}
 data("cheese")
+data("test_data")
 library(MolPad)
 
 cheesedata <- cheese |>
@@ -96,10 +97,10 @@ networkchee <- gNetwork(cluschee,ntop = 3)
 
 pathchee <- gAnnotation(annotations,phylum,class)
 
-gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test",id_colname = c("GO_ID"),id_type = c("GO"))
+gDashboard(cheesedata,cluschee,pathchee,networkchee,dashboardtitle = "Test",id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
 
 #-----
-library(shiny)
+library(shinydashboard)
 
 ```
 
@@ -254,188 +255,6 @@ gMainData.test(test)
 ```
 
 
-# modify funcs
-```{r}
-
-annotation_hyperlink <- function(ptw, id_type) {
-  nao_ptw <- na.omit(ptw)
-  if(id_type == "KEGG"){
-    nao_ptw[, "web_id"] <- paste0("https://www.kegg.jp/entry/", nao_ptw[, "web_id"])
-  }else if(id_type == "GO"){
-    nao_ptw[, "web_id"] <- paste0("https://www.ebi.ac.uk/QuickGO/term/", nao_ptw[, "web_id"])
-  }
-  nao_ptw[, "web_id"] <- paste0("<a href='", nao_ptw[, "web_id"], "' target='_blank'>", nao_ptw[, "web_id"], "</a>")
-  nao_ptw
-}
-
-annotation_hyperlink2 <- function(ptw, id_type) {
-  nao_ptw <- ptw
-  if(id_type == "KEGG"){
-    nao_ptw[, "web_id"] <- paste0("https://www.kegg.jp/entry/", nao_ptw[, "web_id"])
-  }else if(id_type == "GO"){
-    nao_ptw[, "web_id"] <- paste0("https://www.ebi.ac.uk/QuickGO/term/", nao_ptw[, "web_id"])
-  }
-  nao_ptw[, "web_id"] <- paste0("<a href='", nao_ptw[, "web_id"], "' target='_blank'>", nao_ptw[, "web_id"], "</a>")
-  nao_ptw
-}
-
-gDashboard2 <- function(data, clusters, pathway, networkres,
-                       dashboardtitle = "MolPad Dashboard", 
-                       id_type = "KEGG") {
-  ptw <- gPathway(pathway, data, clusters)
-  dfgroup_long <- gMainData(data, clusters, ptw)
-
-  nao_ptw <- annotation_hyperlink(ptw, id_type)
-  
-  uni_t <- unique(pathway$taxonomic.scope)
-  uni_ptw <- unique(pathway$Pathway)
-  css <- readLines(system.file("dashboard.css", package = "MolPad"))
-
-  app <- list(
-    ui =
-      dashboardPage(
-        dashboardHeader(title = dashboardtitle, titleWidth = 350),
-        dashboardSidebar(
-          width = 100,
-          sidebarMenu(
-            menuItem("Main", tabName = "dashboard", icon = icon("dashboard")),
-            menuItem("Info", tabName = "widgets", icon = icon("eye"))
-          )
-        ),
-        dashboardBody(
-          tags$style(HTML(css)),
-          tabItems(
-            tabItem(
-              tabName = "dashboard",
-              fluidRow(
-                box(column(4, selectInput("s_ptw", "Select a Functional Annotation:", uni_ptw)),
-                  column(7, sliderInput("obs", "Importance Score:",
-                    min = 0,
-                    max = round(quantile(abs(networkres$weight))[4], 1),
-                    value = round(quantile(abs(networkres$weight))[3], 1)
-                  )),
-                  plotOutput("plot", brush = brushOpts("plot_brush", fill = "#bd9fb7", stroke = "#85056d", opacity = 0.3), height = 410),
-                  width = 7, height = 550
-                ),
-                tags$div(
-                  id = "toto",
-                  box(selectInput("s_tax", "Select a Taxonomic Scope:", uni_t, selected = NULL, multiple = TRUE),
-                    plotOutput("plot3", height = 120),
-                    plotOutput("plot2", height = 320),
-                    width = 5, height = 550
-                  )
-                )
-              ),
-              fluidRow(
-                tags$div(
-                  id = "toto",
-                  box(column(3, selectInput("s_p", "Filter by Functional Annotation:", uni_ptw, selected = as.factor(uni_ptw[1]))),
-                    column(9, dataTableOutput("Observe_Out")),
-                    width = 12
-                  )
-                )
-              )
-            ),
-            tabItem(tabName = "widgets", h2("Info tab content"))
-          )
-        )
-      ),
-    server =
-      function(input, output, session) {
-        P1 <- reactive(
-          make_the_graph(
-            ptw,
-            networkres,
-            input$obs,
-            input$s_ptw
-          )
-        )
-        output$plot <- renderPlot(P1())
-
-        group_names_selected <- reactive({
-          if (is.null(input$plot_brush$xmin)) {
-            "Group_2"
-          } else {
-            coords_filt()[, 1]
-          }
-        })
-
-        taxa_selected <- reactive({
-          if (is.null(input$s_tax)) {
-            unique(dfgroup_long$taxonomic.scope)
-          } else {
-            input$s_tax
-          }
-        })
-
-        output$plot2 <- renderPlot(
-          make_line_plot(
-            dfgroup_long,
-            group_names_selected(),
-            taxa_selected()
-          )
-        )
-        coords_filt <- reactive({
-          if (is.null(input$plot_brush$xmin)) {
-            make_the_table(P1())[, -c(1, 2)] #test1-10lines
-          } else {
-            filter(
-              make_the_table(P1()),
-              x >= input$plot_brush$xmin,
-              x <= input$plot_brush$xmax,
-              y >= input$plot_brush$ymin,
-              y <= input$plot_brush$ymax
-            )[, -c(1:2)]
-          }
-        })
-
-        output$plot3 <- renderPlot(
-          make_stackbar_plot(
-            dfgroup_long,
-            group_names_selected(),
-            taxa_selected()
-          )
-        )
-
-        observe({
-          updateSelectInput(
-            session,
-            "s_p",
-            choices = unique(info_filt()[, 5]), selected = input$s_ptw
-          )
-        })
-
-        info_filt <- reactive({
-          if (is.null((input$plot_brush$xmin))) {
-            nao_ptw[nao_ptw$cluster %in% coords_filt()[, 1], ][1:10, ]
-          } else {
-            if (is.null(input$s_tax)) {
-              nao_ptw[nao_ptw$cluster %in% coords_filt()[, 1], ]
-            } else {
-              nao_ptw[nao_ptw$cluster %in% coords_filt()[, 1], ] |> filter(taxonomic.scope %in% input$s_tax)
-            }
-          }
-        })
-
-        output$Observe_Out <- renderDataTable({
-          info_filt2 <- info_filt() |>
-            filter(Pathway %in% input$s_p) |>
-            select(-c("Pathway"))
-          datatable(info_filt2, escape = FALSE, options = list(pageLength = 5))
-        })
-
-        brushed_grp <- reactive({
-          if (is.null(input$plot_brush$xmin)) {
-            unique(networkres$from)
-          } else {
-            unique(coords_filt$name)
-          }
-        })
-      }
-  )
-  runApp(app)
-}
-```
 
 # reshape
 ```{r}
@@ -446,29 +265,34 @@ reshape_for_make_functions(cheesedata,cluschee,pathchee,"KEGG")
 # write test
 ```{r}
 set.seed(123)
-sample <- sample(1:10000,100)
-sample
 
-test_data <- cheese[sample,c(1:5)]
-test_annotations <- annotations[sample,c(1:3,4:7)]
+test_data <- cbind("ID"=1:100,cheese[sample(1:10000,100),c(2:6)],cheese[sample(10000:20000,100),c(2:6)],"type"=c(rep("type_A",20),rep("type_B",20),rep("type_C",10),rep("type_D",50)))
+test_data
+rownames(test_data) <- c()
+colnames(test_data)[2:11] <- paste0("T",1:10)
 
 
-test_data <- test_data |>
-  dplyr::mutate(test_annotations["kingdom"]) |>
-  dplyr::rename(type=kingdom)
+
+test_annotations <- cbind("ID"=1:100,annotations[sample(1:10000,100),c(2:3)],"system"=rep(c('Integumentary System', 'Skeletal System', 'Muscular System', 'Nervous System', 'Endocrine System', 'Cardiovascular System', 'Lymphatic System', 'Respiratory System', 'Digestive System', 'Urinary System'),10),"class"=sample(c(rep(c('antibodies', 'contractile proteins', 'enzymes'),each=20),rep(c('hormonal proteins', 'structural proteins', 'storage proteins', 'transport proteins'),each=10))))
+rownames(test_annotations) <- c()
 
 test_data_processed <- test_data |>
   pre_process()
 
-test_clus_res <- gClusters(test_data_processed,ncluster = 10,elbow.max=15)
-test_net_res <- gNetwork(test_clus_res,ntop = 3)
-test_net_res
-test_net_res <- na.omit(test_net_res)
+test_cluster <- gClusters(test_data_processed,ncluster = 5,elbow.max=15)
+test_network <- gNetwork(test_cluster,ntop = 3)
+test_network
+test_cluster
+# data col must greater than 5
 
-test_annotations_processed <- gAnnotation(test_annotations,phylum,class)
+test_annotations_processed <- gAnnotation(test_annotations,system,class)
 test_annotations_processed
-test_clus_res
-gDashboard(test_data_processed,test_clus_res,test_annotations_processed,test_net_res,dashboardtitle = "Test",id_colname = c("GO_ID","web_id"),id_type = c("GO","KEGG"))
+
+gDashboard(test_data_processed,test_cluster,test_annotations_processed,test_network,dashboardtitle = "Test",id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
 #99-pathway error
+
+save(test_data,test_data_processed,
+     test_annotations,test_annotations_processed,
+     test_cluster,test_network,file="test_data.RData")
 ```
 
