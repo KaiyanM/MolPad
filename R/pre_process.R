@@ -1,15 +1,14 @@
 #' pre_process
 #'
-#' @description This function preprocess the data-inputs and automatically sets uniform format for future use.
-#'
+#' @description The `pre_process()` function aids in processing data inputs and automatically establishes a standardized format for future use. It allows for two types of data input: a list of datasets from different sources or a long dataset containing a specified column `type`. It's important to note that for each dataset, the initial column is designated for `ID`s, while the subsequent columns are expected to contain values measured on Time1, Time2, and so forth.
 #' @docType package
 #' @name pre_process
 #'
-#' @param data A list of datasets. Note that for each dataset, the first columns should be ID and the rest columns are Time1, Time2, ...
-#' @param typenameList A vector of dataset names.
+#' @param data A list of datasets or a long dataset.
+#' @param typenameList A vector of dataset names. This parameter is only applicable when the input format is a list.
 #' @param replaceNa Logical; if TRUE (default), replace NA with 0.
-#' @param scale Logical; if TRUE (default), scale the datasets by row. See also \link[pkg]{scale_by_row__}
-#' @param autoColName A string; if it's not NULL (default), automatically set uniform column names for all the datasets.
+#' @param scale Logical; if TRUE (default), scale the datasets by row. See also \link[MolPad]{scale_by_row__}
+#' @param autoColName A string; if it's not NULL (default), automatically set uniform column names for all the datasets.This parameter is only applicable when the input format is a list.
 #'
 #' @examples
 #' data(samples)
@@ -22,7 +21,7 @@ pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
   if(is.data.frame(data)==FALSE){
     print("Reformat a list of datasets:")
     # set default type names
-    if (is.null(typenameList)) {
+    if (is.null(typenameList)==FALSE) {
       typenameList <- paste0("Dataset_", seq_along(data))
     }
     for (i in seq_along(data)) {
