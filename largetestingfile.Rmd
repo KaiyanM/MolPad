@@ -270,7 +270,7 @@ test_data <- cbind("ID"=1:100,cheese[sample(1:10000,100),c(2:6)],cheese[sample(1
 test_data
 rownames(test_data) <- c()
 colnames(test_data)[2:11] <- paste0("T",1:10)
-
+test_data[5,4] <- NA
 
 
 test_annotations <- cbind("ID"=1:100,annotations[sample(1:10000,100),c(2:3)],"system"=rep(c('Integumentary System', 'Skeletal System', 'Muscular System', 'Nervous System', 'Endocrine System', 'Cardiovascular System', 'Lymphatic System', 'Respiratory System', 'Digestive System', 'Urinary System'),10),"class"=sample(c(rep(c('antibodies', 'contractile proteins', 'enzymes'),each=20),rep(c('hormonal proteins', 'structural proteins', 'storage proteins', 'transport proteins'),each=10))))
@@ -282,7 +282,7 @@ test_data_processed <- test_data |>
 test_cluster <- gClusters(test_data_processed,ncluster = 5,elbow.max=15)
 test_network <- gNetwork(test_cluster,ntop = 3)
 test_network
-test_cluster
+class(test_cluster[[2]])
 # data col must greater than 5
 
 test_annotations_processed <- gAnnotation(test_annotations,system,class)
@@ -295,4 +295,13 @@ save(test_data,test_data_processed,
      test_annotations,test_annotations_processed,
      test_cluster,test_network,file="test_data.RData")
 ```
+
+## write test
+
+```{r}
+x<- test_annotations$KEGG_ID
+
+paste_URL(x,"KEGG")[2]
+```
+
 

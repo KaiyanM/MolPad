@@ -36,7 +36,6 @@ reshape_for_make_functions <- function(data, cluster, annotation, id_colname, id
     left_join(select(annotation, ID, taxonomic.scope), by = "ID")
   
   output_tableview <- output_graphptw |>
-    #na.omit()
     match_database(id_colname,id_type)
   
 
