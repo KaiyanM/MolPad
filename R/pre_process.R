@@ -10,9 +10,16 @@
 #' @param scale Logical; if TRUE (default), scale the datasets by row. See also \link[MolPad]{scale_by_row__}
 #' @param autoColName A string; if it's not NULL (default), automatically set uniform column names for all the datasets.This parameter is only applicable when the input format is a list.
 #'
+#' @details
+#' We consider two distinct scenarios for this application:
+#' *In one scenario, individuals collect several datasets from various aspects and instruments for the same objects. For example, they might be separately detecting lipids, metabolites, and peptides from a specific soil sample.
+#' *In the other scenario, all the data is of uniform quality, but it can be categorized into larger groups that exhibit significant differences.
+#' In both of these cases, the pre_process() function serves as a valuable and versatile tool. Yet, this function is optional when generating the dashboard. Users can perform their own processing as long as the format matches the required output. However, they should be mindful that the number of samples (timepoints) must be greater than 5 to avoid potential errors in the subsequent prediction section.
+#' 
 #' @examples
-#' data(samples)
-#' a <- pre_process(samples)
+#' data(test_data)
+#' head(test_data, 10)
+#' a <- pre_process(test_data)
 #' head(a, 10)
 #' @importFrom dplyr bind_rows
 #' @export

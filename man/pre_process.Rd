@@ -14,21 +14,28 @@ pre_process(
 )
 }
 \arguments{
-\item{data}{A list of datasets. Note that for each dataset, the first columns should be ID and the rest columns are Time1, Time2, ...}
+\item{data}{A list of datasets or a long dataset.}
 
-\item{typenameList}{A vector of dataset names.}
+\item{typenameList}{A vector of dataset names. This parameter is only applicable when the input format is a list.}
 
-\item{scale}{Logical; if TRUE (default), scale the datasets by row. See also \link[pkg]{scale_by_row__}}
+\item{scale}{Logical; if TRUE (default), scale the datasets by row. See also \link[MolPad]{scale_by_row__}}
 
-\item{autoColName}{A string; if it's not NULL (default), automatically set uniform column names for all the datasets.}
+\item{autoColName}{A string; if it's not NULL (default), automatically set uniform column names for all the datasets.This parameter is only applicable when the input format is a list.}
 
 \item{replaceNa}{Logical; if TRUE (default), replace NA with 0.}
 }
 \description{
-This function preprocess the data-inputs and automatically sets uniform format for future use.
+The \code{pre_process()} function aids in processing data inputs and automatically establishes a standardized format for future use. It allows for two types of data input: a list of datasets from different sources or a long dataset containing a specified column \code{type}. It's important to note that for each dataset, the initial column is designated for \code{ID}s, while the subsequent columns are expected to contain values measured on Time1, Time2, and so forth.
+}
+\details{
+We consider two distinct scenarios for this application:
+*In one scenario, individuals collect several datasets from various aspects and instruments for the same objects. For example, they might be separately detecting lipids, metabolites, and peptides from a specific soil sample.
+*In the other scenario, all the data is of uniform quality, but it can be categorized into larger groups that exhibit significant differences.
+In both of these cases, the pre_process() function serves as a valuable and versatile tool. Yet, this function is optional when generating the dashboard. Users can perform their own processing as long as the format matches the required output. However, they should be mindful that the number of samples (timepoints) must be greater than 5 to avoid potential errors in the subsequent prediction section.
 }
 \examples{
-data(samples)
-a <- pre_process(samples)
+data(test_data)
+head(test_data, 10)
+a <- pre_process(test_data)
 head(a, 10)
 }
