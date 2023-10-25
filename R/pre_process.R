@@ -1,4 +1,4 @@
-#' pre_process
+#' pre-processing  datasets
 #'
 #' @description The `pre_process()` function aids in processing data inputs and automatically establishes a standardized format for future use. It allows for two types of data input: a list of datasets from different sources or a long dataset containing a specified column `type`. It's important to note that for each dataset, the initial column is designated for `ID`s, while the subsequent columns are expected to contain values measured on Time1, Time2, and so forth.
 #' @docType package
@@ -15,6 +15,8 @@
 #' *In one scenario, individuals collect several datasets from various aspects and instruments for the same objects. For example, they might be separately detecting lipids, metabolites, and peptides from a specific soil sample.
 #' *In the other scenario, all the data is of uniform quality, but it can be categorized into larger groups that exhibit significant differences.
 #' In both of these cases, the pre_process() function serves as a valuable and versatile tool. Yet, this function is optional when generating the dashboard. Users can perform their own processing as long as the format matches the required output. However, they should be mindful that the number of samples (timepoints) must be greater than 5 to avoid potential errors in the subsequent prediction section.
+#' 
+#' @returns A long dataset with columns for ID, Time1, Time2, ..., and type.
 #' 
 #' @examples
 #' data(test_data)
