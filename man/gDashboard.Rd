@@ -3,10 +3,7 @@
 \docType{package}
 \name{gDashboard}
 \alias{gDashboard}
-\title{gDashboard}
-\source{
-scale()
-}
+\title{generate shiny dashboard}
 \usage{
 gDashboard(
   data,
@@ -19,20 +16,32 @@ gDashboard(
 )
 }
 \arguments{
-\item{data}{The output of \code{pre_process()}}
+\item{data}{A dataframe; The output of \code{pre_process()}}
 
-\item{cluster}{The output of \code{gClusters()}}
+\item{cluster}{A list of two; The output of \code{gClusters()}}
 
-\item{annotation}{A string. Choose a column in your dataset to add links for.}
+\item{annotation}{A dataframe; The output of \code{gAnnotation()}}
 
-\item{networkres}{The output of \code{gNetwork}}
+\item{networkres}{A dataframe; The output of \code{gNetwork()}}
 
 \item{dashboardtitle}{A string.}
+
+\item{id_colname}{A single string or a sting vector. The column names in your annoation dataset that contains external database IDs.}
+
+\item{id_type}{A single string or a sting vector. The corresponding database names for the above columns, must be choose from "KEGG" and "GO".}
 }
 \description{
-Run shiny dashboard.
+Once you have the outputs from the g-functions, you're ready to create your custom Molpad dashboard. Be sure to specify the web ID columns and their corresponding column names.
+}
+\details{
+Please ensure that columns containing external database IDs adhere to the following standards:
+\itemize{
+\item KEGG ID: Begin with 'K' followed by 5 digits, for example, K05685 or K06671.
+\item GO ID: Begin with 'GO:' followed by 7 digits, such as GO:0003674."
+}
 }
 \examples{
-data(FuncExample)
-gDashboard(a, b, annotation, networkres, dashboardtitle = "My Title")
+data(test_data)
+gDashboard(test_data_processed,test_cluster,test_annotations_processed,test_network,id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
+
 }

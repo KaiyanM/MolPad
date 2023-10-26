@@ -1,14 +1,14 @@
-#' gNetwork_view
+#' view the feature importance plot
 #'
-#' @description Generate a feature importance plot for the random forest result.
+#' @description `gNetwork_view()` Generate a feature importance plot for the random forest result. This plot visually highlights the importance of individual cluster within a dataset, helping to identify key factors in predictive modeling.
 #'
 #' @docType package
 #'
-#' @param data The output of `gNetwork()`
-#' @source scale()
+#' @param data A dataframe; The output of `gNetwork()`
+
 #' @examples
-#' data(FuncExample)
-#' gNetwork_view(networkres)
+#' data(test_data)
+#' gNetwork_view(test_network)
 #' @name gNetwork_view
 #' @importFrom ggplot2 geom_segment theme_light coord_flip ylab xlab ggtitle theme element_blank facet_wrap
 #' @export

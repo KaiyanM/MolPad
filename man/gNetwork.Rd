@@ -3,26 +3,26 @@
 \docType{package}
 \name{gNetwork}
 \alias{gNetwork}
-\title{gNetwork}
-\source{
-scale()
-}
+\title{generate prediction network}
 \usage{
 gNetwork(clusters, ntop = 10, method = "randomforest")
 }
 \arguments{
-\item{clusters}{The output of \code{gClusters()}}
+\item{clusters}{A list of two; The output of \code{gClusters()}}
 
-\item{ntop}{A number.Pick the top n predictors for each feature.}
+\item{ntop}{A number. Pick the top n predictors for each feature.}
 
 \item{seed}{A number of random seed.}
 }
 \description{
-Generate random forest outputs for the Network.
+\code{gNetwork()} generates a prediction network for each functional annotation. For every feature, all other features are considered as independent variables, and the top predictors are selected based on \%IncMSE.
+}
+\details{
+We assess relationships between clusters using Mean Squared Error (MSE) changes resulting from random shuffling. \code{gNetwork()}'s output includes edge weights and node pairs, which are essential inputs for the dashboard.
 }
 \examples{
-data(FuncExample)
-networkres <- gNetwork(b, ntop = 3)
+data(test_data)
+networkres <- gNetwork(test_cluster, ntop = 3)
 head(networkres)
 gNetwork_view(networkres)
 

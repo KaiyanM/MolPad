@@ -1,22 +1,28 @@
-#' gDashboard
+#' generate shiny dashboard
 #'
-#' @description Run shiny dashboard.
+#' @description Once you have the outputs from the g-functions, you're ready to create your custom Molpad dashboard. Be sure to specify the web ID columns and their corresponding column names.
 #'
 #' @docType package
 #' @name gDashboard
 #'
-#' @param data The output of `pre_process()`
-#' @param cluster The output of `gClusters()`
-#' @param annotation A dataframe. The columns must include "ID", "taxonomic.scope",
-#' and "Pathway".
-#' @param networkres The output of `gNetwork`
+#' @param data A dataframe; The output of `pre_process()`
+#' @param cluster A list of two; The output of `gClusters()`
+#' @param annotation A dataframe; The output of `gAnnotation()`
+#' @param networkres A dataframe; The output of `gNetwork()`
 #' @param dashboardtitle A string.
-#' @param annotation A string. Choose a column in your dataset to add links for.
+#' @param id_colname A single string or a sting vector. The column names in your annoation dataset that contains external database IDs.
+#' @param id_type A single string or a sting vector. The corresponding database names for the above columns, must be choose from "KEGG" and "GO".
 #'
-#' @source scale()
+
 #' @examples
-#' data(FuncExample)
-#' gDashboard(a, b, annotation, networkres, dashboardtitle = "My Title")
+#' data(test_data)
+#' gDashboard(test_data_processed,test_cluster,test_annotations_processed,test_network,id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
+#' 
+#' @details
+#' Please ensure that columns containing external database IDs adhere to the following standards:
+#' * KEGG ID: Begin with 'K' followed by 5 digits, for example, K05685 or K06671.
+#' * GO ID: Begin with 'GO:' followed by 7 digits, such as GO:0003674."
+#' 
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar sidebarMenu menuItem tabItems tabItem box
 #' @importFrom shiny observe runApp fluidRow icon tags HTML column selectInput sliderInput plotOutput brushOpts h2
 #' @importFrom DT renderDataTable datatable dataTableOutput

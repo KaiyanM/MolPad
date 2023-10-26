@@ -5,8 +5,8 @@
 #' @docType package
 #' @name gNetwork
 #'
-#' @param clusters The output of `gClusters()`
-#' @param ntop A number.Pick the top n predictors for each feature.
+#' @param clusters A list of two; The output of `gClusters()`
+#' @param ntop A number. Pick the top n predictors for each feature.
 #' @param seed A number of random seed.
 #' 
 #' @details 
