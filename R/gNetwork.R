@@ -1,17 +1,19 @@
-#' gNetwork
+#' generate prediction network
 #'
-#' @description Generate random forest outputs for the Network.
-#'
+#' @description `gNetwork()` generates a prediction network for each functional annotation. For every feature, all other features are considered as independent variables, and the top predictors are selected based on %IncMSE. 
+#' 
 #' @docType package
 #' @name gNetwork
 #'
 #' @param clusters The output of `gClusters()`
 #' @param ntop A number.Pick the top n predictors for each feature.
 #' @param seed A number of random seed.
-#'
-#' @source scale()
-#' @examples data(FuncExample)
-#' networkres <- gNetwork(b, ntop = 3)
+#' 
+#' @details 
+#' We assess relationships between clusters using Mean Squared Error (MSE) changes resulting from random shuffling. `gNetwork()`'s output includes edge weights and node pairs, which are essential inputs for the dashboard.
+#' 
+#' @examples data(test_data)
+#' networkres <- gNetwork(test_cluster, ntop = 3)
 #' head(networkres)
 #' gNetwork_view(networkres)
 #'
