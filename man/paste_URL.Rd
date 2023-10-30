@@ -3,18 +3,15 @@
 \docType{package}
 \name{paste_URL}
 \alias{paste_URL}
-\title{paste_URL}
-\format{
-A dataframe and a weblink column name
-}
+\title{Paste URL}
 \usage{
 paste_URL(x, id_type)
 }
 \description{
-Generate the cleaned version of the pathway for the dashboard.
+Retrieve database IDs and associate them with their respective URLs.
 }
 \examples{
-data(stuff)
-nao_ptw <- ptw_process(ptw, ko_term)
-head(nao_ptw)
+data(test_data)
+paste_URL(test_annotations$GO_ID[1:4], id_type = "GO")
+
 }

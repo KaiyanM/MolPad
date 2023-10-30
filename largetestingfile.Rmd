@@ -302,6 +302,49 @@ save(test_data,test_data_processed,
 x<- test_annotations$KEGG_ID
 
 paste_URL(x,"KEGG")[2]
+
+data("cheese")
+data("fungal_garden")
+
+colnames(fungal_dlist[[2]])
+colnames(pathway)
+
+data("test_data")
+
+l <- reshape_for_make_functions(test_data_processed, test_cluster, test_annotations_processed, id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
+
+test_graphptw <- l[[1]]
+test_maindata <- l[[2]]
+test_tableview <- l[[3]]
+
+
+save(test_data,
+     test_data_processed,
+     test_annotations,
+     test_annotations_processed,
+     test_cluster,
+     test_network,
+     test_graphptw,
+     test_maindata,
+     test_tableview,
+     file="test_data.RData")
+
+unique(test_graphptw$taxonomic.scope)
+
+c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins")
+
+make_line_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+
+transpose_dataframe__(a)
+
+as.data.frame(t(test_data[1:5,1:10]))
+
+row
+
+a <- data.frame("Day"=c("Day1","Day2","Day3"),"feature_1" =c(1,2,3),"feature_2" =c(0,4,1),"feature_3" =c(1,1,0))
+
+rm(a)
+
 ```
 
 

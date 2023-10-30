@@ -17,8 +17,11 @@ pkgdown::build_site()
 
 getwd()
 
-setwd("/Users/hazelma/Documents/GitHub/MolPad")
 
+#----
+
+setwd("/Users/hazelma/Documents/GitHub/MolPad")
+pkgdown::build_site()
 #----
 
 # One time set-up with Git, Github, and Github Actions

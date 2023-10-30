@@ -1,13 +1,14 @@
-#' paste_URL
-#'
-#' Generate the cleaned version of the pathway for the dashboard.
-#'
+#' Paste URL
+#' 
+#' @description
+#' Retrieve database IDs and associate them with their respective URLs.
+#' 
 #' @docType package
 #' @name paste_URL
-#' @format A dataframe and a weblink column name
-#' @examples data(stuff)
-#' nao_ptw <- ptw_process(ptw, ko_term)
-#' head(nao_ptw)
+#' 
+#' @examples data(test_data)
+#' paste_URL(test_annotations$GO_ID[1:4], id_type = "GO")
+#' 
 #' @importFrom stringr str_extract_all
 #' @export
 paste_URL <- function(x,id_type){

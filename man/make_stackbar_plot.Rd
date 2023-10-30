@@ -3,10 +3,7 @@
 \docType{data}
 \name{make_stackbar_plot}
 \alias{make_stackbar_plot}
-\title{make stackbar plot}
-\format{
-A numeric vector.
-}
+\title{Make stackbar plot}
 \source{
 ggplot2::geom_bar
 }
@@ -17,6 +14,7 @@ make_stackbar_plot(dfgroup_long, selected_groups, selected_taxa)
 Generate the stackbar plot for the dashboard.
 }
 \examples{
-data(FuncExample)
-make_stackbar_plot(dfgroup_long,c('Group_33','Group_3'),c('Bacteria',"Metazoa","Burkholderia"))
+data(test_data)
+make_stackbar_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+
 }

@@ -3,10 +3,7 @@
 \docType{data}
 \name{make_line_plot}
 \alias{make_line_plot}
-\title{make line plot}
-\format{
-A numeric vector.
-}
+\title{Make line plot}
 \source{
 ggplot2::geom_ribbon
 }
@@ -17,6 +14,7 @@ make_line_plot(dfgroup_long, selected_groups, selected_taxa)
 Generate the line and ribbon plot for the dashboard.
 }
 \examples{
-data(FuncExample)
-make_line_plot(dfgroup_long4, c("Group_1", "Group_10"), c("Bacteria", "No Label"))
+data(test_data)
+make_line_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+
 }

@@ -3,17 +3,19 @@
 \docType{package}
 \name{transpose_dataframe__}
 \alias{transpose_dataframe__}
-\title{transpose dataframe}
-\format{
-A data frame in which the first column is ID and the rest are observations for different time points.
-}
+\title{Transpose dataframe}
 \usage{
 transpose_dataframe__(data)
 }
 \description{
-This function transpose a given data frame, converting the first column to new column names
+This function transposes a provided data frame, using the values from the first column as new column names.
+}
+\details{
+The expected input is a data frame where the first column serves as \code{Time}, and the subsequent columns contain observations for various features.
 }
 \examples{
-data(fungal)
-transpose_dataframe__(fungal[[3]])
+a <- data.frame("Day"=c("Day1","Day2","Day3"),"feature_1" =c(1,2,3),"feature_2" =c(0,4,1),"feature_3" =c(1,1,0))
+a
+transpose_dataframe__(a)
+
 }

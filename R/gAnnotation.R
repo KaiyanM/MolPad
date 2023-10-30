@@ -1,9 +1,7 @@
-#' generate processed annotation
+#' Generate processed annotation
 #'
-#' @description `gAnnotation()` returns the 
-#'
-#' @details This function could 
-#' 
+#' @description `gAnnotation()` provides the standard input format for the dashboard, allowing users to select two columns as the primary factors they wish to visualize and describe in the data.
+
 #' @docType package
 #' @name gAnnotation
 #'
@@ -17,8 +15,8 @@
 #' 
 #' @details
 #' Guidelines for Selecting Annotations:
-#' *The first-order annotation is recommended to be functional, such as a pathway or functional system. This parameter will primarily serve the purpose of filtering out one network at a time when displaying the dashboard. 
-#' *The second-order annotation is utilized to illustrate the composition of a first-order annotation using a bar plot. Therefore, it is better to set it as taxon, class label, etc.
+#' * The first-order annotation is recommended to be functional, such as a pathway or functional system. This parameter will primarily serve the purpose of filtering out one network at a time when displaying the dashboard.
+#' * The second-order annotation is utilized to illustrate the composition of a first-order annotation using a bar plot. Therefore, it is better to set it as taxon, class label, etc.
 #' 
 #' @importFrom tidyr replace_na
 #' @importFrom dplyr rename mutate_at

@@ -1,4 +1,4 @@
-#' view the feature importance plot
+#' View the feature importance plot
 #'
 #' @description `gNetwork_view()` Generate a feature importance plot for the random forest result. This plot visually highlights the importance of individual cluster within a dataset, helping to identify key factors in predictive modeling.
 #'

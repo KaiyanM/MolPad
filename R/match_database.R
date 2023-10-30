@@ -1,13 +1,15 @@
-#' match database
+#' Match database
 #'
-#' Generate the cleaned version of the pathway for the dashboard.
+#' @description
+#' `match_database()` is an internal function that matches the selected columns in the dataset with corresponding databases.
 #'
 #' @docType package
 #' @name match_database
-#' @format A dataframe and a weblink column name
-#' @examples data(stuff)
-#' nao_ptw <- ptw_process(ptw, ko_term)
-#' head(nao_ptw)
+#' 
+#' @examples data(test_data)
+#' head(test_annotations_processed)
+#' head(match_database(test_annotations_processed,id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG")))
+#' 
 #' @export
 match_database <- function(data,id_colname,id_type){
   if(length(id_colname)!=length(id_type)){

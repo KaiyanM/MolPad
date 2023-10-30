@@ -1,10 +1,11 @@
-#' make table
+#' Make table from brushed region
 #'
+#' @description
 #' Generate the table of selected groups for the dashboard.
 #'
-#' @docType data
+#' @docType package
 #' @name make_the_table
-#' @format .
+#' @param p ggplot output
 
 #' @importFrom ggplot2 ggplot ggplot_build
 #' @export

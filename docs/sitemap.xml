@@ -4,12 +4,6 @@
     <loc>https://kaiyanm.github.io/MolPad/404.html</loc>
   </url>
   <url>
-    <loc>https://kaiyanm.github.io/MolPad/articles/fungal 2.html</loc>
-  </url>
-  <url>
-    <loc>https://kaiyanm.github.io/MolPad/articles/fungal.html</loc>
-  </url>
-  <url>
     <loc>https://kaiyanm.github.io/MolPad/articles/index.html</loc>
   </url>
   <url>
@@ -22,10 +16,25 @@
     <loc>https://kaiyanm.github.io/MolPad/index.html</loc>
   </url>
   <url>
+    <loc>https://kaiyanm.github.io/MolPad/paper.html</loc>
+  </url>
+  <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/cheese.html</loc>
   </url>
   <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/color_palettes__.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/convert_range.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/extend.color__.html</loc>
+  </url>
+  <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/fungal_garden.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/gAnnotation.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/gClusters.html</loc>
@@ -64,13 +73,25 @@
     <loc>https://kaiyanm.github.io/MolPad/reference/mass_produce_lm__.html</loc>
   </url>
   <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/match_database.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/paste_URL.html</loc>
+  </url>
+  <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/pre_process.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/ptw_process.html</loc>
   </url>
   <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/reshape_for_make_functions.html</loc>
+  </url>
+  <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/scale_by_row__.html</loc>
+  </url>
+  <url>
+    <loc>https://kaiyanm.github.io/MolPad/reference/test_data.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/transpose_dataframe__.html</loc>

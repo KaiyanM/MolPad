@@ -3,22 +3,18 @@
 \docType{package}
 \name{scale_by_row__}
 \alias{scale_by_row__}
-\title{scale_by_row}
-\format{
-A data frame in which the first column is ID and the rest are
-observations for different time points. Note that the first column should be ID
-and thus will not be scaled, and the rest of the columns require dbl format.
-}
-\source{
-scale()
-}
+\title{Scale by row}
 \usage{
 scale_by_row__(data)
 }
 \description{
-This function scales the values in the rows for all non-ID columns.
+Scales the values for each sample, where each row is independently processed.
+}
+\details{
+The input is expected to be a data frame with the first column as the ID and the following columns containing observations at different time points. The ID column remains unaltered, and the other columns should be in double (dbl) format and will be scaled.
 }
 \examples{
-data(fungal)
-scale_by_row__(fungal[[3]])
+data(test_data)
+scale_by_row__(test_data[1:5,1:10])
+
 }

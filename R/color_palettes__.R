@@ -1,3 +1,11 @@
+#' Color palettes
+#'
+#' @description An internal function for built-in color palettes.
+#' @param name A string with two options: `"graytone"` or `"darkwarm"`.
+
+#' @docType package
+#' @name color_palettes__
+#' 
 #' @export
 color_palettes__ <- function(name){
   if(name == "graytone"){

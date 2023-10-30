@@ -3,19 +3,35 @@
 \docType{data}
 \name{test_data}
 \alias{test_data}
-\title{loads PNNL dataframes}
+\title{Test data}
 \format{
-dataframe
-}
-\source{
-cheese data
+two datasets: \code{data} and \code{annotations}
 }
 \description{
-This function loads three PNNL dataframes: dfgroup_long, ptw and res.
+This is a synthetically generated dataset created for basic testing purposes.
 }
+\section{data}{
+
+A data frame with 100 rows and 12 variables:
+\describe{
+\item{ID}{row ID}
+\item{T1~T10}{count value for 10 timepoints}
+\item{type}{type A~D}
+}
+}
+
+\section{annotations}{
+
+A data frame with 100 rows and 5 variables:
+\describe{
+\item{ID}{row ID}
+\item{GO_ID}{go ID}
+\item{KEGG_ID}{kegg ID}
+\item{system}{primary lable: 'Integumentary System', 'Skeletal System', 'Muscular System', 'Nervous System', 'Endocrine System', 'Cardiovascular System', 'Lymphatic System', 'Respiratory System', 'Digestive System', 'Urinary System'}
+\item{class}{secondary label: 'antibodies', 'contractile proteins', 'enzymes', 'hormonal proteins', 'structural proteins', 'storage proteins', 'transport proteins'}
+}
+}
+
 \examples{
 data(test_data)
-head(c12)
-head(f12)
-head(t12)
 }

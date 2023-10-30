@@ -3,10 +3,7 @@
 \docType{package}
 \name{reshape_for_make_functions}
 \alias{reshape_for_make_functions}
-\title{reshape for make functions}
-\source{
-scale()
-}
+\title{Reshape for 'make' functions}
 \usage{
 reshape_for_make_functions(data, cluster, annotation, id_colname, id_type)
 }
@@ -15,8 +12,21 @@ reshape_for_make_functions(data, cluster, annotation, id_colname, id_type)
 
 \item{cluster}{The output of \code{gClusters()}}
 
-\item{annotation}{he output of \code{gPathway()}}
+\item{annotation}{The output of \code{gPathway()}}
+
+\item{id_colname}{The columns that contain database IDs.}
+
+\item{id_type}{The corresponding database names for the above columns.}
 }
 \description{
-This function
+This internal function produces three primary datasets for the dashboard intended for the "make" functions.
+}
+\examples{
+data(test_data)
+l <- reshape_for_make_functions(test_data_processed, test_cluster, test_annotations_processed, id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
+head(l[[1]])
+head(l[[2]])
+head(l[[3]])
+
+
 }

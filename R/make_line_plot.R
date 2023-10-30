@@ -1,13 +1,17 @@
-#' make line plot
+#' Make line plot
 #'
+#' @description
 #' Generate the line and ribbon plot for the dashboard.
 #'
 #' @docType data
 #' @name make_line_plot
-#' @format A numeric vector.
+
 #' @source ggplot2::geom_ribbon
-#' @examples data(FuncExample)
-#' make_line_plot(dfgroup_long4, c("Group_1", "Group_10"), c("Bacteria", "No Label"))
+#' 
+#' @examples data(test_data)
+#' make_line_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+#' 
+
 #' @importFrom grid unit
 #' @importFrom dplyr filter summarise_at n_distinct
 #' @importFrom ggplot2 scale_fill_manual scale_color_manual element_text

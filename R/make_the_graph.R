@@ -1,14 +1,16 @@
-#' make graph plot
-#' need more edit on doc
-#'
+#' Make graph plot
+#' 
+#' @description
 #' Generate the graph for the dashboard.
 #'
-#' @docType data
+#' @docType package
 #' @name make_the_graph
-#' @format A numeric vector. pathway$Pathway
-#' @source ggplot2::geom_bar
-#' @examples data(FuncExample)
-#' make_the_graph(ptw, networkres, 0.03, "03010_Ribosome")
+
+#' @source ggraph::ggraph
+#' 
+#' @examples data(test_data)
+#' make_the_graph(test_graphptw, test_network, 0.03, "Muscular System")
+#' 
 #' @importFrom igraph graph_from_data_frame
 #' @importFrom ggraph ggraph geom_edge_link geom_node_label scale_edge_alpha
 #' @importFrom ggplot2 scale_fill_gradient ggtitle aes scale_fill_gradient
@@ -23,7 +25,7 @@ make_the_graph <- function(ptw, network_output, min_weight, s_ptw) {
   ncluster <- n_distinct(network_output$from)
 
   #-----------------------------------------------
-  # since nao_ptw is processed in gDashboard, use ptw
+
   count_group <- ptw[ptw$Pathway == s_ptw, ] |> count(cluster, sort = TRUE)
 
   if (nrow(count_group) < ncluster) {

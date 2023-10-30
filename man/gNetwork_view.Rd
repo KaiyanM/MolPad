@@ -3,7 +3,7 @@
 \docType{package}
 \name{gNetwork_view}
 \alias{gNetwork_view}
-\title{view the feature importance plot}
+\title{View the feature importance plot}
 \usage{
 gNetwork_view(data)
 }

@@ -3,7 +3,7 @@
 \docType{package}
 \name{gDashboard}
 \alias{gDashboard}
-\title{generate shiny dashboard}
+\title{Generate shiny dashboard}
 \usage{
 gDashboard(
   data,
@@ -41,7 +41,8 @@ Please ensure that columns containing external database IDs adhere to the follow
 }
 }
 \examples{
+\dontrun{
 data(test_data)
 gDashboard(test_data_processed,test_cluster,test_annotations_processed,test_network,id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
-
+}
 }

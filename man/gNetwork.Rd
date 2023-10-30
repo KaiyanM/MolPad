@@ -3,7 +3,7 @@
 \docType{package}
 \name{gNetwork}
 \alias{gNetwork}
-\title{generate prediction network}
+\title{Generate prediction network}
 \usage{
 gNetwork(clusters, ntop = 10, method = "randomforest")
 }

@@ -3,7 +3,7 @@
 \docType{package}
 \name{gClusters}
 \alias{gClusters}
-\title{generate clusters}
+\title{Generate clusters}
 \usage{
 gClusters(data, ncluster = 20, elbow.max = 50, ...)
 }

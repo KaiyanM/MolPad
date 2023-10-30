@@ -1,4 +1,4 @@
-#' pre-processing  datasets
+#' Pre-processing datasets
 #'
 #' @description The `pre_process()` function aids in processing data inputs and automatically establishes a standardized format for future use. It allows for two types of data input: a list of datasets from different sources or a long dataset containing a specified column `type`. It's important to note that for each dataset, the initial column is designated for `ID`s, while the subsequent columns are expected to contain values measured on Time1, Time2, and so forth.
 #' @docType package
@@ -23,6 +23,7 @@
 #' head(test_data, 10)
 #' a <- pre_process(test_data)
 #' head(a, 10)
+#' 
 #' @importFrom dplyr bind_rows
 #' @export
 pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,

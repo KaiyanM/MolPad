@@ -1,4 +1,4 @@
-#' generate prediction network
+#' Generate prediction network
 #'
 #' @description `gNetwork()` generates a prediction network for each functional annotation. For every feature, all other features are considered as independent variables, and the top predictors are selected based on %IncMSE. 
 #' 

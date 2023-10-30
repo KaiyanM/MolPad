@@ -1,4 +1,4 @@
-#' generate shiny dashboard
+#' Generate shiny dashboard
 #'
 #' @description Once you have the outputs from the g-functions, you're ready to create your custom Molpad dashboard. Be sure to specify the web ID columns and their corresponding column names.
 #'
@@ -15,9 +15,11 @@
 #'
 
 #' @examples
+#' \dontrun{
 #' data(test_data)
 #' gDashboard(test_data_processed,test_cluster,test_annotations_processed,test_network,id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
-#' 
+#' }
+
 #' @details
 #' Please ensure that columns containing external database IDs adhere to the following standards:
 #' * KEGG ID: Begin with 'K' followed by 5 digits, for example, K05685 or K06671.

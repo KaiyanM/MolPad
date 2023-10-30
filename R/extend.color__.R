@@ -1,3 +1,14 @@
+#' Extend color palettes
+#'
+#' @description An internal function designed to pair vectors with color palettes and automatically generate colors for longer vectors that cannot find a match.
+#' @param n A number. The length of feature vector that you want to match with the colors.
+#' @param colors A vector of colors (finite).
+#' @param extendby A number to select from 1, 2, 3, or 4, representing four distinct auto-fill schemes.
+#' @param alpha A number to select from range [0,1].
+
+#' @docType package
+#' @name extend.color__
+
 #' @export
 extend.color__ <- function(n, colors, extendby = 1, alpha = 1, ...) {
   k <- length(colors)

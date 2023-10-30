@@ -1,13 +1,17 @@
-#' make stackbar plot
-#'
+#' Make stackbar plot
+#' 
+#' @description
 #' Generate the stackbar plot for the dashboard.
 #'
 #' @docType data
 #' @name make_stackbar_plot
-#' @format A numeric vector.
+
 #' @source ggplot2::geom_bar
-#' @examples data(FuncExample)
-#' make_stackbar_plot(dfgroup_long,c('Group_33','Group_3'),c('Bacteria',"Metazoa","Burkholderia"))
+#' 
+#' @examples data(test_data)
+#' make_stackbar_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+#' 
+
 #' @import dplyr
 #' @import ggplot2
 #' @importFrom grid unit

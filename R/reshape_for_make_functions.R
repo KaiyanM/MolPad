@@ -1,19 +1,25 @@
-#' reshape for make functions
+#' Reshape for 'make' functions
 #'
-#' @description This function 
+#' @description This internal function produces three primary datasets for the dashboard intended for the "make" functions.
 #'
 #' @docType package
 #' @name reshape_for_make_functions
 #'
 #' @param data The output of `pre_process()`
 #' @param cluster The output of `gClusters()`
-#' @param annotation he output of `gPathway()`
+#' @param annotation The output of `gPathway()`
+#' @param id_colname The columns that contain database IDs.
+#' @param id_type The corresponding database names for the above columns.
+#'
+#' @examples data(test_data)
+#' l <- reshape_for_make_functions(test_data_processed, test_cluster, test_annotations_processed, id_colname = c("GO_ID","KEGG_ID"),id_type = c("GO","KEGG"))
+#' head(l[[1]])
+#' head(l[[2]])
+#' head(l[[3]])
+#' 
 #'
 #' @importFrom tidyr pivot_longer 
 #' @importFrom dplyr mutate left_join select
-#' @source scale()
-
-
 #' @export
 reshape_for_make_functions <- function(data, cluster, annotation, id_colname, id_type) {
   
