@@ -61,10 +61,16 @@
 </h1></div>
 <p>2023-05-31</p>
 <div class="section level2">
-<h2 id="background">Background<a class="anchor" aria-label="anchor" href="#background"></a>
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>This package provides a simple and powerful visualization dashboard for multi-omics researchers with less R programming experience to explore and analyze their data in different dimensions.</p>
-<p>MolPad could help you with the following:</p>
+<p>MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of multi-omics microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we’ve developed a focus-plus-context strategy that seamlessly connects to online curated annotations.</p>
+<p>The dashboard itself comprises several components, including a cluster-level network, a bar plot illustrating taxonomic composition, a line plot displaying data modalities, and a table for each pathway. You can see an illustration of these features in this screenshot.</p>
+<p><img src="reference/figures/screenshot.png" width="100%"></p>
+<p>Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to students with limited R programming experience.</p>
+</div>
+<div class="section level2">
+<h2 id="molpad-could-help-you-with">MolPad could help you with:<a class="anchor" aria-label="anchor" href="#molpad-could-help-you-with"></a>
+</h2>
 <ol style="list-style-type: decimal">
 <li>Clutering the data with k-means and building a group network.</li>
 <li>Find the significant trend patterns in your datasets.</li>
@@ -74,12 +80,6 @@
 <li>Check detailed information on each feature through automatically generated hyperlinks.</li>
 <li>Have a better overall understanding of the datasets.</li>
 </ol>
-</div>
-<div class="section level2">
-<h2 id="dashboard">Dashboard<a class="anchor" aria-label="anchor" href="#dashboard"></a>
-</h2>
-<p>You could generate your dashboard easily, for example:</p>
-<p><img src="reference/figures/screenshot.png" width="100%"></p>
 </div>
 <div class="section level2">
 <h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
