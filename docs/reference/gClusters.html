@@ -98,70 +98,70 @@ In cases where your dataset is extensive or intricate, you might consider increa
 <span class="r-in"><span><span class="va">reslist</span> <span class="op">&lt;-</span> <span class="fu">gClusters</span><span class="op">(</span><span class="va">test_data_processed</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># k-means result</span></span></span>
 <span class="r-in"><span><span class="va">reslist</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> K-means clustering with 20 clusters of sizes 3, 6, 8, 6, 5, 3, 4, 7, 4, 3, 1, 12, 5, 3, 6, 10, 4, 2, 2, 6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> K-means clustering with 20 clusters of sizes 6, 8, 5, 1, 6, 3, 2, 3, 4, 8, 13, 5, 5, 4, 4, 6, 4, 3, 7, 3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Cluster means:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             T1          T2          T3         T4         T5         T6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1.31631350 -0.76059916 -0.76059916  1.5193444  0.6006058  0.8438579</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1.03050384 -0.62595927  0.30371539  1.0821972  1.2374965 -1.0856661</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   0.11559709 -0.19000668 -0.25629794 -0.1487697 -0.4383348  2.5830148</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   2.43423843 -0.09945335 -0.61374870 -0.1958739 -0.5847831 -0.7182670</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   0.65431739 -0.06991189  0.32724119  0.2386101  1.1603437  1.4951461</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   0.06782472 -0.71014462 -0.28353947 -0.6475037 -0.8105857  1.0715170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7   0.33814100  1.48152270  0.43414431  0.7473132  0.8107827 -0.5234016</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8   2.51869341 -0.07145513 -0.54062731 -0.4517271 -0.5226647 -0.1941830</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9   1.45173820  0.26236463  1.31600581 -0.2531012  0.2004547 -1.1238942</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10  1.19848738 -0.53770079 -0.98945474  0.3514487  0.3514487  1.6923522</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 -0.22485951 -1.12429753  1.57401655  0.2248595  0.6745785  0.6745785</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 -0.20491350 -0.71755536 -0.69407192 -0.5252359 -0.1153112 -0.6029658</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13 -0.81355388 -0.84696982 -0.32573017  1.1218534  2.0955812 -0.5620731</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  1.59106523 -0.70009954 -0.70009954 -0.8665352 -0.3242091  1.0917582</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15  2.09193480 -0.33320285 -0.50786563 -0.5579659 -0.5579659  1.5455977</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 -0.27715339 -0.39760069 -0.06466866  1.3995407  2.1316423 -0.2806884</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  0.51242658 -0.30850751 -0.74892267 -0.9486565 -0.7214881  1.7698648</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  0.17928591 -0.66637224 -0.66637224 -1.1839214 -1.1839214  1.3276673</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19  2.12358651  1.05868538 -0.39467611  0.1315587 -0.1315587  0.3946761</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20  0.80396722  0.07346897 -0.82246179 -0.6884003 -0.4999813 -0.7273667</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              T7          T8         T9         T10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  -0.666108041 -0.66610804 -0.6661080 -0.76059916</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  -1.182978501 -0.35025781 -0.2882471 -0.12080420</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  -0.006327004 -0.32767797 -0.6655989 -0.66559889</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  -0.718266991 -0.31268050  0.2816637  0.52717140</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  -0.892735465 -0.96439801 -0.9125525 -1.03606056</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  -0.973667763 -0.38398059  1.0715170  1.59856325</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7  -1.000948275 -0.36911602 -0.9592190 -0.95921900</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8  -0.257880387  0.14387695 -0.4517271 -0.17230569</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9  -0.987867401 -0.34001367 -0.3308568 -0.19483004</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 10 -0.043835990 -0.53770079 -0.9894547 -0.49558994</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 11 -1.574016547  0.22485951  0.6745785 -1.12429753</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 12 -0.609199661  0.20785715  1.6549625  1.60643367</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 13 -0.651292750 -0.49883923  0.4244601  0.05656427</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  0.987030825  0.21656075 -0.4289365 -0.86653521</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 -0.425513174 -0.55796593 -0.3057148 -0.39133827</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 -0.548494719 -0.64699282 -0.6639215 -0.65166279</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  1.161061393 -0.72148809 -0.1072487  0.11295885</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18  0.343340400  0.31795470  1.0249441  0.50739489</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19 -0.795567972 -0.79556797 -0.7955680 -0.79556797</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 -0.745878993 -0.09280208  0.7897672  1.90968781</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            T1           T2         T3         T4         T5          T6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   2.0919348 -0.333202855 -0.5078656 -0.5579659 -0.5579659  1.54559773</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   0.6410455 -0.005649381 -0.5787763 -0.7466147 -0.6053004 -0.57819711</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1.2107229 -0.806085206 -0.8060852  1.0953706  0.5441275  1.22356844</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  -0.2248595 -1.124297533  1.5740165  0.2248595  0.6745785  0.67457852</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   2.7734994 -0.217244637 -0.3597240 -0.4172516 -0.5000122 -0.11678355</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  -0.0138494 -0.479399520 -0.1515155  0.9973056  2.3582387 -0.09636628</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7   2.1235865  1.058685377 -0.3946761  0.1315587 -0.1315587  0.39467611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8   0.9149625  0.242137567  0.4594105  1.2274583  0.5713808 -1.41600809</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   1.5659959 -0.491193111 -0.8300086 -0.6160199 -0.2092753  1.19151568</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10  0.1155971 -0.190006681 -0.2562979 -0.1487697 -0.4383348  2.58301481</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 -0.1969268 -0.788853024 -0.7295417 -0.4925252 -0.1517674 -0.28920477</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 -0.5127900 -0.432180422 -0.2928614  1.4016497  2.2364346 -0.42751477</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13  0.6543174 -0.069911892  0.3272412  0.2386101  1.1603437  1.49514606</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14 -0.8425228 -0.884292711 -0.3324115  1.1780630  1.9965494 -0.62784012</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15  1.1859982 -1.066131354  0.4374795  0.8931396  1.4821199 -0.92016280</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16  0.4013797 -0.427795751 -0.7214059 -1.0270782 -0.8756325  1.62246564</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  0.3381410  1.481522705  0.4341443  0.7473132  0.8107827 -0.52340158</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18  1.5003652  0.277271883  1.3193887 -0.5913849  0.1947253 -1.02696603</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  2.2278983  0.029508834 -0.7583628 -0.2619747 -0.5953255 -0.70974025</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 -0.2879046 -0.358194823  0.3243873  1.6307522  1.8504138 -0.22640546</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              T7         T8          T9        T10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  -0.425513174 -0.5579659 -0.30571480 -0.3913383</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  -0.789723656 -0.1303527  0.84262186  1.9509468</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  -0.453071656 -0.7493905 -0.74939053 -0.5097663</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  -1.574016547  0.2248595  0.67457852 -1.1242975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  -0.357532815 -0.2988952 -0.29119673 -0.2148586</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  -0.344330864 -0.6722149 -0.79893393 -0.7989339</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7  -0.795567972 -0.7955680 -0.79556797 -0.7955680</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8  -1.234639029 -0.7766781 -0.24931833  0.2612939</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9   0.774154665  0.1963021 -0.62663627 -0.9548353</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10 -0.006327004 -0.3276780 -0.66559889 -0.6655989</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11 -0.645298764  0.1406425  1.62090230  1.5325728</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12 -0.568882246 -0.4894134 -0.40967873 -0.5047633</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13 -0.892735465 -0.9643980 -0.91255251 -1.0360606</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14 -0.639696370 -0.5487978  0.50565808  0.1952907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 -1.066131354 -0.2965478 -0.32699790 -0.3227660</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16  0.888487728 -0.3750072  0.27014887  0.2444375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17 -1.000948275 -0.3691160 -0.95921900 -0.9592190</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18 -1.026966034  0.0182080 -0.33232101 -0.3323210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19 -0.567081109  0.1320610  0.03929621  0.4637200</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 -0.768407214 -0.7684072 -0.69811702 -0.6981170</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Clustering vector:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19  20 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  12  15  12   7   5  12  17  19  16  13   2  20  20   8   2  13   3  12   9   4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  11   1  11  17  13  11  16   7  12  14  15   2   2   5   8  12  10  11  18  19 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  21  22  23  24  25  26  27  28  29  30  31  32  33  34  35  36  37  38  39  40 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  10  12   3  15   8  13   1   4   3  16  14  16   7  12  16   5   2  20  12   7 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   9  11  10   1   5  14   3  19  10  12   9   6  17  11  20  13  15   2  11  17 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  41  42  43  44  45  46  47  48  49  50  51  52  53  54  55  56  57  58  59  60 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   3  15  12  12  10  12   3   5  15   3   4  14  17  20   3  14  17  16   4  16 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  10   1  11  11   3   2  10  13   1  10  19   9  16   2  10   9  16  12  19  20 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  61  62  63  64  65  66  67  68  69  70  71  72  73  74  75  76  77  78  79  80 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2   5   1  20  11  15   8  10   9   9   6  13   3  19  20  16   7  16   2   1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  15  13   3   2   4   1   5   3  18  18   2  14  10   7   2  12  17   6   8   3 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  81  82  83  84  85  86  87  88  89  90  91  92  93  94  95  96  97  98  99 100 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2   6   8  18   6  15   9   8  18   4  16  17  16   8  12   5  13   8  12   4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  15  11  19  16  11   1   8   5  16   5  20  16   6  19  11  13  14   5  11  19 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Within cluster sum of squares by cluster:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  2.4583646 11.7178543  8.0412334  4.9244324  5.9394323  4.1616532</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [7]  8.1365152 10.6603527  9.9418120  5.0061693  0.0000000 18.8975131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13]  3.4617088  4.4529111  3.0260293  5.9461649  6.5422826  3.9735491</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [19]  0.9833964  9.4996169</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  (between_SS / total_SS =  83.6 %)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1]  3.0260293 14.7124215  8.2663203  0.0000000  2.0713631  1.0044156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7]  0.9833964  5.3908495  7.3290085  8.0412334 26.5869685  1.6484649</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13]  5.9394323  2.5009604  3.9544969 15.7120269  8.1365152  6.6391790</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [19] 13.8467580  1.1799079</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  (between_SS / total_SS =  82.4 %)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Available components:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
