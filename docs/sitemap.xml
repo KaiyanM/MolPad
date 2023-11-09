@@ -13,16 +13,10 @@
     <loc>https://kaiyanm.github.io/MolPad/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://kaiyanm.github.io/MolPad/articles/test_vignette.html</loc>
-  </url>
-  <url>
     <loc>https://kaiyanm.github.io/MolPad/authors.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/index.html</loc>
-  </url>
-  <url>
-    <loc>https://kaiyanm.github.io/MolPad/paper.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/cheese.html</loc>
@@ -49,16 +43,10 @@
     <loc>https://kaiyanm.github.io/MolPad/reference/gDashboard.html</loc>
   </url>
   <url>
-    <loc>https://kaiyanm.github.io/MolPad/reference/gMainData.html</loc>
-  </url>
-  <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/gNetwork.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/gNetwork_view.html</loc>
-  </url>
-  <url>
-    <loc>https://kaiyanm.github.io/MolPad/reference/gPathway.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/index.html</loc>
@@ -86,9 +74,6 @@
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/pre_process.html</loc>
-  </url>
-  <url>
-    <loc>https://kaiyanm.github.io/MolPad/reference/ptw_process.html</loc>
   </url>
   <url>
     <loc>https://kaiyanm.github.io/MolPad/reference/reshape_for_make_functions.html</loc>
