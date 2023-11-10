@@ -12,6 +12,8 @@ https://github.com/KaiyanM/MolPad/assets/108436174/eeb09056-9b1c-4a4b-8b5d-88cc8
 
 ![screen recording](https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording.gif)
 
+<img src="/blob/main/man/figures/screen_recording.gif" width="250" height="250"/>
+
 ## Installation
 
 ```{r, eval = FALSE}
