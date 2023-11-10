@@ -1,5 +1,5 @@
 # MolPad  <img src="https://github.com/KaiyanM/MolPad/blob/main/man/figures/logo.png" align="right" height="130" /></a>
-An R-Shiny Package for Focus-plus-Context Multi-Omics Pattern Exploration
+An R-Shiny Package for Focus-plus-Context Multi-Omics Longitudinal Exploration
 
 ## Overview
 
