@@ -41,8 +41,8 @@ install.packages("MolPad")
 
 If you need assistance with MolPad, there are two primary ways for seeking help:
 
-1. Ask us questions about anything related to MolPad! To add your question, simply create an [issue](https://github.com/KaiyanM/MolPad/issues) in this repository.
-2. [Stack Overflow](https://stackoverflow.com/questions/tagged/molpad) is another excellent resource for finding answers to common R questions. 
+1. Ask us about anything related to MolPad! To add your question, simply create an [issue](https://github.com/KaiyanM/MolPad/issues) in this repository.
+2. [Stack Overflow](https://stackoverflow.com/questions/tagged/molpad) is another excellent resource for finding answers to common issues in R. 
 
 Note that it's particularly effective when you can provide a reproducible example that illustrates the specific problem you're facing.
 
