@@ -10,6 +10,7 @@ Additionally, our package simplifies the entire pipeline for creating the dashbo
 
 https://github.com/KaiyanM/MolPad/assets/108436174/eeb09056-9b1c-4a4b-8b5d-88cc8ac199c9
 
+![screen recording](https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording.gif)
 
 ## Installation
 
