@@ -37,12 +37,15 @@ install.packages("MolPad")
   <img src="man/figures/flow.png" width="450"/></a>  
 </p>
 
-### Getting Help
+## Getting Help
 
-If you need assistance with MolPad, there are two primary ways for seeking help:
+If you need assistance with MolPad, there are two primary ways to seek help:
 
-1. Ask us about anything related to MolPad! To add your question, simply create an [issue](https://github.com/KaiyanM/MolPad/issues) in this repository.
-2. [Stack Overflow](https://stackoverflow.com/questions/tagged/molpad) is another excellent resource for finding answers to common issues in R. 
+1. Ask us about anything related to MolPad! To add your question, create an [issue](https://github.com/KaiyanM/MolPad/issues) in this repository.
+2. [Stack Overflow](https://stackoverflow.com/questions/tagged/molpad) is another excellent resource for answering common issues in R.
 
-Note that it's particularly effective when you can provide a reproducible example that illustrates the specific problem you're facing.
+Remember that it's particularly effective when you can provide a reproducible example that shows the specific problem you're having.
+
+## Contribution
+To contribute to this project, you could use the following workflow: fork the repository --> create vour local copy --> submit a pull request.
 
