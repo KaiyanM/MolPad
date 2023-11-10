@@ -7,12 +7,10 @@ MolPad offers a visualization dashboard tool designed to enhance our understandi
 
 Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to students with limited R programming experience.
 
+<p align="center">
+  <img src="/man/figures/screen_recording.gif" width="550" /></a>  
+</p>
 
-https://github.com/KaiyanM/MolPad/assets/108436174/eeb09056-9b1c-4a4b-8b5d-88cc8ac199c9
-
-![screen recording](https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording.gif)
-
-<img src="/man/figures/screen_recording.gif" width="500" />
 
 ## Installation
 
