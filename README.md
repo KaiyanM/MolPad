@@ -8,7 +8,7 @@ MolPad offers a visualization dashboard tool designed to enhance our understandi
 Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to students with limited R programming experience.
 
 <p align="center">
-  <img src="/man/figures/screen_recording.gif" width="550" /></a>  
+  <img src="/man/figures/screen_recording.gif" width="650" /></a>  
 </p>
 
 
