@@ -1,0 +1,71 @@
+---
+title: "Cheese"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cheese}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(MolPad)
+library(dplyr)
+```
+
+# Load Data
+In the process of producing cheese, regular washing with a brine solution is an aging practice that can homogenize the microbial communities on the cheese' surface and facilitate intermicrobial interactions. In the following parts, we will analyze a longitudinal data set of three washed-rind cheese communities collected during cheese ripening.
+
+```{r}
+data("cheese")
+```
+
+# Preprocess
+## Data and Annotations
+Here we add a 'type' column with `kingdom` to describe the characteristic of cheese data. The other two columns `phylum` and `class` are taken as tags for elemental composition.
+
+```{r}
+cheesedata <- cheese |>
+  dplyr::mutate(annotations["kingdom"]) |>
+  dplyr::rename_with(.cols = 12, ~"type")|>
+  pre_process()
+```
+
+```{r,error=TRUE}
+pathchee <- gAnnotation(annotations,"phylum","class")
+```
+
+## Cluster Input
+Then we generate clusters from the long dataset above. 
+```{r}
+cluschee <- gClusters(cheesedata,ncluster = 10,elbow.max=15)
+```
+
+## network input
+After that, we got the network result from the clusters. We pick top 3 predictors for each feature, and save the network output for future use.
+```{r}
+networkchee <- gNetwork(cluschee,ntop = 3)
+```
+
+View more details of the results with the following function:
+```{r,fig.height=9, fig.width=5}
+gNetwork_view(networkchee)
+```
+
+# Run Dashboard
+Declare the annotations, and then run the dashboard.
+```{r,eval=FALSE}
+gDashboard(cheesedata,
+           cluschee,
+           pathchee,
+           networkchee,
+           id_colname = c("GO_ID","KEGG_ID"),
+           id_type = c("GO","KEGG"))
+```

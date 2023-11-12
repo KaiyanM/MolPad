@@ -40,3 +40,6 @@ usethis::use_pkgdown_github_pages()
 
 pkgdown::build_site()
 
+
+pkgdown::clean_site()
+pkgdown::build_site()
