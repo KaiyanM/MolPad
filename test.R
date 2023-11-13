@@ -1,6 +1,7 @@
 setwd("/Users/hazelma/Documents/GitHub/MolPad")
 usethis::use_testthat(3)
 
+data("test_data")
 use_r()
 use_test("pre_process.R")
 use_test("gClusters.R")

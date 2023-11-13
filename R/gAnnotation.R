@@ -23,7 +23,6 @@
 #' @export
 gAnnotation <- function(data,first_order,second_order) {
   l <- c(as.character(substitute(first_order)), as.character(substitute(second_order)))
-  print(c(l[1],l[2],length(l)))
   data %>%
     dplyr::rename("Pathway" = l[1],
            "taxonomic.scope" = l[2]) %>%

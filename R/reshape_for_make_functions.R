@@ -41,10 +41,13 @@ reshape_for_make_functions <- function(data, cluster, annotation, id_colname, id
     mutate(day = factor(day, levels = colnames(data)[c(-1, -ncol(data))])) |>
     left_join(select(annotation, ID, taxonomic.scope), by = "ID")
   
-  output_tableview <- output_graphptw |>
-    match_database(id_colname,id_type)
+  if(is.null(id_colname)|is.null(id_type)){
+    output_tableview <- output_graphptw
+  }else{
+    output_tableview <- output_graphptw |>
+      match_database(id_colname,id_type)
+  }
   
-
   #output_tableview$web_id <- paste_URL(output_tableview$web_id,id_type)
   
   list(output_graphptw = output_graphptw,

@@ -11,8 +11,8 @@ gDashboard(
   annotation,
   networkres,
   dashboardtitle = "MolPad Dashboard",
-  id_colname,
-  id_type
+  id_colname = NULL,
+  id_type = NULL
 )
 }
 \arguments{

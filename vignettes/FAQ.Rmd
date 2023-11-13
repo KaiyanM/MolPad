@@ -1,5 +1,5 @@
 ---
-title: "test_vignette"
+title: "FAQ"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{test_vignette}
@@ -14,6 +14,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(MolPad)
-```
+
+## Common Questions:
+
+### How can I tell if my dataset is suitable for using this dashboard?
+
+If you have a lot of longitudinal data with at least two descriptive columns (like types), it will match our minimal needs for starting the dashboard. And in addition, if your data has specific web-ID columns, MolPad will make it more convenient for you by createing links to databases automatically.
+
+### How can I customize my dashboard?
+
+You can edit the title within the `gDashboard()` function. For additional personalization, such as adjusting colors or sizes of the figures, you can fork the repository, create a copy, and then make modifications in the `dashboard.css` file.
+
+### What should I do if I only have a few time points(<5)?
+
+Firstly, we strongly recommend extending the length of longitudinal samples. You can achieve this by increasing the number of measurements between two days or by incorporating simulated data. If these options don't suit your needs, you can also consider using the "linear" method for the `gNetwork()` function.
+
+

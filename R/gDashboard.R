@@ -31,7 +31,7 @@
 #' @export
 gDashboard <- function(data, cluster, annotation, networkres,
                        dashboardtitle = "MolPad Dashboard", 
-                       id_colname, id_type) {
+                       id_colname=NULL, id_type=NULL) {
   
   reshaped_df <- reshape_for_make_functions(data, cluster, annotation,id_colname, id_type)
 
