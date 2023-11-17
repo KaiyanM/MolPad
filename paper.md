@@ -7,7 +7,7 @@ tags:
   - dynamic dashboard
   - network
 authors:
-  - name: xxx
+  - name: Kaiyan Ma
     orcid: xx
     equal-contrib: true
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
@@ -67,16 +67,15 @@ Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-dow
 
 Here we aim to highlight the versatility of the MolPad Dashboard with the illustration of the following example of washed-rind cheese communities. Unlike a multi-omics dataset, this data stands for a more general case that only includes single-omic measurements for the change of bacteria or Eukaryota in each cheese sample. Furthermore, it has multiple nested annotation labels ranging from kingdom to class, making it more flexible in interpretation. In this circumstance,  MolPad is able to present the clustered changing patterns with three different levels of granularity selected by the user, providing a dynamic overall perspective that can be drilled down at any time.
 
-\paragraph{Background}
+## Background
 
 In the process of producing cheese, regular washing with a brine solution is an aging practice that can homogenize the microbial communities on the cheese' surface and facilitate intermicrobial interactions. This study analyzed a longitudinal data set of three washed-rind cheese communities collected during cheese ripening. 
 
-\cite{doi:10.1128/msystems.00701-22}
 
-\paragraph{Problem}
+## Problem
 The study revealed a highly reproducible microbial succession in each cheese. In the bacterial community, Firmicutes are dominant at the very beginning, and Proteobacteria quickly take over the domination by the end of ripening. Besides, Cheese A and C show a reproducible establishment of Actinobacteria and Bacteroidetes separately. To verify the above conclusions with the MolPad dashboard, we analyzed two cheeses(A and C) from all three batches in week 2~13. 
 
-\paragraph{Result}
+## Result
 In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. The bacterial community is larger and has a higher variety of patterns, so we take the top four for detailed analysis. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings.
 
 
