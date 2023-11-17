@@ -19,12 +19,13 @@
 #' * The second-order annotation is utilized to illustrate the composition of a first-order annotation using a bar plot. Therefore, it is better to set it as taxon, class label, etc.
 #' 
 #' @importFrom tidyr replace_na
-#' @importFrom dplyr rename mutate_at
+#' @importFrom dplyr rename mutate_at 
+#' @importFrom rlang enquo
 #' @export
 gAnnotation <- function(data,first_order,second_order) {
   l <- c(as.character(substitute(first_order)), as.character(substitute(second_order)))
   data %>%
-    dplyr::rename("Pathway" = l[1],
-           "taxonomic.scope" = l[2]) %>%
+    dplyr::rename("Pathway" = !!rlang::enquo(first_order),
+           "taxonomic.scope" = !!rlang::enquo(second_order)) %>%
     dplyr::mutate_at(c("Pathway","taxonomic.scope"), ~replace_na(.,"Unknown"))
 }
