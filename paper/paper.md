@@ -59,6 +59,10 @@ Besides the data type we mentioned above, our methods allow three levels of info
 
 To depict the longitudinal changes, we first cluster trajectories across all molecular features and then reorganize the clusters into a network graph. As in Fig \ref{fig:dashboard} part A, here, we scaled all the time series to extract only the changing patterns and apply K-means for ordination. We use a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each group and run a random forest regression for each group centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
 
+
+[alt text](/./man/figures/dashboard.png "Title")
+
+
 Navigating the network in the MolPad dashboard follows three steps as demonstrated in Fig \ref{fig:flow}: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
 Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest. 
 
@@ -81,7 +85,6 @@ In applying the dashboard, we made an extended time series by connecting the las
 
 
 
-![alt text](/./man/figures/dashboard.png "Title")
 
 ![alt text](/./man/figures/flow.png "Title"){width=500}
 
