@@ -82,10 +82,10 @@ In applying the dashboard, we made an extended time series by connecting the las
 
 
 
-![alt text](man/figures/dashboard.png "Title")
+![alt text](/man/figures/dashboard.png "Title")
 
-![alt text](man/figures/flow.png "Title"){width=500}
+![alt text](/man/figures/flow.png "Title"){width=500}
 
 
-![alt text](man/figures/pattern.png "Title")
+![alt text](/man/figures/pattern.png "Title")
 
