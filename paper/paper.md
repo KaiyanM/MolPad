@@ -47,7 +47,7 @@ The realm of multi-omics is expanding rapidly, with numerous new studies and met
 
 # Related Work
 
-In response to the above issues, previous studies on multi-omics visualization tools have designed methods to work on complicated data. microViz\cite{microviz} provides a Shiny app for interactive exploration by pairing ordination plots and composition circular bar charts to show each taxon's prevalence and abundance. GWENA\cite{Lemoine_Scott-Boyer_Ambroise_Périn_Droit_2021} applies a network in conducting gene co‑expression analysis and extended module characterization in a single package to understand the underlying processes contributing to a disease or a phenotype. NeVOmics\cite{Zúñiga-León_Carrasco-Navarro_Fierro_2018} improved compatibility with a dynamic dashboard and facilitated the functional characterization of data from omics technologies. It also integrates Over-representation analysis methodology and network-based visualization to show the enrichment results. These methods suggest the mechanisms that improve the utility of multi-omics visualization tools under analysis.
+In response to the above issues, previous studies on multi-omics visualization tools have designed methods to work on complicated data. `microViz` [@microviz] provides a Shiny app for interactive exploration by pairing ordination plots and composition circular bar charts to show each taxon's prevalence and abundance. `GWENA` [@Lemoine_Scott-Boyer_Ambroise_Périn_Droit_2021] applies a network in conducting gene co‑expression analysis and extended module characterization in a single package to understand the underlying processes contributing to a disease or a phenotype. `NeVOmics` [@Zúñiga-León_Carrasco-Navarro_Fierro_2018] improved compatibility with a dynamic dashboard and facilitated the functional characterization of data from omics technologies. It also integrates Over-representation analysis methodology and network-based visualization to show the enrichment results. These methods suggest the mechanisms that improve the utility of multi-omics visualization tools under analysis.
 
 # Data input
 
@@ -81,10 +81,10 @@ In applying the dashboard, we made an extended time series by connecting the las
 
 
 
-![alt text](/man/figures/dashboard.png "Title")
+![alt text](./man/figures/dashboard.png "Title")
 
-![alt text](/man/figures/flow.png "Title"){width=500}
+![alt text](./man/figures/flow.png "Title"){width=500}
 
 
-![alt text](/man/figures/pattern.png "Title")
+![alt text](./man/figures/pattern.png "Title")
 
