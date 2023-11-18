@@ -60,7 +60,7 @@ In applying the dashboard, we made an extended time series by connecting the las
 
 # Usage
 
-The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the eponymous R package which can be downloaded and run on a local computer. We envision some users will need additional flexibility in their analyses and require backend coding in R, for example, for detailed operating model setup and/or final analyses to develop recommendations for management. For such purposes, the core suite of R functions used in the Shiny app is available from the R package.
+The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the eponymous R package which can be downloaded and run on a local computer. We anticipate that some users may need more flexibility in their analyses, requiring backend R coding for tasks like setting up detailed operating models or download figure outputs. For such needs, the essential set of R functions employed in the Shiny app is accessible through the R package.
 
 # Figures
 
