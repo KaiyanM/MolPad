@@ -58,26 +58,23 @@ Here we aim to highlight the versatility of the MolPad Dashboard with a case stu
 Our goal is to verify their conclusions and provide an alternative to visualize complicated longitudinal data. According to the study, in the bacterial community, Firmicutes are dominant at the very beginning, and Proteobacteria quickly take over the domination by the end of ripening. Overall, cheeses A and C show a reproducible establishment of Actinobacteria and Bacteroidetes separately. To confirm the mentioned findings using the MolPad dashboard, we examined two cheeses (A and C) across all three batches during weeks 2 to 13.
 
 ### Conclusion
-In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. We take the top four groups from the bacterial community for detailed analysis: Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings, which substantiate the capabilities of `MolPad` as a reproducible tool to streamline the visualization of longitudinal patterns for the timely implementation of high-dimensional analysis.
-
-
-![cheese.\label{fig:cheese}](cheese.png)
-
+In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. We take the top four groups from the bacterial community for detailed analysis in Fig \ref{fig:cheese}. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings, which substantiate the capabilities of `MolPad` as a reproducible tool to streamline the visualization of longitudinal patterns for the timely implementation of high-dimensional analysis.
 
 
 # Usage
 
-The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the eponymous R package which can be downloaded and run on a local computer. 
-
-Work in progress can be saved to file and returned to later by uploading the session file to the app. We envision some users will need additional flexibility in their analyses and require backend coding in R, for example, for detailed operating model setup and/or final analyses to develop recommendations for management. For such purposes, the core suite of R functions used in the Shiny app are available from the R package.
-
-While `RPC` focuses on Canadian case studies, several LRP methods in the app are used in other management jurisdictions, e.g. @ICES:2021. Therefore, this app will be of interest for a global audience for fisheries population modeling.
+The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the eponymous R package which can be downloaded and run on a local computer. We envision some users will need additional flexibility in their analyses and require backend coding in R, for example, for detailed operating model setup and/or final analyses to develop recommendations for management. For such purposes, the core suite of R functions used in the Shiny app is available from the R package.
 
 # Figures
 
 ![Dashboard Overview: `A`: cluster-level network, `B`: taxonomic-level bar plot, `C`:  a type-level line plot, and `D`: a feature-level table. \label{fig:dashboard}](dashboard.png){ width=20% }
 
 ![Example of discoversing related patterns with network plot. For `a`, the two linked nodes are in the dashed box and have a closer inverse pattern than the other. For `b`, these groups are both less volatile on average and have similar inverse patterns.\label{fig:pattern}](pattern.png)
+
+![Dashboard showing Groups 10, 7, 4, and 3 for the
+bacterial(a.) and Group 4 for the eukaryotic(b.) community. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4\label{fig:cheese}](cheesecase.png)
+
+
 
 
 # References
