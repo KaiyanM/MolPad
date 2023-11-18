@@ -16,7 +16,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-devtools::install()
 library(MolPad)
 library(dplyr)
 ```
@@ -41,11 +40,6 @@ cheesedata <- cheese |>
 
 ```{r}
 pathchee <- gAnnotation(annotations,"phylum","class")
-
-# rename(!!enque(arg1))
-# run cmd chekc and cran submit
-# wgedon prepare
-# edit plot x -- section
 ```
 
 ## Cluster Input
