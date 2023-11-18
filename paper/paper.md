@@ -49,30 +49,20 @@ In response to the above issues, previous studies on multi-omics visualization t
 
 # Methods
 
-To depict the longitudinal changes, we first cluster trajectories across all molecular features and then reorganize the clusters into a network graph. As in Fig \ref{fig:dashboard} part A, here, we scaled all the time series to extract only the changing patterns and apply K-means for ordination. We use a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each group and run a random forest regression for each group centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
+To depict the longitudinal changes, we first scale and cluster trajectories across all molecular features and then reorganize the clusters into a network graph. We use K-means and a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each cluster and run a random forest regression for each centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
 
-Navigating the network in the MolPad dashboard follows three steps: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
-Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest. 
+# Case Study: Cheese Data
 
-# Usage
+Here we aim to highlight the versatility of the MolPad Dashboard with a case study of microbial communities on the wash-rind cheese' surface collected during cheese ripening[@doi:10.1128/msystems.00701-22]. This data stands for a general case that only includes single-omic measurements for the change of Bacteria or Eukaryota in each cheese sample. It has multiple nested annotation labels ranging from kingdom to class, making it more flexible in interpretation. 
 
-Here we aim to highlight the versatility of the MolPad Dashboard with the case study of microbial communities on the wash-rind cheese' surface collected during cheese ripening[@doi:10.1128/msystems.00701-22]. 
-
-Often these projects face limitations of seed quantity and available field space in
-conducting trials with large numbers of genotypes and opt for the use of partially replicated
-or unreplicated designs (
-
-This data stands for a general case that only includes single-omic measurements for the change of Bacteria or Eukaryota in each cheese sample. Furthermore, it has multiple nested annotation labels ranging from kingdom to class, making it more flexible in interpretation. In this circumstance,  `MolPad` is able to present the clustered changing patterns with three different levels of granularity selected by the user, providing a dynamic overall perspective that can be drilled down at any time.
-
-
-The study revealed a highly reproducible microbial succession in each cheese. In the bacterial community, Firmicutes are dominant at the very beginning, and Proteobacteria quickly take over the domination by the end of ripening. Besides, Cheese A and C show a reproducible establishment of Actinobacteria and Bacteroidetes separately. To verify the above conclusions with the MolPad dashboard, we analyzed two cheeses(A and C) from all three batches in week 2~13. 
+Our goal is to verify their conclusions and provide an alternative to visualize complicated longitudinal data. According to the study, in the bacterial community, Firmicutes are dominant at the very beginning, and Proteobacteria quickly take over the domination by the end of ripening. Overall, cheeses A and C show a reproducible establishment of Actinobacteria and Bacteroidetes separately. To confirm the mentioned findings using the MolPad dashboard, we examined two cheeses (A and C) across all three batches during weeks 2 to 13.
 
 ### Conclusion
-In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. The bacterial community is larger and has a higher variety of patterns, so we take the top four for detailed analysis. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings.
+In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. We take the top four groups from the bacterial community for detailed analysis: Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings, which substantiate the capabilities of `MolPad` as a reproducible tool to streamline the visualization of longitudinal patterns for the timely implementation of high-dimensional analysis.
 
-Reproducible tools that
-reduce sources of human error and streamline the evaluation of trigger criteria are vital to the
-timely implementation of protection measures.
+
+![cheese.\label{fig:cheese}](cheese.png)
+
 
 
 # Usage
