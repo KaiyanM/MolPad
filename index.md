@@ -1,4 +1,4 @@
-MolPad: Multi-Omics Longitudinal Pattern Dynamic Dashboard with Network
+MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Multi-Omics
 ================
 2023-05-31
 
