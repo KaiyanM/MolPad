@@ -47,7 +47,7 @@ The realm of multi-omics is expanding rapidly, with numerous new studies and met
 
 # Related Work
 
-In response to the above issues, previous studies on multi-omics visualization tools have designed methods to work on complicated data. microViz\cite{microviz} provides a Shiny app for interactive exploration by pairing ordination plots and composition circular bar charts to show each taxon's prevalence and abundance. GWENA\cite{Lemoine_Scott-Boyer_Ambroise_Périn_Droit_2021} applies a network in conducting gene co‑expression analysis and extended module characterization in a single package to understand the underlying processes contributing to a disease or a phenotype. NeVOmics\cite{Zúñiga-León_Carrasco-Navarro_Fierro_2018} improved compatibility with a dynamic dashboard and facilitated the functional characterization of data from omics technologies. It also integrates Over-representation analysis methodology and network-based visualization to show the enrichment results. These methods suggest the mechanisms that improve the utility of multi-omics visualization tools under analysis.
+In response to the above issues, previous studies on multi-omics visualization tools have designed methods to work on complicated data. `microViz` [@microviz] provides a Shiny app for interactive exploration by pairing ordination plots and composition circular bar charts to show each taxon's prevalence and abundance. `GWENA` [@Lemoine_Scott-Boyer_Ambroise_Périn_Droit_2021] applies a network in conducting gene co‑expression analysis and extended module characterization in a single package to understand the underlying processes contributing to a disease or a phenotype. `NeVOmics` [@Zúñiga-León_Carrasco-Navarro_Fierro_2018] improved compatibility with a dynamic dashboard and facilitated the functional characterization of data from omics technologies. It also integrates Over-representation analysis methodology and network-based visualization to show the enrichment results. These methods suggest the mechanisms that improve the utility of multi-omics visualization tools under analysis.
 
 # Data input
 
@@ -59,8 +59,15 @@ Besides the data type we mentioned above, our methods allow three levels of info
 
 To depict the longitudinal changes, we first cluster trajectories across all molecular features and then reorganize the clusters into a network graph. As in Fig \ref{fig:dashboard} part A, here, we scaled all the time series to extract only the changing patterns and apply K-means for ordination. We use a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each group and run a random forest regression for each group centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
 
+
+![alt text](/./man/figures/dashboard.png "Title")
+
 Navigating the network in the MolPad dashboard follows three steps as demonstrated in Fig \ref{fig:flow}: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
 Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest. 
+
+
+![alt text](/./man/figures/pattern.png "Title")
+
 
 
 # Case Study: Cheese Data
@@ -79,12 +86,4 @@ The study revealed a highly reproducible microbial succession in each cheese. In
 In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. The bacterial community is larger and has a higher variety of patterns, so we take the top four for detailed analysis. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings.
 
 
-
-
-![alt text](/man/figures/dashboard.png "Title")
-
-![alt text](/man/figures/flow.png "Title"){width=500}
-
-
-![alt text](/man/figures/pattern.png "Title")
 
