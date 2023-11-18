@@ -26,7 +26,6 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/FAQ.html">FAQ</a>
     <a class="dropdown-item" href="../articles/cheese.html">Cheese</a>
-    <a class="dropdown-item" href="../articles/fungal.html">Fungal Garden</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -95,38 +94,15 @@
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">fungal_garden</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>data set ‘fungal_garden’ not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fungal_dlist</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>,<span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       ID      D0_01     D1_02      D2_03     D3_04     D4_05     D5_06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 grp1_1 -0.9533405 -1.106882 -0.7821818 -2.344134 -2.213369 -1.846307</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 grp1_2 -0.9533405 -1.106882 -0.7821818 -1.740328 -1.983804 -1.910560</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 grp1_6  0.9672390  1.351778  1.2871986  1.306616  1.253802  1.228330</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       D6_07     D7_08     D8_09     D9_10    D10_11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -2.019264 -1.653271 -1.855675 -1.856335 -2.675131</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -2.360466 -1.728546 -2.204190 -2.552709 -3.220536</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  1.522306  1.381057  1.512031  1.391325  1.297332</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in head(fungal_dlist[[1]], 3):</span> object 'fungal_dlist' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fungal_dlist</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span>,<span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       ID       D0_01       D1_02        D2_03       D3_04        D4_05</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 grp2_1  0.07955562 -0.06847126 -0.085804628 -0.06970496 -0.189086831</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 grp2_2  0.14481731  0.63121925  0.640259446  0.53728726  0.003337022</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 grp2_3 -0.71104811 -0.03273029  0.007307968  0.15272255  0.151116165</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         D5_06       D6_07      D7_08      D8_09      D9_10     D10_11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -0.01056197 -0.30973183 -0.1719941 -0.1238594 -0.2293862  0.1021993</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -0.20361189  0.62014296  0.9765937  1.0188160  0.8699408  0.3023357</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  0.04532175  0.09048819  0.3211153  0.3079252  0.2960252 -0.4230718</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in head(fungal_dlist[[2]], 3):</span> object 'fungal_dlist' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">fungal_dlist</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span>,<span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       ID      D0_01      D1_02     D2_03      D3_04      D4_05      D5_06</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 grp3_1 -0.4702515 -0.3390523 -0.501346 -0.4833872 -0.4902185 -0.6680519</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 grp3_2 -1.6644934 -2.6212720 -2.283416 -1.8775744 -0.6482506 -1.5863859</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 grp3_3 -0.9248744 -0.6240496 -0.552006 -0.2821400 -0.3161406 -0.3980750</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        D6_07      D7_08      D8_09      D9_10     D10_11</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -0.6609125 -0.7754728 -0.7022775 -0.5814545 -0.1418371</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -1.7470608 -0.3588664 -1.0980109 -1.7763473 -0.4198883</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.3106139 -0.2878704 -0.2226940 -0.1963857  0.4274527</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in head(fungal_dlist[[3]], 3):</span> object 'fungal_dlist' not found</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pathway</span>,<span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        ID taxonomic.scope ko_term              Pathway</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 grp1_24        Bacteria  K02706 00195_Photosynthesis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 grp1_25        Bacteria  K02706 00195_Photosynthesis</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 grp1_26        Bacteria  K02706 00195_Photosynthesis</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in head(pathway, 3):</span> object 'pathway' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
