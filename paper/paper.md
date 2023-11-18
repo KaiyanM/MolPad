@@ -8,7 +8,7 @@ tags:
   - network
 authors:
   - name: Kaiyan Ma
-    orcid: xx
+    orcid: 0000-0002-7355-8924
     equal-contrib: true
     affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Author Without ORCID
@@ -39,7 +39,7 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-The R-shiny package MolPad provides a visualization dashboard for understanding the dynamics of longitudinal molecular co-expression in microbiome multi-omics. The main idea for addressing the issue is to first use a network to overview major patterns among their predictive relationships and then zoom into specific clusters of interest. It is designed with a focus-plu-context analysis strategy and automatically generates links to online curated annotations. The dashboard consists of a cluster-level network, a bar plot of taxonomic composition, a line plot of data modalities, and a table for each pathway, as illustrated in Figure 1. Besides, we have the processing functions with the pipeline for generating the dashboard wrapped up in the package, so it is also beginner-friendly for students with less R programming experience. We will illustrate these methods with examples of two case studies:  a longitudinal, multi-platform meta-genomics analysis for cheese communities, and discovering the omics change over time in soil samples collected from the fungus-growing ants' garden.
+The R-shiny package MolPad provides an interactive dashboard for understanding the dynamics of longitudinal molecular co-expression in microbiome multi-omics. The main idea for addressing the issue is to first use a network to overview major patterns among their predictive relationships and then zoom into specific clusters of interest. It is designed with a focus-plu-context analysis strategy and automatically generates links to online curated annotations. The dashboard consists of a cluster-level network, a bar plot of taxonomic composition, a line plot of data modalities, and a table for each pathway, as illustrated in Fig \ref{fig:dashboard}. Plus, the package includes functions that handle the data processing for creating the dashboard. This makes it beginner-friendly for students with less R programming experience. We illustrate these methods with a case study on a longitudinal, multi-platform meta-genomics analysis for cheese communities.
 
 
 # Statement of need
@@ -60,15 +60,12 @@ Besides the data type we mentioned above, our methods allow three levels of info
 
 To depict the longitudinal changes, we first cluster trajectories across all molecular features and then reorganize the clusters into a network graph. As in Fig \ref{fig:dashboard} part A, here, we scaled all the time series to extract only the changing patterns and apply K-means for ordination. We use a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each group and run a random forest regression for each group centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
 
-<p align="center">
-  <img src="dashboard.png" alt="HTML5 Icon" height="500" /></a>  
-</p>
+![Dashboard Overview: `A`: cluster-level network, `B`: taxonomic-level bar plot, `C`:  a type-level line plot, and `D`: a feature-level table. \label{fig:dashboard}](dashboard.png)
 
-Navigating the network in the MolPad dashboard follows three steps as demonstrated in Fig \ref{fig:flow}: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
+Navigating the network in the MolPad dashboard follows three steps: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
 Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest. 
 
-
-![flowchart highlighting the inputs and the three modules available: `VIEWqtl`, `VIEWgenome`, and `VIEWmap`.\label{fig:pattern}](pattern.png)
+![Example of discoversing related patterns with network plot. For `a`, the two linked nodes are in the dashed box and have a closer inverse pattern than the other. For `b`, these groups are both less volatile on average and have similar inverse patterns.\label{fig:pattern}](pattern.png)
 
 # Case Study: Cheese Data
 
