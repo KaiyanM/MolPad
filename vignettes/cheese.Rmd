@@ -1,8 +1,8 @@
 ---
-title: "Cheese"
+title: "Case Study: Cheese"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Cheese}
+  %\VignetteIndexEntry{Case Study: Cheese}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

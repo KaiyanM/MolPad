@@ -1,0 +1,46 @@
+---
+title: "Data Input"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Data Input}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(MolPad)
+```
+
+# Longitudinal Data
+
+Our visualization pipeline starts with an optional pre-processing module with built-in functions. There are basically two conditions:
+
+## If your datasets are multi-omics:
+
+Here, we assume you provide a list of data tables, each gathered for a different omics type. For instance, you might have datasets for peptides, metabolites, and lipids. We recommend reviewing your data and thinking about applying quantile normalization and KNN imputation. This helps to address issues related to library size and missing data.
+
+Then, run the `pre_process()` function, and you will get the standard input format as follows.
+
+```{r, echo=FALSE}
+x <- data.frame("ID"=1:5,"Day_1"=rnorm(5),"Day_2"=rnorm(5),"Day_3"=rnorm(5),"Day_4"=rnorm(5),"Day_5"=rnorm(5),"Day_6"=rnorm(5),"Day_7"=rnorm(5),"Day_8"=rnorm(5),"type"=c(rep("peptide",3),"lipid","metabolite"))
+x
+```
+
+
+## If your datasets are NOT multi-omics:
+
+Well, you can always try it on with our dashboard as long as the data inputs are reformatted into the standard longitudinal format. You can manually assign the `type` with any category label to describe major groups in the data. As In the case study, we used Kingdom as the type label column for cheese data. 
+
+
+# Annotation
+
+Besides the data type we mentioned above, our methods allow three levels of information: functional annotation, taxonomy annotation, and feature annotation. These will be matched with ID as columns in the annotation data, which is another input for generating a dashboard. We support KeggID and GOID for automatic feature link generation, and the users should set the corresponding column name beforehand. 
+

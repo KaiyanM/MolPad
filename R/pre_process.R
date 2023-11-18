@@ -27,7 +27,7 @@
 #' @importFrom dplyr bind_rows
 #' @export
 pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
-                        scale = TRUE, autoColName = "Day_") {
+                        scale = TRUE, autoColName = "Sec_") {
   if(is.data.frame(data)==FALSE){
     print("Reformat a list of datasets:")
     # set default type names
