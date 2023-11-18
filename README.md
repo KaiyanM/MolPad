@@ -1,5 +1,5 @@
 # MolPad  <img src="https://github.com/KaiyanM/MolPad/blob/main/man/figures/logo.png" align="right" height="130" /></a>
-An R-Shiny Package for Focus-plus-Context Multi-Omics Longitudinal Exploration
+An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Multi-Omics
 
 ## Overview
 
@@ -10,7 +10,6 @@ Additionally, our package simplifies the entire pipeline for creating the dashbo
 <p align="center">
   <img src="/man/figures/screen_recording.gif" width="600" /></a>  
 </p>
-
 
 ## Installation
 
