@@ -44,11 +44,7 @@ The R-shiny package MolPad provides an interactive dashboard for understanding t
 
 # Statement of need
 
-The realm of multi-omics is expanding rapidly, with numerous new studies and methodologies emerging. This highlights the need for visualizations that can account for differences across modalities. It’s also important to enable interpretations of dynamics and network structure because these have specific meanings in the genomic context. Another issue is the annotation. The special modality characteristic of multi-omics determines that each identical feature can be classified with various taxons and could have several IDs in different databases. Therefore, although the annotation is available online, it can be tedious to search for parts manually. Moreover, most present visualizations poorly evaluate longitudinal change across omics. In longitudinal data, we need to gain insight into the functioning of how individual features change and how they may influence related features. Thus, it depends upon analysis within one table and across tables. All of these have posed a challenge for unified visualization and interpretation. 
-
-# Related Work
-
-In response to the above issues, previous studies on multi-omics visualization tools have designed methods to work on complicated data. `microViz` [@microviz] provides a Shiny app for interactive exploration by pairing ordination plots and composition circular bar charts to show each taxon's prevalence and abundance. `GWENA` [@Lemoine_Scott-Boyer_Ambroise_Périn_Droit_2021] applies a network in conducting gene co‑expression analysis and extended module characterization in a single package to understand the underlying processes contributing to a disease or a phenotype. `NeVOmics` [@Zúñiga-León_Carrasco-Navarro_Fierro_2018] improved compatibility with a dynamic dashboard and facilitated the functional characterization of data from omics technologies. It also integrates Over-representation analysis methodology and network-based visualization to show the enrichment results. These methods suggest the mechanisms that improve the utility of multi-omics visualization tools under analysis.
+The realm of multi-omics is expanding rapidly, with numerous new studies and methodologies emerging. This highlights the need for visualizations that can account for differences across modalities. It’s also important to enable interpretations of dynamics and network structure because these have specific meanings in the genomic context. Another issue is the annotation. The special modality characteristic of multi-omics determines that each identical feature can be classified with various taxons and could have several IDs in different databases. Therefore, although the annotation is available online, it can be tedious to search for parts manually. Moreover, most present visualizations poorly evaluate longitudinal change across omics. In longitudinal data, we need to gain insight into the functioning of how individual features change and how they may influence related features. Thus, it depends upon analysis within one table and across tables. All of these have posed a challenge for unified visualization and interpretation. In response to the above issues, previous studies on multi-omics visualization tools have designed methods to work on complicated data. `microViz` [@microviz] provides a Shiny app for interactive exploration by pairing ordination plots and composition circular bar charts to show each taxon's prevalence and abundance. `GWENA` [@Lemoine_Scott-Boyer_Ambroise_Périn_Droit_2021] applies a network in conducting gene co‑expression analysis and extended module characterization in a single package to understand the underlying processes contributing to a disease or a phenotype. `NeVOmics` [@Zúñiga-León_Carrasco-Navarro_Fierro_2018] improved compatibility with a dynamic dashboard and facilitated the functional characterization of data from omics technologies. It also integrates Over-representation analysis methodology and network-based visualization to show the enrichment results. These methods suggest the mechanisms that improve the utility of multi-omics visualization tools under analysis.
 
 # Data input
 
@@ -60,12 +56,9 @@ Besides the data type we mentioned above, our methods allow three levels of info
 
 To depict the longitudinal changes, we first cluster trajectories across all molecular features and then reorganize the clusters into a network graph. As in Fig \ref{fig:dashboard} part A, here, we scaled all the time series to extract only the changing patterns and apply K-means for ordination. We use a built-in elbow method to choose the optimal number of clusters. Then, we take the centers of each group and run a random forest regression for each group centroid with all the other centroids as predictors. We pick the top five predictors to build a cluster network with the Mean Decrease Accuracy as the feature importance. Based on the random forest prediction, if two groups of features are highly linked according to the network, then they will have strongly related longitudinal patterns, as shown in Fig \ref{fig:pattern}.
 
-![Dashboard Overview: `A`: cluster-level network, `B`: taxonomic-level bar plot, `C`:  a type-level line plot, and `D`: a feature-level table. \label{fig:dashboard}](dashboard.png)
 
 Navigating the network in the MolPad dashboard follows three steps: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
 Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest. 
-
-![Example of discoversing related patterns with network plot. For `a`, the two linked nodes are in the dashed box and have a closer inverse pattern than the other. For `b`, these groups are both less volatile on average and have similar inverse patterns.\label{fig:pattern}](pattern.png)
 
 # Case Study: Cheese Data
 
@@ -82,5 +75,22 @@ The study revealed a highly reproducible microbial succession in each cheese. In
 ## Result
 In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. The bacterial community is larger and has a higher variety of patterns, so we take the top four for detailed analysis. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings.
 
+
+# Usage
+
+The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the eponymous R package which can be downloaded and run on a local computer. 
+
+Work in progress can be saved to file and returned to later by uploading the session file to the app. We envision some users will need additional flexibility in their analyses and require backend coding in R, for example, for detailed operating model setup and/or final analyses to develop recommendations for management. For such purposes, the core suite of R functions used in the Shiny app are available from the R package.
+
+While `RPC` focuses on Canadian case studies, several LRP methods in the app are used in other management jurisdictions, e.g. @ICES:2021. Therefore, this app will be of interest for a global audience for fisheries population modeling.
+
+# Figures
+
+![Dashboard Overview: `A`: cluster-level network, `B`: taxonomic-level bar plot, `C`:  a type-level line plot, and `D`: a feature-level table. \label{fig:dashboard}](dashboard.png){ width=20% }
+
+![Example of discoversing related patterns with network plot. For `a`, the two linked nodes are in the dashed box and have a closer inverse pattern than the other. For `b`, these groups are both less volatile on average and have similar inverse patterns.\label{fig:pattern}](pattern.png)
+
+
+# References
 
 
