@@ -67,10 +67,8 @@ To depict the longitudinal changes, we first cluster trajectories across all mol
 Navigating the network in the MolPad dashboard follows three steps as demonstrated in Fig \ref{fig:flow}: First, choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig \ref{fig:pattern}.A) represent clusters containing most features in the chosen functional annotation. Second, brushing on the network reveals patterns of taxonomic composition (Fig \ref{fig:pattern}.B) and typical trajectories  (Fig \ref{fig:pattern}.C). The user could also zoom into specific taxonomic annotations by filtering.
 Third, view the feature table (Fig \ref{fig:pattern}.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest. 
 
-<p align="center">
-  <img src="pattern.png" alt="pattern" height="500" /></a>  
-</p>
 
+![flowchart highlighting the inputs and the three modules available: `VIEWqtl`, `VIEWgenome`, and `VIEWmap`.\label{fig:pattern}](pattern.png)
 
 # Case Study: Cheese Data
 
