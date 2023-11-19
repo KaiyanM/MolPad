@@ -12,7 +12,6 @@
 #' @param dashboardtitle A string.
 #' @param id_colname A single string or a sting vector. The column names in your annoation dataset that contains external database IDs.
 #' @param id_type A single string or a sting vector. The corresponding database names for the above columns, must be choose from "KEGG" and "GO".
-#'
 
 #' @examples
 #' \dontrun{
@@ -47,7 +46,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
           width = 100,
           sidebarMenu(
             menuItem("Main", tabName = "dashboard", icon = shiny::icon("gauge-high")),
-            menuItem("Info", tabName = "widgets", icon = shiny::icon("eye"))
+            menuItem("Info", tabName = "info", icon = shiny::icon("eye"))
           )
         ),
         shinydashboard::dashboardBody(
@@ -57,7 +56,8 @@ gDashboard <- function(data, cluster, annotation, networkres,
               tabName = "dashboard",
               fluidRow(
                 box(column(4, selectInput("s_ptw", "Select a Functional Annotation:", uni_ptw)),
-                  column(7, sliderInput("obs", "Importance Score:",
+                    column(2, selectInput("s_layout", "Graph Layout:", c("nicely","grid","star","circle","kk","drl","dh","gem","graphopt"))),
+                  column(6, sliderInput("obs", "Importance Score:",
                     min = 0,
                     max = round(quantile(abs(networkres$weight),na.rm=TRUE)[4], 1),
                     value = round(quantile(abs(networkres$weight),na.rm=TRUE)[3], 1)
@@ -84,7 +84,13 @@ gDashboard <- function(data, cluster, annotation, networkres,
                 )
               )
             ),
-            tabItem(tabName = "widgets", h2("Info tab content"))
+            tabItem(tabName = "info",
+                    box(h3("Network Navigation"),br(),"Navigating the network in the MolPad dashboard follows three steps: ",
+                        br(),br(),"1. Choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green represent clusters containing most features in the chosen functional annotation. ",
+                        br(),br(),"2. Brushing on the network reveals patterns of taxonomic composition and typical trajectories. The user could also zoom into specific taxonomic annotations by filtering.",
+                        br(),br(),"3. View the feature table and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest."
+                        ,width = 10, height = 350),
+                    box(h3("More Information"),br(),"Please check with our Github repository:",br(),br(),"KaiyanM/MolPad",width = 2, height = 350))
           )
         )
       ),
@@ -95,7 +101,8 @@ gDashboard <- function(data, cluster, annotation, networkres,
             reshaped_df$output_graphptw,
             networkres,
             input$obs,
-            input$s_ptw
+            input$s_ptw,
+            input$s_layout
           )
         )
         output$plot <- renderPlot(P1())

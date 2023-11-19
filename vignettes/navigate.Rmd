@@ -17,7 +17,9 @@ knitr::opts_chunk$set(
 
 
 
-### Navigating the network in the MolPad dashboard follows three steps: 
+# Network Navigation
+
+Navigating the network in the MolPad dashboard follows three steps: 
 
 1. Choose a primary functional annotation and adjust the edge density by tuning the threshold value on the importance score. Nodes that turnbright green (Fig 1.A) represent clusters containing most features in the chosen functional annotation. 
 
@@ -25,9 +27,11 @@ knitr::opts_chunk$set(
 
 3. View the feature table (Fig 1.D) and examine the drop-down options for other related function annotations, and then click the link for online information on the interested items. The interface is designed to support iterative exploration, encouraging the use of several steps to answer specific questions, like comparing the pattern distribution between two functions or finding functionally important community members metabolizing a feature of interest.
 
-![Fig 1: Dashboard Overview.](../man/figures/dashboard.png){ width=50% }
+![Fig 1: Dashboard Overview.](../man/figures/dashboard.png){ width=70% }
 
-### Example of discoversing related patterns with network plot:
+### Example
+
+Here is an example of discoversing related patterns with network plot:
 
 ![Fig 2: Find related patterns with network plot. For .a, the two linked nodes are in the dashed box and have a closer inverse pattern than the other. For .b, these groups are both less volatile on average and have similar inverse patterns.](../man/figures/pattern.png){ width=50% }
 

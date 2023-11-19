@@ -15,7 +15,7 @@
 #' @importFrom ggraph ggraph geom_edge_link geom_node_label scale_edge_alpha
 #' @importFrom ggplot2 scale_fill_gradient ggtitle aes scale_fill_gradient
 #' @export
-make_the_graph <- function(ptw, network_output, min_weight, s_ptw) {
+make_the_graph <- function(ptw, network_output, min_weight, s_ptw, graph_layout) {
   ptw <- ptw[!is.na(ptw$Pathway), ]
   data <- data.frame(
     "from" = network_output$from,
@@ -35,12 +35,13 @@ make_the_graph <- function(ptw, network_output, min_weight, s_ptw) {
       data.frame(cluster = missing_group, n = rep(0, length(missing_group)))
     )
   }
+  
 
   g <- filter(data, weight > min_weight) |>
     graph_from_data_frame(directed = FALSE, vertices = count_group)
 
   g |>
-    ggraph(layout = "linear", circular = TRUE) +
+    ggraph(layout = graph_layout) +
     geom_edge_link(
       aes(alpha = convert_range(weight)),
       colour = "#97a09e", show.legend = FALSE, edge_width = 1.5

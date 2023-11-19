@@ -10,7 +10,7 @@ pre_process(
   typenameList = NULL,
   replaceNA = TRUE,
   scale = TRUE,
-  autoColName = "Day_"
+  autoColName = "Sec_"
 )
 }
 \arguments{

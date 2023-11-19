@@ -8,7 +8,7 @@
 ggraph::ggraph
 }
 \usage{
-make_the_graph(ptw, network_output, min_weight, s_ptw)
+make_the_graph(ptw, network_output, min_weight, s_ptw, graph_layout)
 }
 \description{
 Generate the graph for the dashboard.
