@@ -2,7 +2,7 @@
 title: 'MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomics'
 tags:
   - R
-  - shiny
+  - Shiny
   - multi-omics
   - visualization
   - cluster analysis
@@ -34,7 +34,7 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-The R-shiny package MolPad provides an interactive dashboard for understanding the dynamics of longitudinal molecular co-expression in microbiomics. The main idea for addressing the issue is first to use a network to overview major patterns among their predictive relationships and then zoom into specific clusters of interest. It is designed with a focus-plu-context analysis strategy and automatically generates links to online curated annotations. The dashboard consists of a cluster-level network, a bar plot of taxonomic composition, a line plot of data modalities, and a table for each pathway, as illustrated in Fig \ref{fig:dashboard}. Plus, the package includes functions that handle the data processing for creating the dashboard. This makes it beginner-friendly for users with less R programming experience. We illustrate these methods with a case study on a longitudinal, multi-platform meta-genomics analysis for cheese communities.
+The R-Shiny package MolPad provides an interactive dashboard for understanding the dynamics of longitudinal molecular co-expression in microbiomics. The main idea for addressing the issue is first to use a network to overview major patterns among their predictive relationships and then zoom into specific clusters of interest. It is designed with a focus-plus-context analysis strategy and automatically generates links to online curated annotations. The dashboard consists of a cluster-level network, a bar plot of taxonomic composition, a line plot of data modalities, and a table for each pathway, as illustrated in Fig \ref{fig:dashboard}. Plus, the package includes functions that handle the data processing for creating the dashboard. This makes it beginner-friendly for users with less R programming experience. We illustrate these methods with a case study on a longitudinal, multi-platform metagenomics analysis for cheese communities.
 
 # Statement of need
 
@@ -48,15 +48,15 @@ To depict the longitudinal changes, we first scale and cluster trajectories acro
 
 # Case Study: Cheese Data
 
-Here we aim to highlight the versatility of the MolPad Dashboard with a case study of microbial communities on the wash-rind cheese' surface collected during cheese ripening[@doi:10.1128/msystems.00701-22]. This data stands for a general case that only includes single-omic measurements for the change of Bacteria or Eukaryota in each cheese sample. It has multiple nested annotation labels ranging from kingdom to class, making it more flexible in interpretation. 
+Here we aim to highlight the versatility of the MolPad Dashboard with a case study of microbial communities on the wash-rind cheese' surface collected during cheese ripening [@doi:10.1128/msystems.00701-22]. This data stands for a general case that only includes single-omic measurements for the change of Bacteria or Eukaryota in each cheese sample. It has multiple nested annotation labels ranging from kingdom to class, making it more flexible in interpretation. 
 
 Our goal is to verify their conclusions and provide an alternative to visualize complicated longitudinal data. According to the study, in the bacterial community, Firmicutes are dominant at the very beginning, and Proteobacteria quickly take over the domination by the end of ripening. Overall, cheeses A and C show a reproducible establishment of Actinobacteria and Bacteroidetes separately. To confirm the mentioned findings using the MolPad dashboard, we examined two cheeses (A and C) across all three batches during weeks 2 to 13.
 
-In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. We take the top four groups from the bacterial community for detailed analysis in Fig \ref{fig:cheesecase}. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings, which substantiate the capabilities of `MolPad` as a reproducible tool to streamline the visualization of longitudinal patterns for the timely implementation of high-dimensional analysis.
+In applying the dashboard, we made an extended time series by connecting the last time point of cheese A with the first one of cheese C. This allowed us to track unusual pattern combinations among different species and stages. We take the top four groups from the bacterial community for detailed analysis in Fig \ref{fig:cheesecase}. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings, which substantiate the capabilities of `MolPad` as a reproducible tool to streamline the visualization of longitudinal patterns.
 
 # Usage
 
-The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the eponymous R package which can be downloaded and run on a local computer. We anticipate that some users may need more flexibility in their analyses, requiring backend R coding for tasks like setting up detailed operating models or downloading figure outputs. For such needs, the essential set of R functions employed in the Shiny app is accessible through the R package.
+The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/MolPad). The app is hosted in the R package which can be downloaded and run on a local computer. We anticipate that some users may need more flexibility in their analyses, requiring backend R coding for tasks like setting up detailed operating models or downloading figure outputs. For such needs, the essential set of R functions employed in the Shiny app is accessible through the R package.
 
 # Figures
 
@@ -64,8 +64,7 @@ The source code for `MolPad` is stored on [Github](https://github.com/KaiyanM/Mo
 
 ![Example of discovering related patterns with network plot. For `a`, the two linked nodes are in the dashed box and have a closer inverse pattern than the other. For `b`, these groups are both less volatile on average and have similar inverse patterns.\label{fig:pattern}](pattern.png){ width=60% }
 
-![Dashboard showing Groups 10, 7, 4, and 3 for the
-bacterial(a.) and Group 4 for the eukaryotic(b.) community. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4\label{fig:cheesecase}](cheesecase.png){ width=80% }
+![Dashboard showing Groups 10, 7, 4, and 3 for the bacterial (a.) and Group 4 for the eukaryotic (b.) community. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. \label{fig:cheesecase}](cheesecase.png){ width=80% }
 
 
 # References
