@@ -25,7 +25,7 @@
 #' * GO ID: Begin with 'GO:' followed by 7 digits, such as GO:0003674."
 #' 
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar sidebarMenu menuItem tabItems tabItem box
-#' @importFrom shiny observe runApp fluidRow icon tags HTML column selectInput sliderInput plotOutput brushOpts h2
+#' @importFrom shiny observe runApp fluidRow icon tags HTML column selectInput sliderInput plotOutput brushOpts h3
 #' @importFrom DT renderDataTable datatable dataTableOutput
 #' @export
 gDashboard <- function(data, cluster, annotation, networkres,
