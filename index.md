@@ -1,10 +1,10 @@
-MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Multi-Omics
+MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomics
 ================
 2023-05-31
 
 ## Overview
 
-MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of multi-omics microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that seamlessly connects to online curated annotations.
+MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that seamlessly connects to online curated annotations.
 
 The dashboard itself comprises several components, including a cluster-level network, a bar plot illustrating taxonomic composition, a line plot displaying data modalities, and a table for each pathway. You can see an illustration of these features in this screenshot.
 
