@@ -3,7 +3,7 @@ An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomi
 
 ## Overview
 
-MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that seamlessly connects to online curated annotations.
+MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that connects to online curated annotations.
 
 Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to students with limited R programming experience.
 
@@ -22,7 +22,7 @@ install.packages("MolPad")
 
 ### MolPad could help you with:  
 
-1. Clutering the data with k-means and building a group network.
+1. Clustering the data with k-means and building a group network.
 2. Find the significant trend patterns in your datasets.
 3. Target the interaction between groups, taxons, and pathways.
 4. Visualize the distribution of features in specific pathways on the group network.
@@ -46,5 +46,5 @@ If you need assistance with MolPad, there are two primary ways to seek help:
 Remember that it's particularly effective when you can provide a reproducible example that shows the specific problem you're having.
 
 ## Contribution
-To contribute to this project, you could use the following workflow: fork the repository --> create vour local copy --> submit a pull request.
+To contribute to this project, you could use the following workflow: fork the repository --> create your local copy --> submit a pull request.
 
