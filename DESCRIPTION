@@ -9,6 +9,21 @@ License: CC0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Imports:
+    DT,
+    dplyr,
+    ggplot2,
+    ggraph,
+    grid,
+    igraph,
+    purrr,
+    randomForest,
+    rlang,
+    shiny,
+    shinydashboard,
+    stringr,
+    tibble,
+    tidyr,
 Suggests: 
     knitr,
     rmarkdown,
