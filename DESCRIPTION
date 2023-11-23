@@ -1,5 +1,5 @@
 Package: MolPad
-Title: MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Multi-Omics
+Title: MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomics
 Version: 1.0.0
 Authors@R: 
     person("Kaiyan", "Ma", , "kaiiyenma@gmail.com", role = c("aut", "cre"),
