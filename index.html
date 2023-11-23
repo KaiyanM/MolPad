@@ -68,23 +68,31 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="molpad-an-r-shiny-package-for-cluster-co-expression-analysis-in-longitudinal-microbiomics">MolPad: An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomics<a class="anchor" aria-label="anchor" href="#molpad-an-r-shiny-package-for-cluster-co-expression-analysis-in-longitudinal-microbiomics"></a>
+<img src="logo.png" class="logo" alt=""><h1 id="molpad-">MolPad <a class="anchor" aria-label="anchor" href="#molpad-"></a>
 </h1>
 </div>
-<p>2023-05-31</p>
+<p>An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomics</p>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
-<p>MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we’ve developed a focus-plus-context strategy that seamlessly connects to online curated annotations.</p>
-<p>The dashboard itself comprises several components, including a cluster-level network, a bar plot illustrating taxonomic composition, a line plot displaying data modalities, and a table for each pathway. You can see an illustration of these features in this screenshot.</p>
-<p><img src="reference/figures/screenshot.png" width="100%"></p>
-<p>Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to students with limited R programming experience.</p>
+<p>MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we’ve developed a focus-plus-context strategy that connects to online curated annotations.</p>
+<p>Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to people with limited R programming experience. Check out our cheese-data demo <a href="https://connect.doit.wisc.edu/molpad-demo/" class="external-link">here</a>.</p>
+<p align="center">
+<img src="/reference/figures/screen_recording.gif" width="600"></p>
 </div>
 <div class="section level2">
-<h2 id="molpad-could-help-you-with">MolPad could help you with:<a class="anchor" aria-label="anchor" href="#molpad-could-help-you-with"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
+<p><code>{r, eval = FALSE} # Install the package in R: install.packages("MolPad")</code></p>
+</div>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
+<div class="section level3">
+<h3 id="molpad-could-help-you-with">MolPad could help you with:<a class="anchor" aria-label="anchor" href="#molpad-could-help-you-with"></a>
+</h3>
 <ol style="list-style-type: decimal">
-<li>Clutering the data with k-means and building a group network.</li>
+<li>Clustering the data with k-means and building a group network.</li>
 <li>Find the significant trend patterns in your datasets.</li>
 <li>Target the interaction between groups, taxons, and pathways.</li>
 <li>Visualize the distribution of features in specific pathways on the group network.</li>
@@ -93,12 +101,28 @@
 <li>Have a better overall understanding of the datasets.</li>
 </ol>
 </div>
+<div class="section level3">
+<h3 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+</h3>
+<p align="center">
+<img src="reference/figures/flow.png" width="450"></p>
+</div>
+</div>
 <div class="section level2">
-<h2 id="workflow">Workflow<a class="anchor" aria-label="anchor" href="#workflow"></a>
+<h2 id="getting-help">Getting Help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
 </h2>
-<p><img src="reference/figures/flow.png" width="100%"></p>
-<p>The first input is a list of datasets, where each should have been normalized and imputed. The second input is a pathway dataset.</p>
-<p>Note that for all the datasets, the first column must be <code>ID</code>. For more information, please check the corresponding functions.</p>
+<p>If you need assistance with MolPad, there are two primary ways to seek help:</p>
+<ol style="list-style-type: decimal">
+<li>Ask us about anything related to MolPad! To add your question, create an <a href="https://github.com/KaiyanM/MolPad/issues" class="external-link">issue</a> in this repository.</li>
+<li>
+<a href="https://stackoverflow.com/questions/tagged/molpad" class="external-link">Stack Overflow</a> is another excellent resource for answering common issues in R.</li>
+</ol>
+<p>Remember that it’s particularly effective when you can provide a reproducible example that shows the specific problem you’re having.</p>
+</div>
+<div class="section level2">
+<h2 id="contribution">Contribution<a class="anchor" aria-label="anchor" href="#contribution"></a>
+</h2>
+<p>To contribute to this project, you could use the following workflow: fork the repository –&gt; create your local copy –&gt; submit a pull request.</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
