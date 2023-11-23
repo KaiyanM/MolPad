@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">MolPad</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,18 +95,18 @@ thinking about applying quantile normalization and KNN imputation. This
 helps to address issues related to library size and missing data.</p>
 <p>Then, run the <code><a href="../reference/pre_process.html">pre_process()</a></code> function, and you will get
 the standard input format as follows.</p>
-<pre><code><span><span class="co">#&gt;   ID       Day_1      Day_2      Day_3      Day_4      Day_5      Day_6</span></span>
-<span><span class="co">#&gt; 1  1 -0.24571646  1.9400376 -1.6567655 -1.2243735 -1.4891946 -1.1975690</span></span>
-<span><span class="co">#&gt; 2  2 -1.59449919  0.1317558  0.8039044  0.4114791  0.5120504 -0.6180213</span></span>
-<span><span class="co">#&gt; 3  3 -1.93115741  0.1639891  2.0503936  2.8774549 -1.5973896 -0.4932789</span></span>
-<span><span class="co">#&gt; 4  4  0.95765390 -0.4239290 -0.3981148  1.6218707  1.3007900 -1.2791488</span></span>
-<span><span class="co">#&gt; 5  5 -0.07327261  0.1551694 -0.3362459 -0.3603838 -0.9206706 -1.2430234</span></span>
-<span><span class="co">#&gt;         Day_7      Day_8       type</span></span>
-<span><span class="co">#&gt; 1  1.34612092 -0.6015161    peptide</span></span>
-<span><span class="co">#&gt; 2  0.66535966 -1.4461225    peptide</span></span>
-<span><span class="co">#&gt; 3 -0.02740466 -0.9510695    peptide</span></span>
-<span><span class="co">#&gt; 4  1.02612095 -0.6058040      lipid</span></span>
-<span><span class="co">#&gt; 5 -1.99795186 -0.6629869 metabolite</span></span></code></pre>
+<pre><code><span><span class="co">#&gt;   ID       Day_1       Day_2      Day_3      Day_4      Day_5      Day_6</span></span>
+<span><span class="co">#&gt; 1  1 -0.08581961 -0.27018497 -1.0017007 -0.4512072  0.4188566  1.1321237</span></span>
+<span><span class="co">#&gt; 2  2  0.20399155 -0.04973707  0.6290711 -0.4666573 -1.2959531  0.1686841</span></span>
+<span><span class="co">#&gt; 3  3  1.32943027 -0.68201523  0.8769336  0.2186368 -0.4893581 -1.3897209</span></span>
+<span><span class="co">#&gt; 4  4 -0.77236825 -1.11511671  1.0767623 -0.6413529  0.8211507 -0.3418666</span></span>
+<span><span class="co">#&gt; 5  5 -0.82061707  0.90895538 -0.2927591  1.4498460 -0.7803492 -1.4696117</span></span>
+<span><span class="co">#&gt;        Day_7       Day_8       type</span></span>
+<span><span class="co">#&gt; 1  1.4145496  0.45291180    peptide</span></span>
+<span><span class="co">#&gt; 2 -0.7659673  0.40385647    peptide</span></span>
+<span><span class="co">#&gt; 3 -0.4821913 -0.04717524    peptide</span></span>
+<span><span class="co">#&gt; 4 -0.6418271  0.30194325      lipid</span></span>
+<span><span class="co">#&gt; 5  0.1504975 -0.38114968 metabolite</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="if-your-datasets-are-not-multi-omics">If your datasets are NOT multi-omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-not-multi-omics"></a>
@@ -136,7 +136,7 @@ users should set the corresponding column name beforehand.</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by First Last.</p>
+<p>Developed by Kaiyan Ma.</p>
 </div>
 
 <div class="pkgdown-footer-right">

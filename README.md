@@ -5,7 +5,7 @@ An R-Shiny Package for Cluster Co-Expression Analysis in Longitudinal Microbiomi
 
 MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that connects to online curated annotations.
 
-Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to students with limited R programming experience.
+Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to people with limited R programming experience. Check out our cheese-data demo [here](https://connect.doit.wisc.edu/molpad-demo/).
 
 <p align="center">
   <img src="/man/figures/screen_recording.gif" width="600" /></a>  
@@ -47,4 +47,5 @@ Remember that it's particularly effective when you can provide a reproducible ex
 
 ## Contribution
 To contribute to this project, you could use the following workflow: fork the repository --> create your local copy --> submit a pull request.
+
 

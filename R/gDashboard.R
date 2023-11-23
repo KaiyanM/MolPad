@@ -23,15 +23,15 @@
 #' Please ensure that columns containing external database IDs adhere to the following standards:
 #' * KEGG ID: Begin with 'K' followed by 5 digits, for example, K05685 or K06671.
 #' * GO ID: Begin with 'GO:' followed by 7 digits, such as GO:0003674."
-#' 
+#'
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar sidebarMenu menuItem tabItems tabItem box
-#' @importFrom shiny observe runApp fluidRow icon tags HTML column selectInput sliderInput plotOutput brushOpts h2
+#' @importFrom shiny observe shinyApp fluidRow icon tags HTML column selectInput sliderInput plotOutput brushOpts h3 br
 #' @importFrom DT renderDataTable datatable dataTableOutput
 #' @export
 gDashboard <- function(data, cluster, annotation, networkres,
-                       dashboardtitle = "MolPad Dashboard", 
+                       dashboardtitle = "MolPad Dashboard",
                        id_colname=NULL, id_type=NULL) {
-  
+
   reshaped_df <- reshape_for_make_functions(data, cluster, annotation,id_colname, id_type)
 
   uni_t <- unique(annotation$taxonomic.scope)
@@ -190,5 +190,5 @@ gDashboard <- function(data, cluster, annotation, networkres,
         })
       }
   )
-  runApp(app)
+  do.call(shinyApp, app)
 }
