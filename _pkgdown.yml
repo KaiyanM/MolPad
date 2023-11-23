@@ -2,3 +2,33 @@ url: https://kaiyanm.github.io/MolPad/
 template:
   bootstrap: 5
 
+reference:
+- title: Main Functions
+  desc:  Generate a complete site or its individual section components.
+- contents:
+  - pre_process
+  - starts_with("g")
+- title: Data
+  desc:  Built-in datasets that are used in examples for illustration.
+- contents:
+  - cheese
+  - test_data
+- title: Figures & Tables
+  desc:  Make internal figures or table for the dashboard.
+- contents:
+  - starts_with("make_")
+  - reshape_for_make_functions
+  - match_database
+  - paste_URL
+- title: Colors
+  desc:  Functions for color palettes.
+- contents:
+  - color_palettes__
+  - extend.color__
+- title: Others
+  desc:  Other inner functions for processing.
+- contents:
+  - convert_range
+  - scale_by_row__
+  - transpose_dataframe__
+  - mass_produce_lm__
