@@ -12,11 +12,24 @@ Additionally, our package simplifies the entire pipeline for creating the dashbo
 </p>
 
 ## Installation
-
+You can either install it with `devtools`,
 ```{r, eval = FALSE}
 # Install the package in R:
-install.packages("MolPad")
+install.packages("devtools")
+library(devtools)
+install_github("KaiyanM/MolPad")
 ```
+or clone this repository to your local computer (for example, onto `./Github`) for installing:
+```{r, eval = FALSE}
+# Download and install the package in R:
+setwd("./GitHub")
+install("MolPad")
+```
+after that, load the package:
+```{r,eval=FALSE}
+library(MolPad)
+```
+
 
 ## Usage
 
