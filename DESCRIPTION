@@ -4,7 +4,7 @@ Version: 1.0.0
 Authors@R: 
     person("Kaiyan", "Ma", , "kaiiyenma@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7355-8924"))
-Description: MolPad offers a visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of multi-omics microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that seamlessly connects to online curated annotations.
+Description: A visualization dashboard tool designed to enhance our understanding of how molecular co-expression works in the context of multi-omics microbiome data. The approach involves using a cluster network to provide an initial overview of relationships across multiple omics, with the added functionality to interactively zoom in on specific areas of interest. To facilitate this analysis, we've developed a focus-plus-context strategy that seamlessly connects to online curated annotations.
 License: CC0
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
