@@ -1,3 +1,4 @@
+data(test_data)
 test_that("data 'test_cluster' exists", {
   expect_true(exists('test_cluster'))
 })

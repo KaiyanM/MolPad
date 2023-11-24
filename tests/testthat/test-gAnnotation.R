@@ -1,3 +1,4 @@
+data(test_data)
 test_that("dataset 'test_annotations' exists", {
   expect_true(exists('test_annotations'))
 })

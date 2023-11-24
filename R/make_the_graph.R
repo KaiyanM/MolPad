@@ -9,7 +9,7 @@
 #' @source ggraph::ggraph
 #' 
 #' @examples data(test_data)
-#' make_the_graph(test_graphptw, test_network, 0.03, "Muscular System")
+#' make_the_graph(test_graphptw, test_network, 0.03, "Muscular System","kk")
 #' 
 #' @importFrom igraph graph_from_data_frame
 #' @importFrom ggraph ggraph geom_edge_link geom_node_label scale_edge_alpha

@@ -15,6 +15,6 @@ Generate the graph for the dashboard.
 }
 \examples{
 data(test_data)
-make_the_graph(test_graphptw, test_network, 0.03, "Muscular System")
+make_the_graph(test_graphptw, test_network, 0.03, "Muscular System","kk")
 
 }
