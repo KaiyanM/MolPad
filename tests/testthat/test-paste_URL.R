@@ -6,7 +6,7 @@ test_that("force to separate multiple IDs", {
 })
 
 test_that("do not paste links if there are NAs", {
-  expect_equal(links[2],'NA')
+  expect_equal(links[2],"NA")
 })
 
 test_that("the processed vector has equal length with the original column", {
