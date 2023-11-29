@@ -11,12 +11,12 @@ authors:
   - name: Kaiyan Ma
     orcid: 0000-0002-7355-8924
     affiliation: 1
-  - name: Kris Sankaran
-    orcid: 0000-0002-9415-1971
-    affiliation: "1, 2" 
   - name: Margaret Thairu
     orcid: 0000-0002-2799-6261
     affiliation: 2
+  - name: Kris Sankaran
+    orcid: 0000-0002-9415-1971
+    affiliation: "1, 2" 
 affiliations:
  - name: University of Wisconsin-Madison, Department of Statistics, USA
    index: 1
@@ -55,11 +55,11 @@ Navigating the network in the MolPad dashboard follows three steps, as shown in 
 
 # Case Study: Cheese Data
 
-Here we aim to highlight the versatility of the MolPad Dashboard with a case study of microbial communities on the wash-rind cheese' surface collected during cheese ripening [@doi:10.1128/msystems.00701-22]. It has multiple nested annotation labels ranging from kingdom to class, allowing flexible interpretation at multiple levels of resolution. 
+Here we aim to highlight the versatility of the MolPad Dashboard with a case study of microbial communities on the wash-rind cheese' surface collected during cheese ripening. In the original research, [@doi:10.1128/msystems.00701-22] investigated the successional dynamics that occur within cheese rind microbial communities using a combination of 16S rRNA amplicon, Illumina, and PacBio sequencing. We functionally and taxonomically annotate (using eggNOG [@Huerta] and MMseqs2 [@Steinegger] the contigs they have generated from the Illumina reads, to demonstrate the utility of MolPad. Specifically, we focus on Cheese Sample A and Cheese Sample C. Overall, we are not only able to uncover similar findings as [@doi:10.1128/msystems.00701-22], with this subset, but we are also able to make new hypotheses, through the Dashboard. 
 
-Our goal is to verify conclusions from the original publication and provide an alternative visualization of the complex longitudinal measurements. According to the study, in the bacterial community, Firmicutes are dominant at initial timepoints and Proteobacteria quickly take over to dominate sample composition by the end of ripening. Further, cheeses Actinobacteria and Bacteroidetes were found to establish themselves in the final cheese A and C communities. To confirm these findings using the MolPad dashboard, we examined cheeses A and C across all three batches during weeks 2 to 13.
+For example, when we filter for Actinomycetota (Actinobacteria)as the functional group, we see that there are no edges connecting to group 10 and group 3- the clusters that have the most features associated with Actinomycetoa for Cheese sample A (\ref{fig:cheesecase}.A). Looking at the pattern traces of these groups, (\ref{fig:cheesecase}.B), there is a peak in samples A4 (week 9) and A5 (week 13), which mirrors the 16S rRNA results of Saak et al. Since these two clusters do not have edges connecting them to other groups, this suggests that the Actinomycetoa features found in these groups follow a distinct longitudinal succession pattern that is independent. When looking at Actinomycetoa within Cheese Sample C we see a different pattern. Groups 2 and 5, have the most features associated with Actinomycetoa, but they are highly connected to the other groups (\ref{fig:cheesecase}.A). From these results, we can hypothesize that though Actinomycetoa features are more abundant in later time points for both cheese samples, their dynamics are differentially influenced. 
+The authors found that Type VI secretion was enriched in Pseudomonadota bacteria (specifically, Psychrobacter), and hypothesized this enrichment was due to the importance of physical species interactions that occur with this habitat. Using the Dashboard, we searched for other secretion systems associated genes, to understand their dynamics within the community. Focusing on KEGG annotated Type IV secretion genes, we found that group 9 contained 13/12 of these genes. Within this group, features that cluster are ones that peak in Cheese sample C5 (week 13). This is also the most taxonomically diverse sample. From this, we can hypothesize that increased taxonomic diversity is also associated with increases in genes that are related to competitive species interactions. 
 
-In applying the dashboard, we concatenated the time series for cheeses A and C. This allowed us to track unusual pattern combinations among different species and stages. We take the top four groups from the bacterial community for detailed analysis in Fig \ref{fig:cheesecase}. Overall, our results match the above research and could be used to provide intuitive explanations in supporting the findings, which substantiate the capabilities of `MolPad` as a reproducible tool to streamline the visualization of longitudinal patterns.
 
 # Usage
 
@@ -71,7 +71,7 @@ The source code for `MolPad` is available on [Github](https://github.com/KaiyanM
 
 ![Example of discovering related patterns with network plot. The shade of edges stands for the vicinity of nodes. In the brushed area, Groups 1-7-8 (circled by solid black lines) and 1-2 (circled by blue dashed lines) are strongly linked. For Groups 1, 7, and 8, the patterns are w-shape with an evident peak at the same time section. For Groups 1 and 2, although Group 1 has higher volatility, they both show a highly overlapped increasing trend.\label{fig:pattern}](pattern.png){ width=110% }
 
-![Dashboard showing Groups 10, 7, 4, and 3 for the bacterial (a.) and Group 4 for the eukaryotic (b.) community. Groups 10 and 4 have decreasing trends for both cheeses, and they all include largely Proteobacteria and Firmicutes. While Groups 3 and 7 have the opposite increasing trends, which include more Actinobacteria and Bacteroidetes. Among these, Groups 7 and 4 have the strongest periodicity, suggesting a more reproducible tendency for the corresponding main components. For the eukaryote community, most of the features followed the same stable pattern as in Group 4. \label{fig:cheesecase}](cheesecase.png){ width=80% }
+![Dashboard showing Actinomycetota filtered network (A) with enrichment pattern for Cheese Sample-A (B) and Cheese Sample-C (C). Group 9 shows an enrichment of Type IV secretion genes. \label{fig:cheesecase}](cheesecase.png)
 
 # Acknowledgments
 
