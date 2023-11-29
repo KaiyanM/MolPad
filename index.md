@@ -7,10 +7,6 @@ MolPad offers a visualization dashboard tool designed to enhance our understandi
 
 Additionally, our package simplifies the entire pipeline for creating the dashboard. This user-friendly design makes it accessible even to people with limited R programming experience. Check out our cheese-data demo [here](https://connect.doit.wisc.edu/molpad-demo/).
 
-<p align="center">
-  <img src="/man/figures/screen_recording.gif" width="600" /></a>  
-</p>
-
 ## Installation
 You can either install it with `devtools`,
 ```{r, eval = FALSE}

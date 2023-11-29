@@ -10,6 +10,9 @@ convert_range(x)
 \arguments{
 \item{x}{A vector of numbers.}
 }
+\value{
+A vector calculated by (x - min(x)) / (max(x) - min(x))
+}
 \description{
 An internal function for range conversion. For each element in x, it returns the distance to the minimal values and divided by the range.
 }
