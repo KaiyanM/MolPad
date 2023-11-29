@@ -109,22 +109,44 @@ ripening.</p>
 <div class="section level3">
 <h3 id="data-and-annotations">Data and Annotations<a class="anchor" aria-label="anchor" href="#data-and-annotations"></a>
 </h3>
-<p>Here we add a ‘type’ column with <code>kingdom</code> to describe the
-characteristic of cheese data. The other two columns <code>phylum</code>
+<p>Here we select a ‘type’ column with <code>phylum</code> to describe
+the characteristic of cheese data. Also, the columns <code>phylum</code>
 and <code>class</code> are taken as tags for elemental composition.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cheesedata</span> <span class="op">&lt;-</span> <span class="va">cheese</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">annotations</span><span class="op">[</span><span class="st">"kingdom"</span><span class="op">]</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename_with</a></span><span class="op">(</span>.cols <span class="op">=</span> <span class="fl">12</span>, <span class="op">~</span><span class="st">"type"</span><span class="op">)</span><span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">cheesedata</span> <span class="op">&lt;-</span> <span class="va">cheese</span> <span class="op">|&gt;</span> </span>
+<span>         <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">A_1</span><span class="op">:</span><span class="va">C_5</span>, <span class="va">phylum</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>         <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>type<span class="op">=</span><span class="va">phylum</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>            <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pathchee</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gAnnotation.html">gAnnotation</a></span><span class="op">(</span><span class="va">annotations</span>,<span class="st">"phylum"</span>,<span class="st">"class"</span><span class="op">)</span></span></code></pre></div>
+<div class="section level4">
+<h4 id="after-pre-processing-here-is-what-the-two-datasets-that-we-will-put-into-the-dashboard-look-like">After pre-processing, here is what the two datasets that we will put
+into the dashboard look like:<a class="anchor" aria-label="anchor" href="#after-pre-processing-here-is-what-the-two-datasets-that-we-will-put-into-the-dashboard-look-like"></a>
+</h4>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cheesedata</span><span class="op">[</span><span class="fl">112</span><span class="op">:</span><span class="fl">115</span>,<span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 11</span></span></span>
+<span><span class="co">#&gt;   ID      A_1    A_2    A_3    A_4    A_5    C_1    C_3    C_4    C_5 type </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 112   0.943 -<span style="color: #BB0000;">0.471</span> -<span style="color: #BB0000;">0.471</span> -<span style="color: #BB0000;">0.471</span> -<span style="color: #BB0000;">0.471</span>  2.36  -<span style="color: #BB0000;">0.471</span> -<span style="color: #BB0000;">0.471</span> -<span style="color: #BB0000;">0.471</span> Other</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 113   0.786 -<span style="color: #BB0000;">0.124</span>  0.126 -<span style="color: #BB0000;">0.623</span> -<span style="color: #BB0000;">0.637</span>  2.33  -<span style="color: #BB0000;">0.667</span> -<span style="color: #BB0000;">0.593</span> -<span style="color: #BB0000;">0.593</span> Other</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 114   1.22  -<span style="color: #BB0000;">1.09</span>  -<span style="color: #BB0000;">0.430</span> -<span style="color: #BB0000;">0.829</span> -<span style="color: #BB0000;">0.170</span>  1.43  -<span style="color: #BB0000;">1.30</span>   0.455  0.715 Other</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 115   2.67  -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> Other</span></span>
+<span><span class="va">pathchee</span><span class="op">[</span><span class="fl">112</span><span class="op">:</span><span class="fl">115</span>,<span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 9</span></span></span>
+<span><span class="co">#&gt;   ID    GO_ID KEGG_ID          domain Pathway taxonomic.scope order family genus</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 145   -     ko:K00004        Bacte… Pseudo… Unknown         <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 147   -     ko:K00004        Bacte… Actino… Actinomycetes   <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 148   -     ko:K00004        Bacte… Bacill… Bacilli         Baci… Bacil… Lysi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 149   -     ko:K00004,ko:K0… Bacte… Actino… Actinomycetes   <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+</div>
 </div>
 <div class="section level3">
 <h3 id="cluster-input">Cluster Input<a class="anchor" aria-label="anchor" href="#cluster-input"></a>
 </h3>
 <p>Then we generate clusters from the long dataset above.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cluschee</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gClusters.html">gClusters</a></span><span class="op">(</span><span class="va">cheesedata</span>,ncluster <span class="op">=</span> <span class="fl">10</span>,elbow.max<span class="op">=</span><span class="fl">15</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -133,19 +155,19 @@ and <code>class</code> are taken as tags for elemental composition.</p>
 <p>After that, we got the network result from the clusters. We pick top
 3 predictors for each feature, and save the network output for future
 use.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">networkchee</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gNetwork.html">gNetwork</a></span><span class="op">(</span><span class="va">cluschee</span>,ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <p>View more details of the results with the following function:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">networkchee</span><span class="op">)</span></span></code></pre></div>
-<p><img src="cheese_files/figure-html/unnamed-chunk-7-1.png" width="480"></p>
+<p><img src="cheese_files/figure-html/unnamed-chunk-8-1.png" width="480"></p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="run-dashboard">Run Dashboard<a class="anchor" aria-label="anchor" href="#run-dashboard"></a>
 </h2>
 <p>Declare the annotations, and then run the dashboard.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gDashboard.html">gDashboard</a></span><span class="op">(</span><span class="va">cheesedata</span>,</span>
 <span>           <span class="va">cluschee</span>,</span>
 <span>           <span class="va">pathchee</span>,</span>
