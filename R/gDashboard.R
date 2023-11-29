@@ -117,7 +117,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
 
         taxa_selected <- reactive({
           if (is.null(input$s_tax)) {
-            uni_t #unique(reshaped_df$output_maindata$taxonomic.scope)
+            uni_t 
           } else {
             input$s_tax
           }
@@ -156,7 +156,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
           updateSelectInput(
             session,
             "s_p",
-            choices = unique(info_filt()[, 5]), selected = input$s_ptw
+            choices = unique(info_filt()[, "Pathway"]), selected = input$s_ptw
           )
         })
 

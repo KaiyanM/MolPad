@@ -6,6 +6,10 @@
 #' @docType package
 #' @name color_palettes__
 #' 
+#' @examples
+#' color_palettes__("graytone")
+#' color_palettes__("darkwarm")
+#' 
 #' @export
 color_palettes__ <- function(name){
   if(name == "graytone"){

@@ -13,3 +13,7 @@ convert_range(x)
 \description{
 An internal function for range conversion. For each element in x, it returns the distance to the minimal values and divided by the range.
 }
+\examples{
+convert_range(5:10)
+
+}

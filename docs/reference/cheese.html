@@ -66,14 +66,32 @@
     <h2 id="cheese-data">cheese data<a class="anchor" aria-label="anchor" href="#cheese-data"></a></h2>
     
 
-<p>A data frame with 29423 rows and 11 variables:</p><dl><dt>ID</dt>
+<p>A data frame with 106239 rows and 18 variables:</p><dl><dt>ID</dt>
 <dd><p>sample ID</p></dd>
 
-<dt>A1~A5</dt>
-<dd><p>Time series data measured for cheese 1.</p></dd>
+<dt>A_1~A_5</dt>
+<dd><p>Time series data measured for cheese A.</p></dd>
 
-<dt>B1~B5</dt>
-<dd><p>Time series data measured for cheese 2.</p></dd>
+<dt>C_1~C_5</dt>
+<dd><p>Time series data measured for cheese C.</p></dd>
+
+<dt>domain</dt>
+<dd><p>the category of the feature</p></dd>
+
+<dt>phylum</dt>
+<dd><p>the category of the feature</p></dd>
+
+<dt>class</dt>
+<dd><p>the category of the feature</p></dd>
+
+<dt>order</dt>
+<dd><p>the category of the feature</p></dd>
+
+<dt>family</dt>
+<dd><p>the category of the feature</p></dd>
+
+<dt>genus</dt>
+<dd><p>the category of the feature</p></dd>
 
 
 </dl></div>
@@ -81,7 +99,7 @@
     <h2 id="annotation-data">annotation data<a class="anchor" aria-label="anchor" href="#annotation-data"></a></h2>
     
 
-<p>A data frame with 29423 rows and 10 variables:</p><dl><dt>ID</dt>
+<p>A data frame with 86156 rows and 9 variables:</p><dl><dt>ID</dt>
 <dd><p>sample ID</p></dd>
 
 <dt>GO_ID</dt>
@@ -90,10 +108,7 @@
 <dt>KEGG_ID</dt>
 <dd><p>KEGG IDs, linking genomic information with higher order functional information.</p></dd>
 
-<dt>Other_ID</dt>
-<dd><p>other IDs in online databases</p></dd>
-
-<dt>kingdom</dt>
+<dt>domain</dt>
 <dd><p>the category of the feature</p></dd>
 
 <dt>phylum</dt>
@@ -118,28 +133,27 @@
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cheese</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">annotations</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       ID GO_ID KEGG_ID               Other_ID   kingdom         phylum</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1                              DUF1329  Bacteria Proteobacteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1000                                 FliJ  Bacteria Proteobacteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  10001        K07304                   PMSR  Bacteria     Firmicutes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 100040                             ABC_tran  Bacteria Proteobacteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 100058                ABC_membrane,ABC_tran Eukaryota   Opisthokonta</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 100067        K05685 ABC_tran,FtsX,MacB_PCD  Bacteria Proteobacteria</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 class                  order family genus</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 Gammaproteobacteria Pseudoalteromonadaceae   &lt;NA&gt;  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Gammaproteobacteria                   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3             Bacilli            Lactococcus   &lt;NA&gt;  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  Betaproteobacteria                   &lt;NA&gt;   &lt;NA&gt;  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5               Fungi             Ascomycota   &lt;NA&gt;  &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 Gammaproteobacteria          Moraxellaceae   &lt;NA&gt;  &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ID    GO_ID KEGG_ID domain   phylum         class           order family genus</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 9     -     -       Bacteria Pseudomonadota Alphaproteobac… Caul… Caulo… Caul…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 10    -     -       Bacteria Pseudomonadota Alphaproteobac… Caul… Caulo… Caul…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 11    -     -       Bacteria Pseudomonadota Alphaproteobac… Hyph… Barto… Bart…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 12    -     -       Bacteria Pseudomonadota Alphaproteobac… Hyph… Bruce… Bruc…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 13    -     -       Bacteria Pseudomonadota Alphaproteobac… Hyph… Nitro… Brad…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 14    -     -       Bacteria Pseudomonadota Alphaproteobac… Hyph… Phyll… Meso…</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cheese</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       ID A1 A2 A3 A4 A5 B1 B2 B3 B4 B5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1  6  1  1  0  0  4  4  4  4  4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1000  1  0  0  0  0  3  2  1  1  1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  10001  2  0  0  0  1  0  1  0  0  0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 100040  0  0  0  0  1  0  0  0  0  1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 100058  0  0  0  0  1  1  0  0  0  0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 100067  0  0  0  0  1  2  0  0  2  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 18</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ID      A_1   A_2   A_3   A_4   A_5   C_1   C_3   C_4   C_5 GO_ID KEGG_ID</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> 1        38    23    27     5    11    13     1     3     0 <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 2        23     6     4     0     9    21     1     0     2 <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> 3        24     5    37    10    19     3     0     1     4 <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> 4         3     2     4     2    16    56     1     7    17 <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> 5        58    14    45    13    32    82     3     8     3 <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> 6        12     9    14     4    13     2     0     1     4 <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 more variables: domain &lt;chr&gt;, phylum &lt;chr&gt;, class &lt;chr&gt;, order &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   family &lt;chr&gt;, genus &lt;chr&gt;</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

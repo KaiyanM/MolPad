@@ -12,7 +12,7 @@ extend.color__(n, colors, extendby = 1, alpha = 1, ...)
 
 \item{colors}{A vector of colors (finite).}
 
-\item{extendby}{A number to select from 1, 2, 3, or 4, representing four distinct auto-fill schemes.}
+\item{extendby}{A number to select from 1, 2, 3, 4 or 5, representing distinct auto-fill schemes.}
 
 \item{alpha}{A number to select from range \link{0,1}.}
 }

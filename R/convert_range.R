@@ -6,7 +6,9 @@
 #' @docType package
 #' @name convert_range
 #' 
-
+#' @examples
+#' convert_range(5:10)
+#' 
 #' @export
 convert_range <- function(x) {
   (x - min(x)) / (max(x) - min(x))

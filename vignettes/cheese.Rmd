@@ -29,18 +29,25 @@ data("cheese")
 
 # Preprocess
 ## Data and Annotations
-Here we add a 'type' column with `kingdom` to describe the characteristic of cheese data. The other two columns `phylum` and `class` are taken as tags for elemental composition.
+Here we select a 'type' column with `phylum` to describe the characteristic of cheese data. Also, the columns `phylum` and `class` are taken as tags for elemental composition.
 
 ```{r}
-cheesedata <- cheese |>
-  dplyr::mutate(annotations["kingdom"]) |>
-  dplyr::rename_with(.cols = 12, ~"type")|>
-  pre_process()
+cheesedata <- cheese |> 
+   		 select(ID, A_1:C_5, phylum) |> 
+   		 rename(type=phylum) |> 
+      		pre_process()
 ```
 
 ```{r}
 pathchee <- gAnnotation(annotations,"phylum","class")
 ```
+
+### After pre-processing, here is what the two datasets that we will put into the dashboard look like:
+```{r}
+cheesedata[112:115,]
+pathchee[112:115,]
+```
+
 
 ## Cluster Input
 Then we generate clusters from the long dataset above. 

@@ -9,21 +9,26 @@
 #' @format two datasets: `cheese` and `annotations`
 #' 
 #' @section cheese data: 
-#' A data frame with 29423 rows and 11 variables:
+#' A data frame with 106239 rows and 18 variables:
 #' \describe{
 #'   \item{ID}{sample ID}
-#'   \item{A1~A5}{Time series data measured for cheese 1.}
-#'   \item{B1~B5}{Time series data measured for cheese 2.}
+#'   \item{A_1~A_5}{Time series data measured for cheese A.}
+#'   \item{C_1~C_5}{Time series data measured for cheese C.}
+#'   \item{domain}{the category of the feature}
+#'   \item{phylum}{the category of the feature}
+#'   \item{class}{the category of the feature}
+#'   \item{order}{the category of the feature}
+#'   \item{family}{the category of the feature}
+#'   \item{genus}{the category of the feature}
 #' }
 #' 
 #' @section annotation data: 
-#' A data frame with 29423 rows and 10 variables:
+#' A data frame with 86156 rows and 9 variables:
 #' \describe{
 #'   \item{ID}{sample ID}
 #'   \item{GO_ID}{GO IDs, represents a link between a gene product type and a molecular function}
 #'   \item{KEGG_ID}{KEGG IDs, linking genomic information with higher order functional information.}
-#'   \item{Other_ID}{other IDs in online databases}
-#'   \item{kingdom}{the category of the feature}
+#'   \item{domain}{the category of the feature}
 #'   \item{phylum}{the category of the feature}
 #'   \item{class}{the category of the feature}
 #'   \item{order}{the category of the feature}

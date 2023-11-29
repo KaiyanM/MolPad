@@ -18,3 +18,17 @@ gDashboard(test_data_processed,test_cluster,test_annotations_processed,test_netw
 setwd("/Users/hazelma/Documents/GitHub/MolPad")
 devtools::test()
 devtools::check()
+#-----------------------run example----------------------
+data("cheese")
+
+#-----------------------generate web----------------------
+library(pkgdown)
+#----
+setwd("/Users/hazelma/Documents/GitHub/MolPad")
+pkgdown::clean_site()
+pkgdown::build_site()
+#----
+
+convert_range(5:10)
+
+

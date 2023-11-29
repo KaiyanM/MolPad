@@ -25,6 +25,7 @@ reference:
 - contents:
   - color_palettes__
   - extend.color__
+  - match.color__
 - title: Others
   desc:  Other inner functions for processing.
 - contents:

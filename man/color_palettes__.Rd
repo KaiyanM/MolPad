@@ -13,3 +13,8 @@ color_palettes__(name)
 \description{
 An internal function for built-in color palettes.
 }
+\examples{
+color_palettes__("graytone")
+color_palettes__("darkwarm")
+
+}
