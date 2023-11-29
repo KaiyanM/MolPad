@@ -12,12 +12,7 @@ Additionally, our package simplifies the entire pipeline for creating the dashbo
 </p>
 
 2
-![](https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording.gif){ width = 40% }
-
-3
-<p align="center">
-  <img src="https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording" width="600" /></a>  
-</p>
+![](https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording.gif)
 
 ## Installation
 You can either install it with `devtools`,
