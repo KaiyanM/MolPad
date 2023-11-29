@@ -11,9 +11,6 @@ Additionally, our package simplifies the entire pipeline for creating the dashbo
   <img src="/man/figures/screen_recording.gif" width="600" /></a>  
 </p>
 
-2
-![](https://github.com/KaiyanM/MolPad/blob/main/man/figures/screen_recording.gif)
-
 ## Installation
 You can either install it with `devtools`,
 ```{r, eval = FALSE}
