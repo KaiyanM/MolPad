@@ -8,7 +8,7 @@
 #' @param typenameList A vector of strings. This parameter is used to clarify the source or names for each data.frame, and is only applicable when the input of \code{data} is a list of data.frame. By default, it will be set as "Dataset_1", "Dataset_2", ..., etc.
 #' @param replaceNa Logical; if TRUE (default), replace NA with 0.
 #' @param scale Logical; if TRUE (default), standardize the datasets by row with \code{base::scale}. This converts each original value into a z-score. See also \link[MolPad]{scale_by_row__}.
-#' @param autoColName A string; if it's not NULL (default), automatically set uniform column names for all the datasets.This parameter is only applicable when the input format is a list.
+#' @param autoColName A string; if it's not NULL (default), automatically set uniform column names for all the datasets.This parameter is only applicable when the input of \code{data} is a list of data.frame.
 #'
 #' @details
 #' We consider two distinct scenarios for this application:
