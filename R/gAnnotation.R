@@ -5,9 +5,9 @@
 #' @docType package
 #' @name gAnnotation
 #'
-#' @param data A dataframe.
-#' @param first_order The name of one column of categorical variable in `data`.
-#' @param second_order The name of another column of categorical variable in `data`.
+#' @param data A data.frame containing annotations that should be used for describing the features we measured at each time point. It is also required to include `ID` and at least two categorical variables.
+#' @param first_order A string. The name of one column of categorical variable in `data`. 
+#' @param second_order A string. The name of another column of categorical variable in `data`.
 #'
 #' @examples data(test_data)
 #' test_annotations_processed <- gAnnotation(test_annotations,system,class)
