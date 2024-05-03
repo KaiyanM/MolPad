@@ -5,13 +5,13 @@
 #' @docType package
 #' @name gDashboard
 #'
-#' @param data A dataframe; The output of `pre_process()`
-#' @param cluster A list of two; The output of `gClusters()`
-#' @param annotation A dataframe; The output of `gAnnotation()`
-#' @param networkres A dataframe; The output of `gNetwork()`
-#' @param dashboardtitle A string.
-#' @param id_colname A single string or a sting vector. The column names in your annoation dataset that contains external database IDs.
-#' @param id_type A single string or a sting vector. The corresponding database names for the above columns, must be choose from "KEGG" and "GO".
+#' @param data The output of `pre_process()`:a scaled data.frame contain variables \code{ID}, \code{value on time_1}, ..., \code{value on time_k}, and \code{type}.
+#' @param cluster The output of `gClusters()`: a list contains the result of k-means Cluster means, vectors and sum of squares.
+#' @param annotation The output of `gAnnotation()`: a data.frame containing annotations for describing the features. Variables must include `ID`, `Pathway`, and `taxonomic.scope`. Note that NA is not permitted for these 3 variables.
+#' @param networkres The output of `gNetwork()`: a data.frame with 4 variables `weight`,`IncNodePurity`,`var_names`,`from`.
+#' @param dashboardtitle A string of customized dashboard name.
+#' @param id_colname A single string or a string vector. The column names in your annotation dataset where the vector contains external database IDs.
+#' @param id_type A single string or a string vector. The corresponding database names for the above columns, must be chosen from "KEGG" and "GO".
 
 #' @examples
 #' \dontrun{
