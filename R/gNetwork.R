@@ -5,8 +5,8 @@
 #' @docType package
 #' @name gNetwork
 #'
-#' @param clusters A list of two; The output of `gClusters()`
-#' @param ntop A number. Pick the top n predictors for each feature.
+#' @param clusters A list of two; The output of `gClusters()`. See also \link[MolPad]{gClusters}.
+#' @param ntop A number you pick to set the top n predictors(default: top 10) for each feature as the important ones. This will be used to construct the network among the clustered patterns.
 #' @param seed A number of random seed.
 #' 
 #' @details 
