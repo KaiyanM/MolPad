@@ -5,7 +5,7 @@
 #'
 #' @details 
 #' To determine the optimal number of clusters (`ncluster`), it is advised to closely examine the elbow plot and identify the point on the graph where a substantial change or 'elbow' occurs. This is often indicative of the most suitable cluster count.
-#' In cases where your dataset is extensive or intricate, you might consider increasing the value of `elbow.max` to ensure a more comprehensive exploration of potential cluster counts. This can help in achieving more accurate and meaningful results, especially when working with larger or more complex datasets. This function can be executed with only the `data` parameter at the outset. However, to achieve the best clustering results, further adjustments are recommended. After the initial run, users are expected to adjust the function's parameters based on the clustering outcomes and the elbow plot analysis. See also `stats::kmeans`.
+#' In cases where your dataset is extensive or intricate, you might consider increasing the value of `elbow.max` to ensure a more comprehensive exploration of potential cluster counts. This can help in achieving more accurate and meaningful results, especially when working with larger or more complex datasets. This function can be executed with only the `data` parameter at the outset. However, to achieve the best clustering results, further adjustments are recommended. After the initial run, users are expected to adjust the function's parameters based on the clustering outcomes and the elbow plot analysis. 
 #' 
 #' @docType package
 #' @name gClusters
@@ -13,9 +13,9 @@
 #' @param data A scaled data.frame that contain variables \code{ID}, \code{value on time_1}, ..., \code{value on time_k}, and \code{type} for extracting patterns across the time. See also `pre_process()`.
 #' @param ncluster A number of clusters. It is related to the complexity of information in the network: When choosing the `ncluster`, we suggest thinking about how many nodes you are about to show on the visualization and how representative you want for each clustered pattern.
 #' @param elbow.max A number of the maximum value of x-axis for the elbow method plot. It should be larger than the expected `ncluster` and smaller than the sample size.
-#' @param iter.max A number of the maximum iterations allowed in k-means.
+#' @param iter.max A number of the maximum iterations allowed in k-means. See also `stats::kmeans`.
 #' @param nstart A number of random attempts of generating initial configurations. The k-means algorithm will choose the best one among these
-#' attempts. For larger data, 'nstart' can be set lower or just set to 1.
+#' attempts. For larger data, 'nstart' can be set lower or just set to 1. See also `stats::kmeans`.
 
 #'
 #' @returns This function return a list of 2 elements: a k-means cluster result and an elbow method plot. 
