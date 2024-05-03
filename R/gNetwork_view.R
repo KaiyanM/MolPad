@@ -4,7 +4,7 @@
 #'
 #' @docType package
 #'
-#' @param data A dataframe; The output of `gNetwork()`
+#' @param data A dataframe; The output of `gNetwork()`, including 4 variables: `weight`, `IncNodePurity`, `var_names` and `from`. The weight is the edge value, the IncNodePurity(%IncMSE) is the measure of predictions as a result of `var_names` being permuted. `from` is the dependent variable in each round of random forest.
 
 #' @examples
 #' data(test_data)
