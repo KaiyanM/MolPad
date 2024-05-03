@@ -5,10 +5,11 @@
 #' 
 #' @details
 #' This function simply aims to collect position information on the brushed area of the network plot and returns the annotation table of corresponding features.
+#' It takes the plot object and produce an object information table. 
 #' 
 #' @docType package
 #' @name make_the_table
-#' @param p ggplot output
+#' @param p ggplot output, see also `ggplot2::ggplot_build`.
 
 #' @importFrom ggplot2 ggplot ggplot_build
 #' @export

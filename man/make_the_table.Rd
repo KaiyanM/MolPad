@@ -8,11 +8,12 @@
 make_the_table(p)
 }
 \arguments{
-\item{p}{ggplot output}
+\item{p}{ggplot output, see also \code{ggplot2::ggplot_build}.}
 }
 \description{
 Generate the table of selected groups for the dashboard.
 }
 \details{
 This function simply aims to collect position information on the brushed area of the network plot and returns the annotation table of corresponding features.
+It takes the plot object and produce an object information table.
 }
