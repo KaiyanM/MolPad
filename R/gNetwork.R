@@ -5,7 +5,7 @@
 #' @docType package
 #' @name gNetwork
 #'
-#' @param clusters A list of two; The output of `gClusters()`. See also \link[MolPad]{gClusters}.
+#' @param clusters A list of two outputs of `gClusters()`. The first element is the k-means result (See also `stats::kmeans`), while the other element is a plot and will be automatically omitted for ease of directly passing results to the function. 
 #' @param ntop A number you pick to set the top n predictors(default: top 10) for each feature as the important ones. This will be used to construct the network among the clustered patterns.
 #' @param seed A number of random seed.
 #' 
