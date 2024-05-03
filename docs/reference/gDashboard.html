@@ -65,31 +65,31 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd><p>A dataframe; The output of <code><a href="pre_process.html">pre_process()</a></code></p></dd>
+<dd><p>The output of <code><a href="pre_process.html">pre_process()</a></code>:a scaled data.frame contain variables <code>ID</code>, <code>value on time_1</code>, ..., <code>value on time_k</code>, and <code>type</code>.</p></dd>
 
 
 <dt>cluster</dt>
-<dd><p>A list of two; The output of <code><a href="gClusters.html">gClusters()</a></code></p></dd>
+<dd><p>The output of <code><a href="gClusters.html">gClusters()</a></code>: a list contains the result of k-means Cluster means, vectors and sum of squares.</p></dd>
 
 
 <dt>annotation</dt>
-<dd><p>A dataframe; The output of <code><a href="gAnnotation.html">gAnnotation()</a></code></p></dd>
+<dd><p>The output of <code><a href="gAnnotation.html">gAnnotation()</a></code>: a data.frame containing annotations for describing the features. Variables must include <code>ID</code>, <code>Pathway</code>, and <code>taxonomic.scope</code>. Note that NA is not permitted for these 3 variables.</p></dd>
 
 
 <dt>networkres</dt>
-<dd><p>A dataframe; The output of <code><a href="gNetwork.html">gNetwork()</a></code></p></dd>
+<dd><p>The output of <code><a href="gNetwork.html">gNetwork()</a></code>: a data.frame with 4 variables <code>weight</code>,<code>IncNodePurity</code>,<code>var_names</code>,<code>from</code>.</p></dd>
 
 
 <dt>dashboardtitle</dt>
-<dd><p>A string.</p></dd>
+<dd><p>A string of customized dashboard name.</p></dd>
 
 
 <dt>id_colname</dt>
-<dd><p>A single string or a sting vector. The column names in your annoation dataset that contains external database IDs.</p></dd>
+<dd><p>A single string or a string vector. The column names in your annotation dataset where the vector contains external database IDs.</p></dd>
 
 
 <dt>id_type</dt>
-<dd><p>A single string or a sting vector. The corresponding database names for the above columns, must be choose from "KEGG" and "GO".</p></dd>
+<dd><p>A single string or a string vector. The corresponding database names for the above columns, must be chosen from "KEGG" and "GO".</p></dd>
 
 </dl></div>
     <div class="section level2">

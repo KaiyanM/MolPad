@@ -3,7 +3,7 @@
 \docType{package}
 \name{mass_produce_lm__}
 \alias{mass_produce_lm__}
-\title{Produce linear model for each column}
+\title{Mass produce linear model}
 \usage{
 mass_produce_lm__(data)
 }
@@ -11,5 +11,8 @@ mass_produce_lm__(data)
 \item{data}{A dataframe.}
 }
 \description{
-This is an internal function designed to automatically generate a list of linear functions for a dataset. Each column is considered a response variable against all other columns. The resulting functions can be utilized as inputs for random forest regression.
+Take each column as dependent vairable at a time, and produce n linear models for n columns in a dataset.
+}
+\details{
+This is an internal function designed to automatically generate a list of functions for regression. Each column is considered a response variable against all other columns. The resulting functions can be utilized as inputs for random forest regression in \code{gNetwork()}.
 }

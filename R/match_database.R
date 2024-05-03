@@ -1,7 +1,10 @@
 #' Match database
 #'
 #' @description
-#' `match_database()` is an internal function that matches the selected columns in the dataset with corresponding databases.
+#' matches the selected columns with online database names.
+#' 
+#' @details
+#' `match_database()` is an internal function that matches the selected columns in the dataset with corresponding databases. Currently MolPad support two types of annotation database: GO and KEGG. If you want to custom the URL for other platform, you could download and modify on `paste_URL()` function.
 #'
 #' @docType package
 #' @name match_database

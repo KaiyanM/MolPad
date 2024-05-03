@@ -6,7 +6,9 @@
 #' @docType data
 #' @name make_line_plot
 
-#' @source ggplot2::geom_ribbon
+#' @details
+#' this function makes a ribbon plot for every brush action in the Shiny to show the min, max, and mean value of each clustered pattern group across time. The ribbon plot is grouped and colored by the `type` variable in input datasets.
+#' See also `ggplot2::geom_ribbon`.
 #' 
 #' @examples data(test_data)
 #' make_line_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))

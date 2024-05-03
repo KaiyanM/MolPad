@@ -16,19 +16,19 @@ gDashboard(
 )
 }
 \arguments{
-\item{data}{A dataframe; The output of \code{pre_process()}}
+\item{data}{The output of \code{pre_process()}:a scaled data.frame contain variables \code{ID}, \code{value on time_1}, ..., \code{value on time_k}, and \code{type}.}
 
-\item{cluster}{A list of two; The output of \code{gClusters()}}
+\item{cluster}{The output of \code{gClusters()}: a list contains the result of k-means Cluster means, vectors and sum of squares.}
 
-\item{annotation}{A dataframe; The output of \code{gAnnotation()}}
+\item{annotation}{The output of \code{gAnnotation()}: a data.frame containing annotations for describing the features. Variables must include \code{ID}, \code{Pathway}, and \code{taxonomic.scope}. Note that NA is not permitted for these 3 variables.}
 
-\item{networkres}{A dataframe; The output of \code{gNetwork()}}
+\item{networkres}{The output of \code{gNetwork()}: a data.frame with 4 variables \code{weight},\code{IncNodePurity},\code{var_names},\code{from}.}
 
-\item{dashboardtitle}{A string.}
+\item{dashboardtitle}{A string of customized dashboard name.}
 
-\item{id_colname}{A single string or a sting vector. The column names in your annoation dataset that contains external database IDs.}
+\item{id_colname}{A single string or a string vector. The column names in your annotation dataset where the vector contains external database IDs.}
 
-\item{id_type}{A single string or a sting vector. The corresponding database names for the above columns, must be choose from "KEGG" and "GO".}
+\item{id_type}{A single string or a string vector. The corresponding database names for the above columns, must be chosen from "KEGG" and "GO".}
 }
 \description{
 Once you have the outputs from the g-functions, you're ready to create your custom Molpad dashboard. Be sure to specify the web ID columns and their corresponding column names.

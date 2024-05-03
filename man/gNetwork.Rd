@@ -8,9 +8,9 @@
 gNetwork(clusters, ntop = 10, method = "randomforest")
 }
 \arguments{
-\item{clusters}{A list of two; The output of \code{gClusters()}}
+\item{clusters}{A list of two outputs of \code{gClusters()}. The first element is the k-means result (See also \code{stats::kmeans}), while the other element is a plot and will be automatically omitted for ease of directly passing results to the function.}
 
-\item{ntop}{A number. Pick the top n predictors for each feature.}
+\item{ntop}{A number you pick to set the top n predictors(default: top 10) for each feature as the important ones. This will be used to construct the network among the clustered patterns.}
 
 \item{seed}{A number of random seed.}
 }

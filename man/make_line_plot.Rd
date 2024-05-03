@@ -4,14 +4,15 @@
 \name{make_line_plot}
 \alias{make_line_plot}
 \title{Make line plot}
-\source{
-ggplot2::geom_ribbon
-}
 \usage{
 make_line_plot(dfgroup_long, selected_groups, selected_taxa)
 }
 \description{
 Generate the line and ribbon plot for the dashboard.
+}
+\details{
+this function makes a ribbon plot for every brush action in the Shiny to show the min, max, and mean value of each clustered pattern group across time. The ribbon plot is grouped and colored by the \code{type} variable in input datasets.
+See also \code{ggplot2::geom_ribbon}.
 }
 \examples{
 data(test_data)

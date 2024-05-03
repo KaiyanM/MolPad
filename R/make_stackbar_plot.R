@@ -6,7 +6,9 @@
 #' @docType data
 #' @name make_stackbar_plot
 
-#' @source ggplot2::geom_bar
+#' @details
+#' this function makes a bar plot for every brush action in the Shiny to show the components of each clustered pattern group. The bar plot is colored by the `taxonomic.scope` variable in the processed annotation dataset generated from `gAnnotation()`.
+#' See also `ggplot2::geom_bar`.
 #' 
 #' @examples data(test_data)
 #' make_stackbar_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))

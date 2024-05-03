@@ -4,14 +4,16 @@
 \name{make_the_graph}
 \alias{make_the_graph}
 \title{Make graph plot}
-\source{
-ggraph::ggraph
-}
 \usage{
 make_the_graph(ptw, network_output, min_weight, s_ptw, graph_layout)
 }
 \description{
 Generate the graph for the dashboard.
+}
+\details{
+this function makes a network plot for every \code{Pathway} selection in the Shiny to show the relationship among clustered pattern groups.
+The network plot is built by the dataset generated from \code{gNetwork()} and can be further adjusted with layout and minimum weights.
+See also \code{ggraph::ggraph}.
 }
 \examples{
 data(test_data)

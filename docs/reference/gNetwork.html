@@ -57,11 +57,11 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>clusters</dt>
-<dd><p>A list of two; The output of <code><a href="gClusters.html">gClusters()</a></code></p></dd>
+<dd><p>A list of two outputs of <code><a href="gClusters.html">gClusters()</a></code>. The first element is the k-means result (See also <code><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">stats::kmeans</a></code>), while the other element is a plot and will be automatically omitted for ease of directly passing results to the function.</p></dd>
 
 
 <dt>ntop</dt>
-<dd><p>A number. Pick the top n predictors for each feature.</p></dd>
+<dd><p>A number you pick to set the top n predictors(default: top 10) for each feature as the important ones. This will be used to construct the network among the clustered patterns.</p></dd>
 
 
 <dt>seed</dt>
@@ -78,13 +78,13 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">networkres</span> <span class="op">&lt;-</span> <span class="fu">gNetwork</span><span class="op">(</span><span class="va">test_cluster</span>, ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       weight IncNodePurity var_names    from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.1952993     0.7377004   Group_3 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.7740212     1.0274723   Group_5 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -1.3466898     0.7317835   Group_4 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4.8079094     0.8886960   Group_5 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  4.5994151     0.9587071   Group_4 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.6594313     1.2896380   Group_1 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      weight IncNodePurity var_names    from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  2.652329     0.7215618   Group_3 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2.000188     1.1693296   Group_5 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -1.550864     0.6052169   Group_2 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  5.839458     0.8639380   Group_5 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5.208290     1.1325881   Group_4 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  2.601626     1.4028247   Group_1 Group_2</span>
 <span class="r-in"><span><span class="fu"><a href="gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="gNetwork-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

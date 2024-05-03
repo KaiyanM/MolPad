@@ -4,14 +4,15 @@
 \name{make_stackbar_plot}
 \alias{make_stackbar_plot}
 \title{Make stackbar plot}
-\source{
-ggplot2::geom_bar
-}
 \usage{
 make_stackbar_plot(dfgroup_long, selected_groups, selected_taxa)
 }
 \description{
 Generate the stackbar plot for the dashboard.
+}
+\details{
+this function makes a bar plot for every brush action in the Shiny to show the components of each clustered pattern group. The bar plot is colored by the \code{taxonomic.scope} variable in the processed annotation dataset generated from \code{gAnnotation()}.
+See also \code{ggplot2::geom_bar}.
 }
 \examples{
 data(test_data)

@@ -5,8 +5,11 @@
 #'
 #' @docType package
 #' @name make_the_graph
-
-#' @source ggraph::ggraph
+#' 
+#' @details
+#' this function makes a network plot for every `Pathway` selection in the Shiny to show the relationship among clustered pattern groups. 
+#' The network plot is built by the dataset generated from `gNetwork()` and can be further adjusted with layout and minimum weights.
+#' See also `ggraph::ggraph`.
 #' 
 #' @examples data(test_data)
 #' make_the_graph(test_graphptw, test_network, 0.03, "Muscular System","kk")

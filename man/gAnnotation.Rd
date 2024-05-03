@@ -8,11 +8,11 @@
 gAnnotation(data, first_order, second_order)
 }
 \arguments{
-\item{data}{A dataframe.}
+\item{data}{A data.frame containing annotations that should be used for describing the features we measured at each time point. It is also required to include \code{ID} and at least two categorical variables.}
 
-\item{first_order}{The name of one column of categorical variable in \code{data}.}
+\item{first_order}{A string. The name of one column of categorical variable in \code{data}.}
 
-\item{second_order}{The name of another column of categorical variable in \code{data}.}
+\item{second_order}{A string. The name of another column of categorical variable in \code{data}.}
 }
 \description{
 \code{gAnnotation()} provides the standard input format for the dashboard, allowing users to select two columns as the primary factors they wish to visualize and describe in the data.

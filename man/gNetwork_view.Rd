@@ -8,7 +8,7 @@
 gNetwork_view(data)
 }
 \arguments{
-\item{data}{A dataframe; The output of \code{gNetwork()}}
+\item{data}{A dataframe; The output of \code{gNetwork()}, including 4 variables: \code{weight}, \code{IncNodePurity}, \code{var_names} and \code{from}. The weight is the edge value, the IncNodePurity(\%IncMSE) is the measure of predictions as a result of \code{var_names} being permuted. \code{from} is the dependent variable in each round of random forest.}
 }
 \description{
 \code{gNetwork_view()} Generate a feature importance plot for the random forest result. This plot visually highlights the importance of individual cluster within a dataset, helping to identify key factors in predictive modeling.
