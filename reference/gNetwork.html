@@ -57,11 +57,11 @@
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>clusters</dt>
-<dd><p>A list of two; The output of <code><a href="gClusters.html">gClusters()</a></code></p></dd>
+<dd><p>A list of two outputs of <code><a href="gClusters.html">gClusters()</a></code>. The first element is the k-means result (See also <code><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">stats::kmeans</a></code>), while the other element is a plot and will be automatically omitted for ease of directly passing results to the function.</p></dd>
 
 
 <dt>ntop</dt>
-<dd><p>A number. Pick the top n predictors for each feature.</p></dd>
+<dd><p>A number you pick to set the top n predictors(default: top 10) for each feature as the important ones. This will be used to construct the network among the clustered patterns.</p></dd>
 
 
 <dt>seed</dt>

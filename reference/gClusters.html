@@ -60,38 +60,36 @@ an elbow plot as a way of finding the optimal parameter.</p>
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>data</dt>
-<dd><p>A data frame. See also <code><a href="pre_process.html">pre_process()</a></code>.</p></dd>
+<dd><p>A scaled data.frame that contain variables <code>ID</code>, <code>value on time_1</code>, ..., <code>value on time_k</code>, and <code>type</code> for extracting patterns across the time. See also <code><a href="pre_process.html">pre_process()</a></code>.</p></dd>
 
 
 <dt>ncluster</dt>
-<dd><p>A number of clusters.</p></dd>
+<dd><p>A number of clusters. It is related to the complexity of information in the network: When choosing the <code>ncluster</code>, we suggest thinking about how many nodes you are about to show on the visualization and how representative you want for each clustered pattern.</p></dd>
 
 
 <dt>elbow.max</dt>
-<dd><p>A number of the maximum value of x-axis. It should be larger
-than the expected <code>ncluster</code> and smaller than the sample size.</p></dd>
+<dd><p>A number of the maximum value of x-axis for the elbow method plot. It should be larger than the expected <code>ncluster</code> and smaller than the sample size.</p></dd>
 
 
 <dt>iter.max</dt>
-<dd><p>A number of the maximum iterations allowed in k-means.</p></dd>
+<dd><p>A number of the maximum iterations allowed in k-means. See also <code><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">stats::kmeans</a></code>.</p></dd>
 
 
 <dt>nstart</dt>
-<dd><p>A number of random attempts of generating initial
-configurations. The k-means algorithm will choose the best one among these
-attempts. For larger data, 'nstart' can be set lower or just set to 1.</p></dd>
+<dd><p>A number of random attempts of generating initial configurations. The k-means algorithm will choose the best one among these
+attempts. For larger data, 'nstart' can be set lower or just set to 1. See also <code><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">stats::kmeans</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     
 
-<p>A list of 2:</p>
+<p>This function return a list of 2 elements: a k-means cluster result and an elbow method plot.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>To determine the optimal number of clusters (<code>ncluster</code>), it is advised to closely examine the elbow plot and identify the point on the graph where a substantial change or 'elbow' occurs. This is often indicative of the most suitable cluster count.
-In cases where your dataset is extensive or intricate, you might consider increasing the value of <code>elbow.max</code> to ensure a more comprehensive exploration of potential cluster counts. This can help in achieving more accurate and meaningful results, especially when working with larger or more complex datasets.""This function can be executed with only the <code>data</code> parameter at the outset. However, to achieve the best clustering results, further adjustments are recommended. After the initial run, users are expected to adjust the function's parameters based on the clustering outcomes and the elbow plot analysis.</p>
+In cases where your dataset is extensive or intricate, you might consider increasing the value of <code>elbow.max</code> to ensure a more comprehensive exploration of potential cluster counts. This can help in achieving more accurate and meaningful results, especially when working with larger or more complex datasets. This function can be executed with only the <code>data</code> parameter at the outset. However, to achieve the best clustering results, further adjustments are recommended. After the initial run, users are expected to adjust the function's parameters based on the clustering outcomes and the elbow plot analysis.</p>
     </div>
 
     <div class="section level2">
