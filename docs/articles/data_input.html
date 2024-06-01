@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="MolPad">
-<title>Data Input • MolPad</title>
+<title>Data Input: Multi-Omics/Single-Omics • MolPad</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Input">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Data Input: Multi-Omics/Single-Omics">
 <meta property="og:description" content="MolPad">
 <meta property="og:image" content="https://kaiyanm.github.io/MolPad/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -48,10 +48,10 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/FAQ.html">FAQ</a>
-    <a class="dropdown-item" href="../articles/cheese.html">Case Study: Cheese</a>
-    <a class="dropdown-item" href="../articles/data_input.html">Data Input</a>
-    <a class="dropdown-item" href="../articles/navigate.html">Network Navigation</a>
+    <a class="dropdown-item" href="../articles/FAQ.html">FAQs</a>
+    <a class="dropdown-item" href="../articles/cheese.html">Case Study: Cheese Communities</a>
+    <a class="dropdown-item" href="../articles/data_input.html">Data Input: Multi-Omics/Single-Omics</a>
+    <a class="dropdown-item" href="../articles/navigate.html">Network Navigation: Key Steps</a>
   </div>
 </li>
       </ul>
@@ -71,7 +71,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Data Input</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Data Input: Multi-Omics/Single-Omics</h1>
             
       
       
@@ -81,15 +81,16 @@
     
     
 <div class="section level2">
-<h2 id="longitudinal-data">Longitudinal Data<a class="anchor" aria-label="anchor" href="#longitudinal-data"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>Our visualization pipeline begins with an optional pre-processing
 module that offers built-in functions to streamline data preparation.
 Depending on the nature of your datasets, there are two primary
 conditions to consider:</p>
-<div class="section level3">
-<h3 id="if-your-datasets-are-multi-omics">If Your Datasets are Multi-Omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-multi-omics"></a>
-</h3>
+</div>
+<div class="section level2">
+<h2 id="if-your-datasets-are-multi-omics">If Your Datasets are Multi-Omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-multi-omics"></a>
+</h2>
 <p>In this scenario, we assume that you provide a list of data tables,
 each collected for a different omics type. For example, you might have
 datasets for peptides, metabolites, and lipids. We recommend carefully
@@ -98,19 +99,18 @@ KNN imputation to address issues related to library size and missing
 data.</p>
 <p>To achieve this, simply run the pre_process() function, which will
 yield the standard input format as demonstrated below.</p>
-<pre><code><span><span class="co">#&gt;   ID       Day_1      Day_2      Day_3      Day_4      Day_5      Day_6</span></span>
-<span><span class="co">#&gt; 1  1 -0.08335804 -0.2085817  0.5869482  0.1699043  0.9403184 -0.9954891</span></span>
-<span><span class="co">#&gt; 2  2 -0.17257714  1.1684596  2.4053477 -0.5494836 -0.7090162 -2.5461490</span></span>
-<span><span class="co">#&gt; 3  3  0.53757557  0.5257204  1.4074739  0.5061685 -2.0590149 -0.2446670</span></span>
-<span><span class="co">#&gt; 4  4 -2.25483764 -1.3357002 -0.2990436 -0.5077761  0.6935525  0.2489053</span></span>
-<span><span class="co">#&gt; 5  5 -1.01190961 -1.6224468  0.6320236  0.8240863  1.4993621 -0.1292575</span></span>
-<span><span class="co">#&gt;        Day_7      Day_8       type</span></span>
-<span><span class="co">#&gt; 1 -1.5813292  0.2656933    peptide</span></span>
-<span><span class="co">#&gt; 2 -1.5987021  1.3886218    peptide</span></span>
-<span><span class="co">#&gt; 3 -0.3034318  0.1072592    peptide</span></span>
-<span><span class="co">#&gt; 4  1.7918412  0.8816391      lipid</span></span>
-<span><span class="co">#&gt; 5 -0.8726440 -0.2019004 metabolite</span></span></code></pre>
-</div>
+<pre><code><span><span class="co">#&gt;   ID      Day_1       Day_2      Day_3      Day_4      Day_5      Day_6</span></span>
+<span><span class="co">#&gt; 1  1  0.5817621  0.81234410 -0.5179464 -1.8248280 -0.3686574  0.7726121</span></span>
+<span><span class="co">#&gt; 2  2 -0.2293004 -0.07349086 -1.4694419 -0.4497169  2.0161773 -0.6154054</span></span>
+<span><span class="co">#&gt; 3  3 -0.4455635 -0.68140943  1.0693325 -0.7090084  0.4993759  1.5274639</span></span>
+<span><span class="co">#&gt; 4  4 -1.0958002  0.59286365  0.3753236 -0.8386137 -0.8188066 -1.1248000</span></span>
+<span><span class="co">#&gt; 5  5  0.4431089 -0.96834799 -0.8497481 -2.1996118 -1.1090027 -1.1560818</span></span>
+<span><span class="co">#&gt;        Day_7       Day_8       type</span></span>
+<span><span class="co">#&gt; 1 -0.7790768 -0.12981708    peptide</span></span>
+<span><span class="co">#&gt; 2  0.7483253 -0.18939408    peptide</span></span>
+<span><span class="co">#&gt; 3  1.3873813  0.05163392    peptide</span></span>
+<span><span class="co">#&gt; 4 -0.3007957  1.92998318      lipid</span></span>
+<span><span class="co">#&gt; 5 -1.7556661 -0.04460992 metabolite</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="if-your-datasets-are-not-multi-omics">If Your Datasets are NOT Multi-Omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-not-multi-omics"></a>
@@ -123,7 +123,7 @@ case study, we utilized “Kingdom” as the type label column for the
 cheese data.</p>
 </div>
 <div class="section level2">
-<h2 id="annotation">Annotation<a class="anchor" aria-label="anchor" href="#annotation"></a>
+<h2 id="choose-your-annotation">Choose Your Annotation<a class="anchor" aria-label="anchor" href="#choose-your-annotation"></a>
 </h2>
 <p>In addition to specifying the data type mentioned above, our methods
 support three levels of information: functional annotation, taxonomy

@@ -1,5 +1,5 @@
 ---
-title: "Case Study: Cheese"
+title: "Case Study: Cheese Communities"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Case Study: Cheese}

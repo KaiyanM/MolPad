@@ -24,10 +24,10 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/FAQ.html">FAQ</a>
-    <a class="dropdown-item" href="../articles/cheese.html">Case Study: Cheese</a>
-    <a class="dropdown-item" href="../articles/data_input.html">Data Input</a>
-    <a class="dropdown-item" href="../articles/navigate.html">Network Navigation</a>
+    <a class="dropdown-item" href="../articles/FAQ.html">FAQs</a>
+    <a class="dropdown-item" href="../articles/cheese.html">Case Study: Cheese Communities</a>
+    <a class="dropdown-item" href="../articles/data_input.html">Data Input: Multi-Omics/Single-Omics</a>
+    <a class="dropdown-item" href="../articles/navigate.html">Network Navigation: Key Steps</a>
   </div>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
@@ -78,13 +78,13 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">networkres</span> <span class="op">&lt;-</span> <span class="fu">gNetwork</span><span class="op">(</span><span class="va">test_cluster</span>, ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        weight IncNodePurity var_names    from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  3.10926408     0.6586928   Group_3 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  1.61790938     1.0347287   Group_5 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.04634439     0.7007260   Group_4 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4.62251117     1.2197267   Group_4 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  3.79083807     0.8512389   Group_5 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.22034270     1.2296093   Group_1 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       weight IncNodePurity var_names    from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  0.6261361     0.7938505   Group_3 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.3791254     1.0400303   Group_5 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -2.5774246     0.6075788   Group_4 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  5.5229722     0.9616367   Group_5 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5.2202034     1.0532797   Group_4 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.5106624     1.1098355   Group_1 Group_2</span>
 <span class="r-in"><span><span class="fu"><a href="gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="gNetwork-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
