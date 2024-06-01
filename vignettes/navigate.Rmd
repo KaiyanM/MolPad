@@ -2,7 +2,7 @@
 title: "Network Navigation: Key Steps"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Network Navigation}
+  %\VignetteIndexEntry{Network Navigation: Key Steps}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

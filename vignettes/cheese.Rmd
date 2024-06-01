@@ -2,7 +2,7 @@
 title: "Case Study: Cheese Communities"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Case Study: Cheese}
+  %\VignetteIndexEntry{Case Study: Cheese Communities}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

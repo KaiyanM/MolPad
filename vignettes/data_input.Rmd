@@ -2,7 +2,7 @@
 title: "Data Input: Multi-Omics/Single-Omics"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Data Input}
+  %\VignetteIndexEntry{Data Input: Multi-Omics/Single-Omics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
