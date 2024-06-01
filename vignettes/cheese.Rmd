@@ -20,16 +20,28 @@ library(MolPad)
 library(dplyr)
 ```
 
-# Load Data
+# Introduction
+This vignette provides a comprehensive guide on using MolPad for a case study, including data pre-processing, network generation, and result analysis.
+
+# Washed-Rind Cheese Microbial Communities
+Cheese making is an ancient craft that involves the coagulation of milk proteins to form curds, which are then separated from the liquid whey. The curds are processed, shaped, and aged to develop the desired texture and flavor. Various factors, such as the type of milk, specific cultures of bacteria, and aging conditions, contribute to the unique characteristics of each cheese. One crucial step in this process is the aging practice, where regular washing with a brine solution plays a significant role.
+
 In the process of producing cheese, regular washing with a brine solution is an aging practice that can homogenize the microbial communities on the cheese' surface and facilitate intermicrobial interactions. In the following parts, we will analyze a longitudinal data set of three washed-rind cheese communities collected during cheese ripening.
+
+# Data
+For the analysis, we use a data set contained in the study by Smith et al. (2022) on [microbial communities in cheese](https://journals.asm.org/doi/10.1128/msystems.00701-22). The original research investigated the successional dynamics that occur within cheese rind microbial communities using a combination of 16S rRNA amplicon, Illumina, and PacBio sequencing. We functionally and taxonomically annotate (using eggNOG (21) and MMseqs2 (22)) the contigs they have generated from the Illumina reads, to demonstrate the utility of MolPad using a single-omic. Specifically, we focus on Cheese Sample A and Cheese Sample C. For more detailed information on our attached data, please check [this documentation](https://kaiyanm.github.io/MolPad/reference/cheese.html).
 
 ```{r}
 data("cheese")
+str(cheese)
+str(annotations)
 ```
 
-# Preprocess
-## Data and Annotations
+## Pre-process
+### Data and Annotations
 Here we select a 'type' column with `phylum` to describe the characteristic of cheese data. Also, the columns `phylum` and `class` are taken as tags for elemental composition.
+
+In this section, we will introduce data preparing steps for analysis. The annotations dataset contains various columns that describe the characteristics and properties of samples. First, we select the 'type' column with `phylum` to provide a broad categorization of the microbial communities present on the cheese surface. This categorization helps in understanding the overall composition and diversity of microbes at a high taxonomic level. Then we run the `pre_process()` function to clean and standardize the data.
 
 ```{r}
 cheesedata <- cheese |> 
@@ -38,36 +50,46 @@ cheesedata <- cheese |>
       		pre_process()
 ```
 
+To further annotate the dataset, we also use the columns `phylum` and `class` as tags for the elemental composition of the microbial communities. The `phylum` column represents a major taxonomic rank, giving us a broad overview of the microbial distribution. The `class` column provides more detailed information, allowing us to delve deeper into the specific types of microbes present.
+
 ```{r}
 pathchee <- gAnnotation(annotations,"phylum","class")
 ```
 
-### After pre-processing, here is what the two datasets that we will put into the dashboard look like:
+
+After pre-processing, here is what the two datasets that we will put into the dashboard look like:
 ```{r}
+# data
 cheesedata[112:115,]
+# annotation
 pathchee[112:115,]
 ```
 
 
 ## Cluster Input
-Then we generate clusters from the long dataset above. 
+
+In this section, we generate clusters from the first dataset above using the `gClusters` function. This function takes the cheese dataset (`cheesedata`) as input and generates clusters based on specified parameters. Here, we set the number of clusters to 10 (`ncluster = 10`) and specify the maximum number of clusters to consider for determining the optimal number of clusters (`elbow.max=15`).
+
 ```{r}
 cluschee <- gClusters(cheesedata,ncluster = 10,elbow.max=15)
 ```
 
 ## network input
-After that, we got the network result from the clusters. We pick top 3 predictors for each feature, and save the network output for future use.
+After generating the clusters for major patterns, we proceed to obtain network results from the clusters. Taking the cluster centroids as the nodes, the prediction process for edges is divided into individual regression tasks, where each cluster centroid is independentally predicted from the expression of all the other cluster centroids, using random forests. We pick the top 3 related predictors for each cluster centroid and save the network output for future use. This is achieved using the `gNetwork()` function.
+
 ```{r}
 networkchee <- gNetwork(cluschee,ntop = 3)
 ```
 
-View more details of the results with the following function:
+To gain more insight into the network results, we can visualize the details using the `gNetwork_view()` function, as shown below.
+
 ```{r,fig.height=9, fig.width=5}
 gNetwork_view(networkchee)
 ```
 
 # Run Dashboard
-Declare the annotations, and then run the dashboard.
+Once the clusters and network results are obtained, we can proceed to run the dashboard. This involves declaring the annotations and then executing the dashboard using the `gDashboard()` function. Here, we pass the cheese dataset (cheesedata), cluster results (cluschee), network results (networkchee), and specify column names and types for annotation identifiers.
+
 ```{r,eval=FALSE}
 gDashboard(cheesedata,
            cluschee,

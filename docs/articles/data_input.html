@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">MolPad</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,50 +83,55 @@
 <div class="section level2">
 <h2 id="longitudinal-data">Longitudinal Data<a class="anchor" aria-label="anchor" href="#longitudinal-data"></a>
 </h2>
-<p>Our visualization pipeline starts with an optional pre-processing
-module with built-in functions. There are basically two conditions:</p>
+<p>Our visualization pipeline begins with an optional pre-processing
+module that offers built-in functions to streamline data preparation.
+Depending on the nature of your datasets, there are two primary
+conditions to consider:</p>
 <div class="section level3">
-<h3 id="if-your-datasets-are-multi-omics">If your datasets are multi-omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-multi-omics"></a>
+<h3 id="if-your-datasets-are-multi-omics">If Your Datasets are Multi-Omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-multi-omics"></a>
 </h3>
-<p>Here, we assume you provide a list of data tables, each gathered for
-a different omics type. For instance, you might have datasets for
-peptides, metabolites, and lipids. We recommend reviewing your data and
-thinking about applying quantile normalization and KNN imputation. This
-helps to address issues related to library size and missing data.</p>
-<p>Then, run the <code><a href="../reference/pre_process.html">pre_process()</a></code> function, and you will get
-the standard input format as follows.</p>
-<pre><code><span><span class="co">#&gt;   ID      Day_1      Day_2       Day_3      Day_4       Day_5       Day_6</span></span>
-<span><span class="co">#&gt; 1  1  0.8564458 -0.7026066  0.36425502  2.4817445  0.34595037  0.98407204</span></span>
-<span><span class="co">#&gt; 2  2 -0.8276824 -1.0309664 -0.01834923 -0.1516639  0.41712822  1.94645479</span></span>
-<span><span class="co">#&gt; 3  3  0.2413671 -0.6354232 -0.13154219  1.0836720 -0.24427531  0.04627503</span></span>
-<span><span class="co">#&gt; 4  4 -1.3853057  1.3269031 -0.73650929  1.3218904 -1.08954020 -0.14244174</span></span>
-<span><span class="co">#&gt; 5  5 -0.7863371  0.4455912 -1.81562430 -1.1050732 -0.06868605 -0.26191600</span></span>
+<p>In this scenario, we assume that you provide a list of data tables,
+each collected for a different omics type. For example, you might have
+datasets for peptides, metabolites, and lipids. We recommend carefully
+reviewing your data and considering applying quantile normalization and
+KNN imputation to address issues related to library size and missing
+data.</p>
+<p>To achieve this, simply run the pre_process() function, which will
+yield the standard input format as demonstrated below.</p>
+<pre><code><span><span class="co">#&gt;   ID       Day_1      Day_2      Day_3      Day_4      Day_5      Day_6</span></span>
+<span><span class="co">#&gt; 1  1 -0.08335804 -0.2085817  0.5869482  0.1699043  0.9403184 -0.9954891</span></span>
+<span><span class="co">#&gt; 2  2 -0.17257714  1.1684596  2.4053477 -0.5494836 -0.7090162 -2.5461490</span></span>
+<span><span class="co">#&gt; 3  3  0.53757557  0.5257204  1.4074739  0.5061685 -2.0590149 -0.2446670</span></span>
+<span><span class="co">#&gt; 4  4 -2.25483764 -1.3357002 -0.2990436 -0.5077761  0.6935525  0.2489053</span></span>
+<span><span class="co">#&gt; 5  5 -1.01190961 -1.6224468  0.6320236  0.8240863  1.4993621 -0.1292575</span></span>
 <span><span class="co">#&gt;        Day_7      Day_8       type</span></span>
-<span><span class="co">#&gt; 1  0.1947470  0.8254115    peptide</span></span>
-<span><span class="co">#&gt; 2 -0.3697760  0.9036718    peptide</span></span>
-<span><span class="co">#&gt; 3  0.5317324  0.2719372    peptide</span></span>
-<span><span class="co">#&gt; 4 -1.5919935  0.7888163      lipid</span></span>
-<span><span class="co">#&gt; 5  0.7955413 -0.1197570 metabolite</span></span></code></pre>
+<span><span class="co">#&gt; 1 -1.5813292  0.2656933    peptide</span></span>
+<span><span class="co">#&gt; 2 -1.5987021  1.3886218    peptide</span></span>
+<span><span class="co">#&gt; 3 -0.3034318  0.1072592    peptide</span></span>
+<span><span class="co">#&gt; 4  1.7918412  0.8816391      lipid</span></span>
+<span><span class="co">#&gt; 5 -0.8726440 -0.2019004 metabolite</span></span></code></pre>
 </div>
-<div class="section level3">
-<h3 id="if-your-datasets-are-not-multi-omics">If your datasets are NOT multi-omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-not-multi-omics"></a>
-</h3>
-<p>Well, you can always try it on with our dashboard as long as the data
-inputs are reformatted into the standard longitudinal format. You can
-manually assign the <code>type</code> with any category label to
-describe major groups in the data. As In the case study, we used Kingdom
-as the type label column for cheese data.</p>
 </div>
+<div class="section level2">
+<h2 id="if-your-datasets-are-not-multi-omics">If Your Datasets are NOT Multi-Omics:<a class="anchor" aria-label="anchor" href="#if-your-datasets-are-not-multi-omics"></a>
+</h2>
+<p>You can still utilize our dashboard by ensuring that your data inputs
+are reformatted into the standard longitudinal format. While the
+datasets may not be multi-omics, you can manually assign the type column
+with any category label to describe major groups in the data. In our
+case study, we utilized “Kingdom” as the type label column for the
+cheese data.</p>
 </div>
 <div class="section level2">
 <h2 id="annotation">Annotation<a class="anchor" aria-label="anchor" href="#annotation"></a>
 </h2>
-<p>Besides the data type we mentioned above, our methods allow three
-levels of information: functional annotation, taxonomy annotation, and
-feature annotation. These will be matched with ID as columns in the
-annotation data, which is another input for generating a dashboard. We
-support KeggID and GOID for automatic feature link generation, and the
-users should set the corresponding column name beforehand.</p>
+<p>In addition to specifying the data type mentioned above, our methods
+support three levels of information: functional annotation, taxonomy
+annotation, and feature annotation. These annotations will be matched
+with ID columns in the annotation data, serving as another crucial input
+for generating the dashboard. We facilitate automatic feature link
+generation using KeggID and GOID, for which users should set the
+corresponding column names beforehand.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

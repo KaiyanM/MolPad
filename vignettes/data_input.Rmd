@@ -16,27 +16,31 @@ knitr::opts_chunk$set(
 ```
 
 # Longitudinal Data
+Our visualization pipeline begins with an optional pre-processing module that offers built-in functions to streamline data preparation. Depending on the nature of your datasets, there are two primary conditions to consider:
 
-Our visualization pipeline starts with an optional pre-processing module with built-in functions. There are basically two conditions:
+## If Your Datasets are Multi-Omics:
+In this scenario, we assume that you provide a list of data tables, each collected for a different omics type. For example, you might have datasets for peptides, metabolites, and lipids. We recommend carefully reviewing your data and considering applying quantile normalization and KNN imputation to address issues related to library size and missing data.
 
-## If your datasets are multi-omics:
-
-Here, we assume you provide a list of data tables, each gathered for a different omics type. For instance, you might have datasets for peptides, metabolites, and lipids. We recommend reviewing your data and thinking about applying quantile normalization and KNN imputation. This helps to address issues related to library size and missing data.
-
-Then, run the `pre_process()` function, and you will get the standard input format as follows.
+To achieve this, simply run the pre_process() function, which will yield the standard input format as demonstrated below.
 
 ```{r, echo=FALSE}
+# Simulated data with the standard input format 
 x <- data.frame("ID"=1:5,"Day_1"=rnorm(5),"Day_2"=rnorm(5),"Day_3"=rnorm(5),"Day_4"=rnorm(5),"Day_5"=rnorm(5),"Day_6"=rnorm(5),"Day_7"=rnorm(5),"Day_8"=rnorm(5),"type"=c(rep("peptide",3),"lipid","metabolite"))
 x
 ```
 
 
-## If your datasets are NOT multi-omics:
+# If Your Datasets are NOT Multi-Omics:
 
-Well, you can always try it on with our dashboard as long as the data inputs are reformatted into the standard longitudinal format. You can manually assign the `type` with any category label to describe major groups in the data. As In the case study, we used Kingdom as the type label column for cheese data. 
-
+You can still utilize our dashboard by ensuring that your data inputs are reformatted into the standard longitudinal format. While the datasets may not be multi-omics, you can manually assign the type column with any category label to describe major groups in the data. In our case study, we utilized "Kingdom" as the type label column for the cheese data.
 
 # Annotation
 
-Besides the data type we mentioned above, our methods allow three levels of information: functional annotation, taxonomy annotation, and feature annotation. These will be matched with ID as columns in the annotation data, which is another input for generating a dashboard. We support KeggID and GOID for automatic feature link generation, and the users should set the corresponding column name beforehand. 
+In addition to specifying the data type mentioned above, our methods support three levels of information: functional annotation, taxonomy annotation, and feature annotation. These annotations will be matched with ID columns in the annotation data, serving as another crucial input for generating the dashboard. We facilitate automatic feature link generation using KeggID and GOID, for which users should set the corresponding column names beforehand.
+
+
+
+
+
+
 

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">MolPad</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,13 +78,13 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">networkres</span> <span class="op">&lt;-</span> <span class="fu">gNetwork</span><span class="op">(</span><span class="va">test_cluster</span>, ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      weight IncNodePurity var_names    from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 3.2888057     0.6192152   Group_3 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 1.9826662     0.9160617   Group_5 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.6454853     0.6866772   Group_4 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 5.9753772     1.2197499   Group_4 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 4.1684077     0.9617163   Group_5 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 2.3996993     1.1232793   Group_1 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        weight IncNodePurity var_names    from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  3.10926408     0.6586928   Group_3 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  1.61790938     1.0347287   Group_5 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.04634439     0.7007260   Group_4 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4.62251117     1.2197267   Group_4 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  3.79083807     0.8512389   Group_5 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.22034270     1.2296093   Group_1 Group_2</span>
 <span class="r-in"><span><span class="fu"><a href="gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="gNetwork-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

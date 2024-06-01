@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">MolPad</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -92,39 +92,113 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
 <div class="section level2">
-<h2 id="load-data">Load Data<a class="anchor" aria-label="anchor" href="#load-data"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
+<p>This vignette provides a comprehensive guide on using MolPad for a
+case study, including data pre-processing, network generation, and
+result analysis.</p>
+</div>
+<div class="section level2">
+<h2 id="washed-rind-cheese-microbial-communities">Washed-Rind Cheese Microbial Communities<a class="anchor" aria-label="anchor" href="#washed-rind-cheese-microbial-communities"></a>
+</h2>
+<p>Cheese making is an ancient craft that involves the coagulation of
+milk proteins to form curds, which are then separated from the liquid
+whey. The curds are processed, shaped, and aged to develop the desired
+texture and flavor. Various factors, such as the type of milk, specific
+cultures of bacteria, and aging conditions, contribute to the unique
+characteristics of each cheese. One crucial step in this process is the
+aging practice, where regular washing with a brine solution plays a
+significant role.</p>
 <p>In the process of producing cheese, regular washing with a brine
 solution is an aging practice that can homogenize the microbial
 communities on the cheese’ surface and facilitate intermicrobial
 interactions. In the following parts, we will analyze a longitudinal
 data set of three washed-rind cheese communities collected during cheese
 ripening.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"cheese"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="preprocess">Preprocess<a class="anchor" aria-label="anchor" href="#preprocess"></a>
+<h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a>
 </h2>
+<p>For the analysis, we use a data set contained in the study by Smith
+et al. (2022) on <a href="https://journals.asm.org/doi/10.1128/msystems.00701-22" class="external-link">microbial
+communities in cheese</a>. The original research investigated the
+successional dynamics that occur within cheese rind microbial
+communities using a combination of 16S rRNA amplicon, Illumina, and
+PacBio sequencing. We functionally and taxonomically annotate (using
+eggNOG (21) and MMseqs2 (22)) the contigs they have generated from the
+Illumina reads, to demonstrate the utility of MolPad using a
+single-omic. Specifically, we focus on Cheese Sample A and Cheese Sample
+C. For more detailed information on our attached data, please check <a href="https://kaiyanm.github.io/MolPad/reference/cheese.html">this
+documentation</a>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"cheese"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cheese</span><span class="op">)</span></span>
+<span><span class="co">#&gt; tibble [106,239 × 18] (S3: tbl_df/tbl/data.frame)</span></span>
+<span><span class="co">#&gt;  $ ID     : chr [1:106239] "1" "2" "3" "4" ...</span></span>
+<span><span class="co">#&gt;  $ A_1    : int [1:106239] 38 23 24 3 58 12 1 14 1 3 ...</span></span>
+<span><span class="co">#&gt;  $ A_2    : int [1:106239] 23 6 5 2 14 9 1 7 1 1 ...</span></span>
+<span><span class="co">#&gt;  $ A_3    : int [1:106239] 27 4 37 4 45 14 0 14 3 5 ...</span></span>
+<span><span class="co">#&gt;  $ A_4    : int [1:106239] 5 0 10 2 13 4 1 4 4 0 ...</span></span>
+<span><span class="co">#&gt;  $ A_5    : int [1:106239] 11 9 19 16 32 13 0 4 1 1 ...</span></span>
+<span><span class="co">#&gt;  $ C_1    : int [1:106239] 13 21 3 56 82 2 4 17 7 2 ...</span></span>
+<span><span class="co">#&gt;  $ C_3    : int [1:106239] 1 1 0 1 3 0 0 0 0 1 ...</span></span>
+<span><span class="co">#&gt;  $ C_4    : int [1:106239] 3 0 1 7 8 1 0 1 2 2 ...</span></span>
+<span><span class="co">#&gt;  $ C_5    : int [1:106239] 0 2 4 17 3 4 0 1 8 6 ...</span></span>
+<span><span class="co">#&gt;  $ GO_ID  : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ KEGG_ID: chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ domain : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ phylum : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ class  : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ order  : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ family : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="co">#&gt;  $ genus  : chr [1:106239] NA NA NA NA ...</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">annotations</span><span class="op">)</span></span>
+<span><span class="co">#&gt; tibble [86,156 × 9] (S3: tbl_df/tbl/data.frame)</span></span>
+<span><span class="co">#&gt;  $ ID     : chr [1:86156] "9" "10" "11" "12" ...</span></span>
+<span><span class="co">#&gt;  $ GO_ID  : chr [1:86156] "-" "-" "-" "-" ...</span></span>
+<span><span class="co">#&gt;  $ KEGG_ID: chr [1:86156] "-" "-" "-" "-" ...</span></span>
+<span><span class="co">#&gt;  $ domain : chr [1:86156] "Bacteria" "Bacteria" "Bacteria" "Bacteria" ...</span></span>
+<span><span class="co">#&gt;  $ phylum : chr [1:86156] "Pseudomonadota" "Pseudomonadota" "Pseudomonadota" "Pseudomonadota" ...</span></span>
+<span><span class="co">#&gt;  $ class  : chr [1:86156] "Alphaproteobacteria" "Alphaproteobacteria" "Alphaproteobacteria" "Alphaproteobacteria" ...</span></span>
+<span><span class="co">#&gt;  $ order  : chr [1:86156] "Caulobacterales" "Caulobacterales" "Hyphomicrobiales" "Hyphomicrobiales" ...</span></span>
+<span><span class="co">#&gt;  $ family : chr [1:86156] "Caulobacteraceae" "Caulobacteraceae" "Bartonellaceae" "Brucellaceae;-_Brucella/Ochrobactrum group" ...</span></span>
+<span><span class="co">#&gt;  $ genus  : chr [1:86156] "Caulobacter" "Caulobacter;-_unclassified Caulobacter" "Bartonella" "Brucella" ...</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="data-and-annotations">Data and Annotations<a class="anchor" aria-label="anchor" href="#data-and-annotations"></a>
+<h3 id="pre-process">Pre-process<a class="anchor" aria-label="anchor" href="#pre-process"></a>
 </h3>
+<div class="section level4">
+<h4 id="data-and-annotations">Data and Annotations<a class="anchor" aria-label="anchor" href="#data-and-annotations"></a>
+</h4>
 <p>Here we select a ‘type’ column with <code>phylum</code> to describe
 the characteristic of cheese data. Also, the columns <code>phylum</code>
 and <code>class</code> are taken as tags for elemental composition.</p>
+<p>In this section, we will introduce data preparing steps for analysis.
+The annotations dataset contains various columns that describe the
+characteristics and properties of samples. First, we select the ‘type’
+column with <code>phylum</code> to provide a broad categorization of the
+microbial communities present on the cheese surface. This categorization
+helps in understanding the overall composition and diversity of microbes
+at a high taxonomic level. Then we run the <code><a href="../reference/pre_process.html">pre_process()</a></code>
+function to clean and standardize the data.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cheesedata</span> <span class="op">&lt;-</span> <span class="va">cheese</span> <span class="op">|&gt;</span> </span>
 <span>         <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">ID</span>, <span class="va">A_1</span><span class="op">:</span><span class="va">C_5</span>, <span class="va">phylum</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>         <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>type<span class="op">=</span><span class="va">phylum</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>            <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>To further annotate the dataset, we also use the columns
+<code>phylum</code> and <code>class</code> as tags for the elemental
+composition of the microbial communities. The <code>phylum</code> column
+represents a major taxonomic rank, giving us a broad overview of the
+microbial distribution. The <code>class</code> column provides more
+detailed information, allowing us to delve deeper into the specific
+types of microbes present.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pathchee</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gAnnotation.html">gAnnotation</a></span><span class="op">(</span><span class="va">annotations</span>,<span class="st">"phylum"</span>,<span class="st">"class"</span><span class="op">)</span></span></code></pre></div>
-<div class="section level4">
-<h4 id="after-pre-processing-here-is-what-the-two-datasets-that-we-will-put-into-the-dashboard-look-like">After pre-processing, here is what the two datasets that we will put
-into the dashboard look like:<a class="anchor" aria-label="anchor" href="#after-pre-processing-here-is-what-the-two-datasets-that-we-will-put-into-the-dashboard-look-like"></a>
-</h4>
+<p>After pre-processing, here is what the two datasets that we will put
+into the dashboard look like:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">cheesedata</span><span class="op">[</span><span class="fl">112</span><span class="op">:</span><span class="fl">115</span>,<span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="co"># data</span></span>
+<span><span class="va">cheesedata</span><span class="op">[</span><span class="fl">112</span><span class="op">:</span><span class="fl">115</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 11</span></span></span>
 <span><span class="co">#&gt;   ID      A_1    A_2    A_3    A_4    A_5    C_1    C_3    C_4    C_5 type </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
@@ -132,6 +206,7 @@ into the dashboard look like:<a class="anchor" aria-label="anchor" href="#after-
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 113   0.786 -<span style="color: #BB0000;">0.124</span>  0.126 -<span style="color: #BB0000;">0.623</span> -<span style="color: #BB0000;">0.637</span>  2.33  -<span style="color: #BB0000;">0.667</span> -<span style="color: #BB0000;">0.593</span> -<span style="color: #BB0000;">0.593</span> Other</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 114   1.22  -<span style="color: #BB0000;">1.09</span>  -<span style="color: #BB0000;">0.430</span> -<span style="color: #BB0000;">0.829</span> -<span style="color: #BB0000;">0.170</span>  1.43  -<span style="color: #BB0000;">1.30</span>   0.455  0.715 Other</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 115   2.67  -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> -<span style="color: #BB0000;">0.333</span> Other</span></span>
+<span><span class="co"># annotation</span></span>
 <span><span class="va">pathchee</span><span class="op">[</span><span class="fl">112</span><span class="op">:</span><span class="fl">115</span>,<span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 9</span></span></span>
 <span><span class="co">#&gt;   ID    GO_ID KEGG_ID          domain Pathway taxonomic.scope order family genus</span></span>
@@ -145,19 +220,32 @@ into the dashboard look like:<a class="anchor" aria-label="anchor" href="#after-
 <div class="section level3">
 <h3 id="cluster-input">Cluster Input<a class="anchor" aria-label="anchor" href="#cluster-input"></a>
 </h3>
-<p>Then we generate clusters from the long dataset above.</p>
+<p>In this section, we generate clusters from the first dataset above
+using the <code>gClusters</code> function. This function takes the
+cheese dataset (<code>cheesedata</code>) as input and generates clusters
+based on specified parameters. Here, we set the number of clusters to 10
+(<code>ncluster = 10</code>) and specify the maximum number of clusters
+to consider for determining the optimal number of clusters
+(<code>elbow.max=15</code>).</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cluschee</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gClusters.html">gClusters</a></span><span class="op">(</span><span class="va">cheesedata</span>,ncluster <span class="op">=</span> <span class="fl">10</span>,elbow.max<span class="op">=</span><span class="fl">15</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="network-input">network input<a class="anchor" aria-label="anchor" href="#network-input"></a>
 </h3>
-<p>After that, we got the network result from the clusters. We pick top
-3 predictors for each feature, and save the network output for future
-use.</p>
+<p>After generating the clusters for major patterns, we proceed to
+obtain network results from the clusters. Taking the cluster centroids
+as the nodes, the prediction process for edges is divided into
+individual regression tasks, where each cluster centroid is
+independentally predicted from the expression of all the other cluster
+centroids, using random forests. We pick the top 3 related predictors
+for each cluster centroid and save the network output for future use.
+This is achieved using the <code><a href="../reference/gNetwork.html">gNetwork()</a></code> function.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">networkchee</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gNetwork.html">gNetwork</a></span><span class="op">(</span><span class="va">cluschee</span>,ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
-<p>View more details of the results with the following function:</p>
+<p>To gain more insight into the network results, we can visualize the
+details using the <code><a href="../reference/gNetwork_view.html">gNetwork_view()</a></code> function, as shown
+below.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">networkchee</span><span class="op">)</span></span></code></pre></div>
 <p><img src="cheese_files/figure-html/unnamed-chunk-8-1.png" width="480"></p>
@@ -166,7 +254,12 @@ use.</p>
 <div class="section level2">
 <h2 id="run-dashboard">Run Dashboard<a class="anchor" aria-label="anchor" href="#run-dashboard"></a>
 </h2>
-<p>Declare the annotations, and then run the dashboard.</p>
+<p>Once the clusters and network results are obtained, we can proceed to
+run the dashboard. This involves declaring the annotations and then
+executing the dashboard using the <code><a href="../reference/gDashboard.html">gDashboard()</a></code> function.
+Here, we pass the cheese dataset (cheesedata), cluster results
+(cluschee), network results (networkchee), and specify column names and
+types for annotation identifiers.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gDashboard.html">gDashboard</a></span><span class="op">(</span><span class="va">cheesedata</span>,</span>
 <span>           <span class="va">cluschee</span>,</span>
