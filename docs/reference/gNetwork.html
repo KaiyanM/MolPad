@@ -6,7 +6,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-default navbar-expand-lg bg-light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">MolPad</a>
 
@@ -18,17 +18,23 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/whymolpad.html">Why MolPad?</a>
+</li>
+<li class="nav-item">
+  <a class="nav-link" href="../articles/getstarted.html">Get started</a>
 </li>
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/cheese.html">Case study</a>
+    <a class="dropdown-item" href="../articles/data_input.html">Data input</a>
+    <a class="dropdown-item" href="../articles/navigate.html">Network navigation</a>
     <a class="dropdown-item" href="../articles/FAQ.html">FAQs</a>
-    <a class="dropdown-item" href="../articles/cheese.html">Case Study: Cheese Communities</a>
-    <a class="dropdown-item" href="../articles/data_input.html">Data Input: Multi-Omics/Single-Omics</a>
-    <a class="dropdown-item" href="../articles/navigate.html">Network Navigation: Key Steps</a>
   </div>
+</li>
+<li class="active nav-item">
+  <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
@@ -78,13 +84,13 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">networkres</span> <span class="op">&lt;-</span> <span class="fu">gNetwork</span><span class="op">(</span><span class="va">test_cluster</span>, ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        weight IncNodePurity var_names    from</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  2.28519855     0.9196328   Group_3 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  0.01325098     1.0647271   Group_5 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -1.52876440     0.6472361   Group_4 Group_1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  5.74000483     1.0925108   Group_4 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5.40615345     0.9142736   Group_5 Group_2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.02589705     1.2726073   Group_1 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      weight IncNodePurity var_names    from</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.953142     1.0293667   Group_5 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  1.338057     0.6796840   Group_3 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -1.760520     0.5888700   Group_4 Group_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4.553531     0.8262671   Group_5 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  4.529512     1.1169605   Group_4 Group_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  1.267883     1.2473650   Group_1 Group_2</span>
 <span class="r-in"><span><span class="fu"><a href="gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">networkres</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="gNetwork-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

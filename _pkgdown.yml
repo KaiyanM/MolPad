@@ -33,3 +33,23 @@ reference:
   - scale_by_row__
   - transpose_dataframe__
   - mass_produce_lm__
+
+navbar:
+  type: default
+  left:
+    - text: Why MolPad?
+      href: articles/whymolpad.html
+    - text: Get started
+      href: articles/getstarted.html
+    - text: Articles
+      menu:
+        - text: Case study
+          href: articles/cheese.html
+        - text: Data input
+          href: articles/data_input.html
+        - text: Network navigation 
+          href: articles/navigate.html
+        - text: FAQs
+          href: articles/FAQ.html
+    - text: Reference
+      href: reference/index.html

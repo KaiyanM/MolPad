@@ -1,0 +1,48 @@
+---
+title: "Why MolPad?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Why MolPad?}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(MolPad)
+library(dplyr)
+```
+
+# Why MolPad?
+
+
+focus-plus-context network navigation
+
+# We got a complex network -- What to do?
+
+# Facilitate the information interpretation
+
+(comic: read network)
+
+(add image: a normal network-hard to read)
+
+With the increasing multi-omics data and longitudinal designs integrated into microbiome experiments, there is a growing need to present the network, especially with complex variation across biological modalities. Network perspective helps detect the underlying co-occurrence among microbiome samples, allowing for high-level insights into the global structure. For the aim of interpretation, one important aspect is to capture groups of features that share longitudinal patterns and functional properties within the network. 
+
+(add image or table: complex annotation)
+
+Another is to annotate the network under complex experimental datasets, as a way to dig in specific components with notable features. 
+A characteristic of microbiome data is that each feature can be classified at several levels of taxonomic resolution and could have several identifiers across databases \cite{https://doi.org/10.1002/pro.3711}. Although relevant annotation is typically available online, it can be tedious to search through databases manually. Therefore, the microbiome network's and relevant annotation's complexity make it challenging for researchers to create visualizations of global patterns across data types, bringing extra issues for those without specialized programming knowledge.
+
+# Focus-plus-context network navigation
+
+Here, we introduce the focus-
+plus-context analysis strategy originating from human-computer interaction that enables users to view detailed information (focus) within the broader scope of the dataset (context) without losing sight of either aspect \cite{10.1145/502348.502354}. This strategy is beneficial for boosting user comprehension and navigation in complex visual representations. The coherent display decreases the short-term memory load associated with assimilating distinct views of a system, and thus potentially improves the user's ability to comprehend and manipulate information \cite{10.1145/1456650.1456652}. Recent research has created focus-plus-context methods to study time-series, high-dimensional, tree, and network data, improving the effectiveness of information visualizations \cite{Shneiderman1996TheEH, Sankaran2018InteractiveVO}.
+
+Though there is a wide range of tools available for visualizing and analyzing static microbiome networks, none of them offer a focus-plus-context dashboard within the network. We built MolPad, an R-Shiny package that implements a processing pipeline and interactive dashboard to enable exploratory analysis of longitudinal molecular co-expression in microbiomics. This pipeline includes pre-precessing data, co-expressed feature detection, network prediction, feature trajectory analysis, and comparisons of networks between conditions. The output dashboard is designed with a focus-plus-context analysis strategy: presenting a network to overview major patterns among their predictive relationships while allowing the users to zoom into specific nodes of interest. Once the focus is set by brushing, it automatically generates links to online annotation databases. Besides the main view of the network, the dashboard also includes a bar plot of taxonomic composition, a ribbon plot of data modalities, and a table for each pathway. Built-in functions are available for the whole pipeline mentioned above from data cleansing to creating the dashboard, making MolPad beginner-friendly. To illustrate the workflow, we present a case study on a longitudinal metagenomics analysis of the cheese microbiome
