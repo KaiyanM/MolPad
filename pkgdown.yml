@@ -1,13 +1,14 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   cheese: cheese.html
   data_input: data_input.html
   FAQ: FAQ.html
+  getstarted: getstarted.html
   navigate: navigate.html
-last_built: 2024-06-01T14:15Z
+  whymolpad: whymolpad.html
+last_built: 2024-08-04T02:33Z
 urls:
   reference: https://kaiyanm.github.io/MolPad/reference
   article: https://kaiyanm.github.io/MolPad/articles
-
