@@ -43,7 +43,7 @@ pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
   if(is.data.frame(data)==FALSE){
     print("Reformat a list of datasets:")
     # set default type names
-    if (is.null(typenameList)==FALSE) {
+    if (is.null(typenameList)==TRUE) {
       typenameList <- paste0("Dataset_", seq_along(data))
     }
     for (i in seq_along(data)) {
