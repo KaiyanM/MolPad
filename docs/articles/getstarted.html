@@ -52,8 +52,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/cheese.html">Case study</a>
-    <a class="dropdown-item" href="../articles/data_input.html">Data input</a>
-    <a class="dropdown-item" href="../articles/navigate.html">Network navigation</a>
     <a class="dropdown-item" href="../articles/FAQ.html">FAQs</a>
   </div>
 </li>
@@ -86,23 +84,413 @@
 
     
     
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>You can either install MolPad with <code>devtools</code>,</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kaiyanm.github.io/MolPad/">MolPad</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
-<p>Installation</p>
-<p>key features</p>
-<p>clustering</p>
-<p>extracting (explain numbers in functions)</p>
-<p>dashboard (explain functions)</p>
-  </main>
+<code class="sourceCode R"><span><span class="co"># Install the package in R:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"devtools"</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://devtools.r-lib.org/" class="external-link">devtools</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"KaiyanM/MolPad"</span><span class="op">)</span></span></code></pre></div>
+<p>or clone this repository to your local computer (for example, onto
+<code>./Github</code>) for installing:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Download through Github and install the package in R:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/getwd.html" class="external-link">setwd</a></span><span class="op">(</span><span class="st">"./GitHub"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://devtools.r-lib.org/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"MolPad"</span><span class="op">)</span></span></code></pre></div>
+<p>after that, load the package:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kaiyanm.github.io/MolPad/">MolPad</a></span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="before-input">Before Input<a class="anchor" aria-label="anchor" href="#before-input"></a>
+</h2>
+<p>We recommend carefully reviewing your data and considering applying
+normalization (standardization, quantile normalization, log
+transformation, …) and imputation (KNN, PMM, Mean/Median/Mode, …) to
+address issues related to library size and missing data beforehead,
+otherwise the <code>pre_processing()</code> function will default to
+converting NAs to 0s.</p>
+<div class="section level4">
+<h4 id="tips-for-normalization-and-imputation">Tips for normalization and imputation<a class="anchor" aria-label="anchor" href="#tips-for-normalization-and-imputation"></a>
+</h4>
+<ul>
+<li><p>To choose a normalization method, first consider your data
+distribution. Use Z-score normalization if your data is normally
+distributed, or log transformation and robust scaling if it’s skewed. If
+your analysis requires data within a specific range, like [0, 1], opt
+for Min-Max normalization. For datasets with outliers, robust scaling or
+rank normalization are better choices.</p></li>
+<li><p>When selecting an imputation method, assess the amount and
+pattern of missing data. For a small amount of missing data, simple
+methods like mean, median, or mode imputation are effective. If missing
+data is related to other variables, consider more sophisticated
+approaches like Predictive Mean Matching or k-NN imputation. If
+computational resources are a concern, simpler imputation methods might
+be more practical, but if resources allow, more advanced methods can
+improve data quality.</p></li>
+<li><p>If it’s hard to decide, you can always experiment with different
+methods and use cross-validation to compare their effectiveness. Let
+your choice be guided by domain knowledge and the specific requirements
+of your analysis to increase the quality of the following
+steps.</p></li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="data-format">Data Format<a class="anchor" aria-label="anchor" href="#data-format"></a>
+</h2>
+<div class="section level4">
+<h4 id="multi-omics-yes-or-no">Multi-omics: Yes or No<a class="anchor" aria-label="anchor" href="#multi-omics-yes-or-no"></a>
+</h4>
+<p>Our visualization pipeline starts with a pre-processing module that
+includes built-in functions to reshape data inputs into a standard
+format and streamline data preparation. Depending on the nature of your
+datasets, there are two primary conditions to consider:</p>
+<ul>
+<li><p>If Your research object includes multi-omics measurements, we
+assume that you could provide them as a list of dataframes, where each
+collected for a different omics type. For example, you might have
+datasets for peptides, metabolites, and lipids. To combine them together
+into a standard long dataset where each row represents a feature, simply
+run the pre_process() function, which will conduct data preparation and
+yield the standard input format as demonstrated below.</p></li>
+<li><p>If Your Datasets are not multi-omics, you can still utilize our
+dashboard as long as ensuring that your data inputs are reformatted into
+the standard longitudinal format. In this situation, you can manually
+assign the type column with any category label to describe major groups
+in the data, and input your data into the <code>pre_processing()</code>
+module for data preparation only. In our case study, we utilized
+“Kingdom” as the type label column for the cheese data.</p></li>
+</ul>
+<p>If your datasets are not multi-omics, you can simply apply it to our
+dashboard by reformatting your data into the standard longitudinal
+format. In this case, manually assign a category label to the
+<code>type</code> column to represent the major groups. After that you
+can still input your data into the <code>pre_processing()</code> module
+for cleaning and preparation. In our case study, we used “Kingdom” as
+the <code>type</code> label for the cheese datasets.</p>
+</div>
+<div class="section level4">
+<h4 id="data-format-and-pre-process">Data Format and Pre-process<a class="anchor" aria-label="anchor" href="#data-format-and-pre-process"></a>
+</h4>
+<center>
+<div class="float">
+<img src="../reference/figures/preprocess.png" style="width:70.0%" alt="Fig 1: Reshape a list of datasets into a standard format."><div class="figcaption">Fig 1: Reshape a list of datasets into a
+standard format.</div>
+</div>
+</center>
+<p>In the figure, A, B, and C can represent datasets from different
+sources or different aspects of measurements. Below are two examples of
+what the input data might look like and how to transform it into the
+required format through <code><a href="../reference/pre_process.html">pre_process()</a></code> modules.</p>
+<div class="section level5">
+<h5 id="if-your-input-is-a-list-of-datasets">If your input is a list of datasets:<a class="anchor" aria-label="anchor" href="#if-your-input-is-a-list-of-datasets"></a>
+</h5>
+<p>Here is a list of datasets, each following the same format: they all
+have an ID column and identical column names.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">fungal_dlist</span><span class="op">)</span></span>
+<span><span class="co">#&gt; List of 3</span></span>
+<span><span class="co">#&gt;  $ :'data.frame':    149786 obs. of  12 variables:</span></span>
+<span><span class="co">#&gt;   ..$ ID    : chr [1:149786] "grp1_1" "grp1_2" "grp1_6" "grp1_7" ...</span></span>
+<span><span class="co">#&gt;   ..$ D0_01 : num [1:149786] -0.33 -0.33 1.591 1.106 0.659 ...</span></span>
+<span><span class="co">#&gt;   ..$ D1_02 : num [1:149786] 0.628 0.628 3.087 3.618 2.843 ...</span></span>
+<span><span class="co">#&gt;   ..$ D2_03 : num [1:149786] -1.223 -1.223 0.846 1.178 1.435 ...</span></span>
+<span><span class="co">#&gt;   ..$ D3_04 : num [1:149786] -2.411 -1.808 1.239 1.753 0.258 ...</span></span>
+<span><span class="co">#&gt;   ..$ D4_05 : num [1:149786] -1.41 -1.18 2.05 1.64 1.21 ...</span></span>
+<span><span class="co">#&gt;   ..$ D5_06 : num [1:149786] -2.245 -2.309 0.83 1.64 0.395 ...</span></span>
+<span><span class="co">#&gt;   ..$ D6_07 : num [1:149786] -0.784 -1.125 2.758 2.888 2.516 ...</span></span>
+<span><span class="co">#&gt;   ..$ D7_08 : num [1:149786] -2.61197 -2.68724 0.42236 0.92846 0.00892 ...</span></span>
+<span><span class="co">#&gt;   ..$ D8_09 : num [1:149786] -0.951 -1.3 2.417 2.454 1.418 ...</span></span>
+<span><span class="co">#&gt;   ..$ D9_10 : num [1:149786] -1.91 -2.61 1.33 1.8 2.25 ...</span></span>
+<span><span class="co">#&gt;   ..$ D10_11: num [1:149786] -2.871 -3.417 1.101 0.619 1.275 ...</span></span>
+<span><span class="co">#&gt;  $ :'data.frame':    150 obs. of  12 variables:</span></span>
+<span><span class="co">#&gt;   ..$ ID    : chr [1:150] "grp2_1" "grp2_2" "grp2_3" "grp2_4" ...</span></span>
+<span><span class="co">#&gt;   ..$ D0_01 : num [1:150] 0.947 1.012 0.156 0.31 0.138 ...</span></span>
+<span><span class="co">#&gt;   ..$ D1_02 : num [1:150] -1.616 -0.917 -1.581 -2.717 -2.578 ...</span></span>
+<span><span class="co">#&gt;   ..$ D2_03 : num [1:150] -2.4 -1.67 -2.31 -3.02 -3.66 ...</span></span>
+<span><span class="co">#&gt;   ..$ D3_04 : num [1:150] -0.5734 0.0336 -0.351 -1.3052 -1.737 ...</span></span>
+<span><span class="co">#&gt;   ..$ D4_05 : num [1:150] 0.662 0.854 1.002 0.12 -0.371 ...</span></span>
+<span><span class="co">#&gt;   ..$ D5_06 : num [1:150] -1.09 -1.28 -1.04 -1.82 -3.15 ...</span></span>
+<span><span class="co">#&gt;   ..$ D6_07 : num [1:150] -0.212 0.718 0.189 -0.627 -1.081 ...</span></span>
+<span><span class="co">#&gt;   ..$ D7_08 : num [1:150] 0.969 2.117 1.462 0.339 -0.038 ...</span></span>
+<span><span class="co">#&gt;   ..$ D8_09 : num [1:150] -0.712 0.43 -0.281 -1.297 -1.822 ...</span></span>
+<span><span class="co">#&gt;   ..$ D9_10 : num [1:150] -0.649 0.45 -0.124 -1.77 -1.962 ...</span></span>
+<span><span class="co">#&gt;   ..$ D10_11: num [1:150] -1.05 -0.85 -1.58 -1.91 -4.05 ...</span></span>
+<span><span class="co">#&gt;  $ :'data.frame':    369 obs. of  12 variables:</span></span>
+<span><span class="co">#&gt;   ..$ ID    : chr [1:369] "grp3_1" "grp3_2" "grp3_3" "grp3_4" ...</span></span>
+<span><span class="co">#&gt;   ..$ D0_01 : num [1:369] -0.918 -2.112 -1.372 -0.4 -1.75 ...</span></span>
+<span><span class="co">#&gt;   ..$ D1_02 : num [1:369] -1.219 -3.502 -1.504 -0.615 -2.11 ...</span></span>
+<span><span class="co">#&gt;   ..$ D2_03 : num [1:369] -0.542 -2.324 -0.592 0.161 -1.342 ...</span></span>
+<span><span class="co">#&gt;   ..$ D3_04 : num [1:369] -0.101 -1.495 0.1 0.603 -1.058 ...</span></span>
+<span><span class="co">#&gt;   ..$ D4_05 : num [1:369] 1.715 1.557 1.89 2.296 0.653 ...</span></span>
+<span><span class="co">#&gt;   ..$ D5_06 : num [1:369] -1.452 -2.37 -1.182 -0.846 -2.531 ...</span></span>
+<span><span class="co">#&gt;   ..$ D6_07 : num [1:369] 0.0879 -0.9982 0.4382 0.6215 -0.9464 ...</span></span>
+<span><span class="co">#&gt;   ..$ D7_08 : num [1:369] 0.0502 0.4668 0.5378 0.8353 -0.9213 ...</span></span>
+<span><span class="co">#&gt;   ..$ D8_09 : num [1:369] -0.0268 -0.4226 0.4528 0.6328 -1.0998 ...</span></span>
+<span><span class="co">#&gt;   ..$ D9_10 : num [1:369] -0.5807 -1.7755 -0.1956 0.0866 -1.5876 ...</span></span>
+<span><span class="co">#&gt;   ..$ D10_11: num [1:369] 0.118 -0.16 0.687 0.572 -1.037 ...</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt;       ID      D0_01     D1_02      D2_03     D3_04     D4_05      D5_06</span></span>
+<span><span class="co">#&gt; 1 grp1_1 -0.3297741 0.6284682 -1.2232968 -2.411339 -1.413062 -2.2445487</span></span>
+<span><span class="co">#&gt; 2 grp1_2 -0.3297741 0.6284682 -1.2232968 -1.807533 -1.183498 -2.3088022</span></span>
+<span><span class="co">#&gt; 3 grp1_6  1.5908054 3.0871284  0.8460835  1.239411  2.054109  0.8300876</span></span>
+<span><span class="co">#&gt; 4 grp1_7  1.1061795 3.6176250  1.1781012  1.753078  1.643661  1.6400102</span></span>
+<span><span class="co">#&gt;        D6_07      D7_08      D8_09     D9_10     D10_11</span></span>
+<span><span class="co">#&gt; 1 -0.7839412 -2.6119663 -0.9511467 -1.914273 -2.8711810</span></span>
+<span><span class="co">#&gt; 2 -1.1251434 -2.6872417 -1.2996614 -2.610647 -3.4165861</span></span>
+<span><span class="co">#&gt; 3  2.7576288  0.4223618  2.4165602  1.333387  1.1012825</span></span>
+<span><span class="co">#&gt; 4  2.8877343  0.9284640  2.4538561  1.799019  0.6187648</span></span>
+<span><span class="co">#&gt;       ID     D0_01      D1_02     D2_03       D3_04     D4_05     D5_06</span></span>
+<span><span class="co">#&gt; 1 grp2_1 0.9467431 -1.6162900 -2.400394 -0.57337845 0.6616711 -1.090914</span></span>
+<span><span class="co">#&gt; 2 grp2_2 1.0120048 -0.9165994 -1.674330  0.03361378 0.8540950 -1.283964</span></span>
+<span><span class="co">#&gt; 3 grp2_3 0.1561394 -1.5805490 -2.307281 -0.35095093 1.0018741 -1.035030</span></span>
+<span><span class="co">#&gt; 4 grp2_4 0.3104578 -2.7173471 -3.022886 -1.30521496 0.1198075 -1.816677</span></span>
+<span><span class="co">#&gt;        D6_07     D7_08      D8_09      D9_10     D10_11</span></span>
+<span><span class="co">#&gt; 1 -0.2116778 0.9688582 -0.7123773 -0.6489204 -1.0504845</span></span>
+<span><span class="co">#&gt; 2  0.7181970 2.1174460  0.4302981  0.4504066 -0.8503481</span></span>
+<span><span class="co">#&gt; 3  0.1885422 1.4619677 -0.2805926 -0.1235090 -1.5757556</span></span>
+<span><span class="co">#&gt; 4 -0.6271954 0.3393109 -1.2967938 -1.7697248 -1.9073101</span></span>
+<span><span class="co">#&gt;       ID      D0_01      D1_02      D2_03      D3_04    D4_05      D5_06</span></span>
+<span><span class="co">#&gt; 1 grp3_1 -0.9178218 -1.2193128 -0.5415780 -0.1007493 1.715495 -1.4515238</span></span>
+<span><span class="co">#&gt; 2 grp3_2 -2.1120636 -3.5015326 -2.3236475 -1.4949366 1.557463 -2.3698578</span></span>
+<span><span class="co">#&gt; 3 grp3_3 -1.3724446 -1.5043101 -0.5922380  0.1004978 1.889573 -1.1815469</span></span>
+<span><span class="co">#&gt; 4 grp3_4 -0.4002445 -0.6145252  0.1613003  0.6031744 2.295751 -0.8464012</span></span>
+<span><span class="co">#&gt;         D6_07      D7_08       D8_09       D9_10     D10_11</span></span>
+<span><span class="co">#&gt; 1  0.08792489 0.05020749 -0.02681783 -0.58065562  0.1177374</span></span>
+<span><span class="co">#&gt; 2 -0.99822332 0.46681389 -0.42255125 -1.77554842 -0.1603138</span></span>
+<span><span class="co">#&gt; 3  0.43822354 0.53780990  0.45276561 -0.19558682  0.6870272</span></span>
+<span><span class="co">#&gt; 4  0.62145080 0.83528878  0.63275758  0.08663959  0.5720591</span></span></code></pre>
+<ul>
+<li>after <code><a href="../reference/pre_process.html">pre_process()</a></code>:</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="va">fungal_dlist</span>, typenameList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'DataSource_A'</span>,<span class="st">'DataSource_B'</span>,<span class="st">'DataSource_C'</span><span class="op">)</span>, replaceNA <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                        scale <span class="op">=</span> <span class="cn">TRUE</span>, autoColName <span class="op">=</span> <span class="st">"Section_"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Reformat a list of datasets:"</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">data</span>,<span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt;         ID       D0_01    D1_02      D2_03       D3_04       D4_05      D5_06</span></span>
+<span><span class="co">#&gt; 1   grp1_1  1.06146675 1.956656  0.2267383 -0.88312967  0.04945980 -0.7273146</span></span>
+<span><span class="co">#&gt; 2   grp1_2  1.08465667 1.916983  0.3085454 -0.19892034  0.34311497 -0.6343214</span></span>
+<span><span class="co">#&gt; 3   grp1_6 -0.01899274 1.717871 -0.8834318 -0.42687491  0.51878884 -0.9019992</span></span>
+<span><span class="co">#&gt; 4   grp1_7 -0.75869657 2.051470 -0.6782202 -0.03485388 -0.15728499 -0.1613700</span></span>
+<span><span class="co">#&gt; 5   grp1_8 -0.68132827 1.648062  0.1465161 -1.10875822 -0.09101615 -0.9629427</span></span>
+<span><span class="co">#&gt; 6  grp1_11  0.27709905 1.981042 -0.5786717  0.02888008  0.54647685 -0.7013406</span></span>
+<span><span class="co">#&gt; 7  grp1_12  0.90487968 2.180079 -0.6439891 -0.14841544 -0.69040101 -0.3834938</span></span>
+<span><span class="co">#&gt; 8  grp1_13  0.46335031 1.695812 -1.0938459 -0.76868293  0.74415950 -0.6861036</span></span>
+<span><span class="co">#&gt; 9  grp1_14  0.72014702 1.708604 -0.9344900 -0.35796963  0.63730277 -0.9872778</span></span>
+<span><span class="co">#&gt; 10 grp1_15  0.54526798 1.784716 -0.8846753 -0.49538649  0.62916563 -0.9742293</span></span>
+<span><span class="co">#&gt;        D6_07      D7_08     D8_09       D9_10      D10_11         type</span></span>
+<span><span class="co">#&gt; 1  0.6371841 -1.0705560 0.4809808 -0.41877137 -1.31271417 DataSource_A</span></span>
+<span><span class="co">#&gt; 2  0.3938012 -0.9630327 0.2422154 -0.89650312 -1.59653914 DataSource_A</span></span>
+<span><span class="co">#&gt; 3  1.3354026 -1.3752687 0.9395058 -0.31779210 -0.58720856 DataSource_A</span></span>
+<span><span class="co">#&gt; 4  1.2347631 -0.9575502 0.7492778  0.01655139 -1.30408627 DataSource_A</span></span>
+<span><span class="co">#&gt; 5  1.2995756 -1.3741657 0.1285139  1.01932257 -0.02377948 DataSource_A</span></span>
+<span><span class="co">#&gt; 6  1.1406352 -1.6339536 0.2041455 -0.45793129 -0.80638109 DataSource_A</span></span>
+<span><span class="co">#&gt; 7  0.4794959 -1.6340692 0.5360766 -0.31430867 -0.28585374 DataSource_A</span></span>
+<span><span class="co">#&gt; 8  1.2235141 -1.2241931 0.6790383 -0.28487806 -0.74817082 DataSource_A</span></span>
+<span><span class="co">#&gt; 9  1.1466328 -1.4265286 0.5357111 -0.51799361 -0.52413804 DataSource_A</span></span>
+<span><span class="co">#&gt; 10 1.1813273 -1.2944121 0.6417621 -0.46906150 -0.66447461 DataSource_A</span></span></code></pre></div>
+</div>
+<div class="section level5">
+<h5 id="if-your-input-is-a-single-dataset">If your input is a single dataset:<a class="anchor" aria-label="anchor" href="#if-your-input-is-a-single-dataset"></a>
+</h5>
+<p>Here is a dataset that already includes a labeled ‘type’ column:</p>
+<pre><code><span><span class="co">#&gt;    ID      Day_1      Day_2       Day_3      Day_4       Day_5      Day_6</span></span>
+<span><span class="co">#&gt; 1   1         NA         NA -1.17485031  1.2062127  1.88115375 -0.8729663</span></span>
+<span><span class="co">#&gt; 2   2         NA         NA  0.40516079 -0.8241496  0.92997037  1.0567471</span></span>
+<span><span class="co">#&gt; 3   3 -1.1921416         NA -0.06701077 -2.7317659  0.48229874 -1.4051413</span></span>
+<span><span class="co">#&gt; 4   4 -2.7801597  1.1853134  1.25503279 -1.4775515 -0.64129021 -1.4341540</span></span>
+<span><span class="co">#&gt; 5   5  0.4012437 -1.1449160  0.89213227  0.4713003 -1.55710756  1.1143766</span></span>
+<span><span class="co">#&gt; 6   6  0.2744053  1.4567672  0.54405158 -0.6289747  0.74762995  0.7669416</span></span>
+<span><span class="co">#&gt; 7   7  0.8654952 -0.2621673 -1.95658624  0.9295762 -0.03226082 -0.2024099</span></span>
+<span><span class="co">#&gt; 8   8  0.1154924 -0.6012784 -0.79133213  1.4951410  0.01856763 -1.0385365</span></span>
+<span><span class="co">#&gt; 9   9 -1.4124645 -0.5322794  0.38977106 -0.1159478 -1.99806718  1.2890455</span></span>
+<span><span class="co">#&gt; 10 10 -1.0877990  0.6316820  0.90134953 -1.5829052  2.45372228 -0.8747928</span></span>
+<span><span class="co">#&gt;         Day_7       Day_8       type</span></span>
+<span><span class="co">#&gt; 1  -0.2803250 -0.83232673    peptide</span></span>
+<span><span class="co">#&gt; 2   0.7826227 -0.08501400    peptide</span></span>
+<span><span class="co">#&gt; 3   0.9343347 -1.30032240    peptide</span></span>
+<span><span class="co">#&gt; 4   1.2480531  0.74650804    peptide</span></span>
+<span><span class="co">#&gt; 5   0.3294889  0.10198086    peptide</span></span>
+<span><span class="co">#&gt; 6   0.9716911 -0.04437639    peptide</span></span>
+<span><span class="co">#&gt; 7  -0.6098363  1.46197240    peptide</span></span>
+<span><span class="co">#&gt; 8   0.7379569  1.39698235      lipid</span></span>
+<span><span class="co">#&gt; 9  -0.8221077  0.83239894      lipid</span></span>
+<span><span class="co">#&gt; 10 -1.3312973          NA metabolite</span></span></code></pre>
+<ul>
+<li>after <code><a href="../reference/pre_process.html">pre_process()</a></code>:</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="va">x</span>, replaceNA <span class="op">=</span> <span class="cn">TRUE</span>,scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">x1</span>,<span class="fl">10</span><span class="op">)</span></span>
+<span><span class="co">#&gt;    ID        Day_1        Day_2       Day_3      Day_4       Day_5      Day_6</span></span>
+<span><span class="co">#&gt; 1   1  0.008597843  0.008597843 -1.09683801  1.1435431  1.77860614 -0.8127904</span></span>
+<span><span class="co">#&gt; 2   2 -0.447471473 -0.447471473  0.19277896 -1.7498239  1.02210294  1.2224403</span></span>
+<span><span class="co">#&gt; 3   3 -0.441410527  0.547410475  0.49182844 -1.7184509  0.94745284 -0.6180830</span></span>
+<span><span class="co">#&gt; 4   4 -1.630535552  0.912190891  0.95689610 -0.7952818 -0.25905733 -0.7674546</span></span>
+<span><span class="co">#&gt; 5   5  0.344720529 -1.294343452  0.86510515  0.4189866 -1.73130237  1.1007035</span></span>
+<span><span class="co">#&gt; 6   6 -0.368036510  1.471062960  0.05138357 -1.7731949  0.36803862  0.3980768</span></span>
+<span><span class="co">#&gt; 7   7  0.784162467 -0.266948560 -1.84634181  0.8438933 -0.05264932 -0.2112478</span></span>
+<span><span class="co">#&gt; 8   8 -0.052700517 -0.791462196 -0.98734685  1.3692764 -0.15259897 -1.2421356</span></span>
+<span><span class="co">#&gt; 9   9 -0.997585556 -0.210975411  0.61304925  0.1610948 -1.52093119  1.4167193</span></span>
+<span><span class="co">#&gt; 10 10 -0.706874862  0.537777671  0.73297750 -1.0652593  1.85666812 -0.5526896</span></span>
+<span><span class="co">#&gt;         Day_7       Day_8       type</span></span>
+<span><span class="co">#&gt; 1  -0.2551646 -0.77455197    peptide</span></span>
+<span><span class="co">#&gt; 2   0.7892585 -0.58181382    peptide</span></span>
+<span><span class="co">#&gt; 3   1.3223938 -0.53114106    peptide</span></span>
+<span><span class="co">#&gt; 4   0.9524206  0.63082169    peptide</span></span>
+<span><span class="co">#&gt; 5   0.2686542  0.02747584    peptide</span></span>
+<span><span class="co">#&gt; 6   0.7165536 -0.86388409    peptide</span></span>
+<span><span class="co">#&gt; 7  -0.5910160  1.34014780    peptide</span></span>
+<span><span class="co">#&gt; 8   0.5888615  1.26810619      lipid</span></span>
+<span><span class="co">#&gt; 9  -0.4699913  1.00862012      lipid</span></span>
+<span><span class="co">#&gt; 10 -0.8831320  0.08053239 metabolite</span></span></code></pre></div>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 id="choose-your-annotation">Choose Your Annotation<a class="anchor" aria-label="anchor" href="#choose-your-annotation"></a>
+</h2>
+<p>In addition to specifying the data type mentioned above, our methods
+support three levels of information: functional annotation, taxonomy
+annotation, and feature annotation. These annotations will be matched
+with ID columns in the annotation data, serving as another crucial input
+for generating the dashboard. We facilitate automatic feature link
+generation using KeggID and GOID, for which users should set the
+corresponding column names beforehand.</p>
+<p>Here is an example of annotation formats that align with your data
+inputs.</p>
+<pre><code><span><span class="co">#&gt;          ID taxonomic.scope ko_term              Pathway</span></span>
+<span><span class="co">#&gt; 1   grp1_24        Bacteria  K02706 00195_Photosynthesis</span></span>
+<span><span class="co">#&gt; 2   grp1_25        Bacteria  K02706 00195_Photosynthesis</span></span>
+<span><span class="co">#&gt; 3   grp1_26        Bacteria  K02706 00195_Photosynthesis</span></span>
+<span><span class="co">#&gt; 4 grp1_1075        Bacteria  K02112 00195_Photosynthesis</span></span>
+<span><span class="co">#&gt; 5 grp1_1076        Bacteria  K02112 00195_Photosynthesis</span></span>
+<span><span class="co">#&gt; 6 grp1_1358        Bacteria  K02112 00195_Photosynthesis</span></span></code></pre>
+<p>If your data has more than two layers of labels (like the cheese
+dataset), you can specify which two layers you want to focus on in the
+network by using the <code><a href="../reference/gAnnotation.html">gAnnotation()</a></code> function.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">Annotation_path_taxon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gAnnotation.html">gAnnotation</a></span><span class="op">(</span><span class="va">annotations</span>,<span class="st">"phylum"</span>,<span class="st">"class"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="network-generation">Network Generation<a class="anchor" aria-label="anchor" href="#network-generation"></a>
+</h2>
+<p>To generate the network, we first scale and cluster the trajectories
+across the input molecular features. Trajectories are clustered using
+K-means, and a built-in elbow method is used to select the optimal K. We
+build network between clustered trajectories by adapting the GENIE3
+algorithm. Specifically, the network is learned through a series of
+regressions, where each cluster centroid is predicted from the
+expression patterns of all the other cluster centroids using random
+forests. We choose random forests because of their potential to model
+interacting features and non-linearity without strong assumptions.</p>
+<center>
+<div class="float">
+<img src="../reference/figures/predict.png" style="width:50.0%" alt="Fig 2: Each cluster centroid is predicted from all the other cluster centroids."><div class="figcaption">Fig 2: Each cluster centroid is predicted from
+all the other cluster centroids.</div>
+</div>
+</center>
+<p>To determine which feature clusters are predictive of a given
+trajectory, the Mean Decrease Accuracy of a subset of top predictors
+whose expression directly influences the expression of the target
+cluster is taken as an indication of a putative link.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">cluster_result</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/gClusters.html">gClusters</a></span><span class="op">(</span>ncluster <span class="op">=</span> <span class="fl">5</span>,elbow.max<span class="op">=</span><span class="fl">15</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Quick-TRANSfer stage steps exceeded maximum (= 7515250)</span></span>
+<span></span>
+<span><span class="va">network_result</span> <span class="op">&lt;-</span> <span class="va">cluster_result</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="../reference/gNetwork.html">gNetwork</a></span><span class="op">(</span>ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">network_result</span><span class="op">)</span></span></code></pre></div>
+<p><img src="getstarted_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="dashboard-navigation">Dashboard Navigation<a class="anchor" aria-label="anchor" href="#dashboard-navigation"></a>
+</h2>
+<p>Here is the workflow of inputs related to the gDashboard function.
+This is the key function that processes the data and runs the dashboard,
+requiring input from the previous steps.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/gDashboard.html">gDashboard</a></span><span class="op">(</span><span class="va">data</span>,</span>
+<span>           <span class="va">cluster_result</span>,</span>
+<span>           <span class="va">Annotation_path_taxon</span>,</span>
+<span>           <span class="va">network_result</span>,</span>
+<span>           id_colname <span class="op">=</span> <span class="st">"ko_term"</span> ,</span>
+<span>           id_type <span class="op">=</span> <span class="st">"KEGG"</span><span class="op">)</span></span></code></pre></div>
+<center>
+<div class="float">
+<img src="../reference/figures/gdashboard.png" style="width:70.0%" alt="Fig 3: gDashboard() function"><div class="figcaption">Fig 3: <code><a href="../reference/gDashboard.html">gDashboard()</a></code> function</div>
+</div>
+</center>
+<p>Once you’ve launched the Shiny dashboard, you can zoom in or make
+adjustments to explore interesting findings within your data. To
+effectively navigate the dashboard generated by MolPad, you’ll follow
+three main steps:</p>
+<div class="section level4">
+<h4 id="choose-a-primary-functional-annotation-and-adjust-edge-density">Choose a Primary Functional Annotation and Adjust Edge Density<a class="anchor" aria-label="anchor" href="#choose-a-primary-functional-annotation-and-adjust-edge-density"></a>
+</h4>
+<p>Start by selecting a primary functional annotation from the available
+options. Then, fine-tune the edge density by adjusting the threshold
+value on the importance score. Nodes that turn bright green indicate
+clusters containing the most features related to the chosen functional
+annotation.</p>
+</div>
+<div class="section level4">
+<h4 id="explore-the-network">Explore the Network<a class="anchor" aria-label="anchor" href="#explore-the-network"></a>
+</h4>
+<p>Brushing on the network unveils patterns of taxonomic composition and
+typical trajectories. You can also zoom into specific taxonomic
+annotations by applying filters.</p>
+</div>
+<div class="section level4">
+<h4 id="investigate-feature-details-and-related-function-annotations">Investigate Feature Details and Related Function Annotations<a class="anchor" aria-label="anchor" href="#investigate-feature-details-and-related-function-annotations"></a>
+</h4>
+<p>Delve into the feature table to examine the specifics of the features
+within the selected clusters. Explore additional related function
+annotations using the drop-down options. Click on the provided links to
+access online information about the items of interest. The interface
+encourages iterative exploration, enabling you to conduct multiple steps
+to answer specific questions, such as comparing pattern distributions
+between two functions or identifying functionally important community
+members metabolizing a feature of interest.</p>
+<center>
+<div class="float">
+<img src="../reference/figures/dashboard.png" style="width:100.0%" alt="Fig 4: MolPad Dashboard Overview."><div class="figcaption">Fig 4: MolPad Dashboard Overview.</div>
+</div>
+</center>
+</div>
+</div>
+<div class="section level2">
+<h2 id="related-visualization-outputs">Related Visualization Outputs<a class="anchor" aria-label="anchor" href="#related-visualization-outputs"></a>
+</h2>
+<p>The following visualizations are integrated into the dashboard, so
+there’s no need to run function for each plot individually. We’ve linked
+a stacked bar plot and a ribbon plot with the network to facilitate
+focus and context explorations. This setup helps in detecting similar
+longitudinal patterns and understanding their relationships.</p>
+<div class="section level4">
+<h4 id="network-plot">Network Plot<a class="anchor" aria-label="anchor" href="#network-plot"></a>
+</h4>
+<p><img src="getstarted_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+</div>
+<div class="section level4">
+<h4 id="stack-bar-plot">Stack Bar Plot<a class="anchor" aria-label="anchor" href="#stack-bar-plot"></a>
+</h4>
+<p><img src="getstarted_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
+</div>
+<div class="section level4">
+<h4 id="ribbon-plot">Ribbon Plot<a class="anchor" aria-label="anchor" href="#ribbon-plot"></a>
+</h4>
+<p><img src="getstarted_files/figure-html/unnamed-chunk-18-1.png" width="700"></p>
+</div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

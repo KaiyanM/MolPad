@@ -40,37 +40,60 @@ after that, load the package:
 library(MolPad)
 ```
 
-# Key features
-
-### Trajectory clustering
-
-By organizing data into clusters, it helps identify patterns, relationships, and underlying structures within a dataset. In essence, clustering detects groups of features or observations that behave similarly, allowing for deeper insights and more effective decision-making. 
-
-### Network extracting
-
-We build network between clustered trajectories by adapting the GENIE3 algorithm. Specifically, the network is learned through a series of regressions, where each cluster centroid is predicted from the expression patterns of all the other cluster centroids using random forests. We choose random forests because of their potential to model interacting features and non-linearity without strong assumptions. 
-
-### Interactive Dashboard
-
-This package provides an interactive dashboard designed to help users explore data and uncover relationships within complex networks. By utilizing focus-plus-context visualization, the dashboard allows users to zoom in on specific details while keeping the broader dataset in view. This approach enables a deeper understanding of the data, making it easier to identify patterns and make informed decisions. 
 
 ```{r, include = FALSE}
-load("/Users/hazelma/multiomics_simulate.RData")
-fungal_dlist[[1]]
-
+load("/Users/hazelma/Documents/GitHub/MolPad_Data/multiomics_simulate.RData")
 ```
 
-# Data Input
+# Before Input
 
-Our visualization pipeline begins with an optional pre-processing module that offers built-in functions to streamline data preparation. 
+We recommend carefully reviewing your data and considering applying normalization (standardization, quantile normalization, log transformation, ...) and imputation (KNN, PMM,  Mean/Median/Mode, ...) to address issues related to library size and missing data beforehead, otherwise the `pre_processing()` function will default to converting NAs to 0s. 
 
-Depending on the nature of your datasets, there are two primary conditions to consider:
+### Tips for normalization and imputation
 
-## If Your Datasets are Multi-Omics:
+* To choose a normalization method, first consider your data distribution. Use Z-score normalization if your data is normally distributed, or log transformation and robust scaling if it’s skewed. If your analysis requires data within a specific range, like [0, 1], opt for Min-Max normalization. For datasets with outliers, robust scaling or rank normalization are better choices.
 
-In this scenario, we assume that you provide a list of data tables, each collected for a different omics type. For example, you might have datasets for peptides, metabolites, and lipids. We recommend carefully reviewing your data and considering applying quantile normalization and KNN imputation to address issues related to library size and missing data.
+* When selecting an imputation method, assess the amount and pattern of missing data. For a small amount of missing data, simple methods like mean, median, or mode imputation are effective. If missing data is related to other variables, consider more sophisticated approaches like Predictive Mean Matching or k-NN imputation. If computational resources are a concern, simpler imputation methods might be more practical, but if resources allow, more advanced methods can improve data quality.
 
-To achieve this, simply run the pre_process() function, which will yield the standard input format as demonstrated below.
+* If it's hard to decide, you can always experiment with different methods and use cross-validation to compare their effectiveness. Let your choice be guided by domain knowledge and the specific requirements of your analysis to increase the quality of the following steps.
+
+
+# Data Format
+
+### Multi-omics: Yes or No
+
+Our visualization pipeline starts with a pre-processing module that includes built-in functions to reshape data inputs into a standard format and streamline data preparation. Depending on the nature of your datasets, there are two primary conditions to consider:
+
+* If Your research object includes multi-omics measurements, we assume that you could provide them as a list of dataframes, where each collected for a different omics type. For example, you might have datasets for peptides, metabolites, and lipids. To combine them together into a standard long dataset where each row represents a feature, simply run the pre_process() function, which will conduct data preparation and yield the standard input format as demonstrated below.
+
+* If Your Datasets are not multi-omics, you can still utilize our dashboard as long as ensuring that your data inputs are reformatted into the standard longitudinal format. In this situation, you can manually assign the type column with any category label to describe major groups in the data, and input your data into the `pre_processing()` module for data preparation only. In our case study, we utilized "Kingdom" as the type label column for the cheese data.
+
+If your datasets are not multi-omics, you can simply apply it to our dashboard by reformatting your data into the standard longitudinal format. In this case, manually assign a category label to the `type` column to represent the major groups. After that you can still input your data into the `pre_processing()` module for cleaning and preparation. In our case study, we used "Kingdom" as the `type` label for the cheese datasets.
+
+### Data Format and Pre-process
+
+<center>
+  
+  ![Fig 1: Reshape a list of datasets into a standard format.](../man/figures/preprocess.png){ width=70% }
+</center>
+
+
+In the figure, A, B, and C can represent datasets from different sources or different aspects of measurements. Below are two examples of what the input data might look like and how to transform it into the required format through `pre_process()` modules.
+
+#### If your input is a list of datasets:
+
+Here is a list of datasets, each following the same format: they all have an ID column and identical column names.
+```{r}
+str(fungal_dlist)
+```
+
+```{r,echo=FALSE}
+head(fungal_dlist[[1]],4)
+head(fungal_dlist[[2]],4)
+head(fungal_dlist[[3]],4)
+```
+
+* after `pre_process()`: 
 
 ```{r}
 data <- pre_process(fungal_dlist, typenameList = c('DataSource_A','DataSource_B','DataSource_C'), replaceNA = TRUE,
@@ -79,49 +102,118 @@ data <- pre_process(fungal_dlist, typenameList = c('DataSource_A','DataSource_B'
 
 
 ```{r}
-head(data)
+head(data,10)
 ```
 
-<div align="center">
-  
-  ![Fig 1: Dashboard Overview.](../man/figures/preprocess.png){ width=70% }
+#### If your input is a single dataset:
 
-
-```{r}
-
-```
-
-
+Here is a dataset that already includes a labeled 'type' column:
 ```{r, echo=FALSE}
 # Simulated data with the standard input format 
-x <- data.frame("ID"=1:5,"Day_1"=rnorm(5),"Day_2"=rnorm(5),"Day_3"=rnorm(5),"Day_4"=rnorm(5),"Day_5"=rnorm(5),"Day_6"=rnorm(5),"Day_7"=rnorm(5),"Day_8"=rnorm(5),"type"=c(rep("peptide",3),"lipid","metabolite"))
+k = 10
+x <- data.frame("ID"=1:k,"Day_1"=c(rep(NA,2),rnorm(k-2)),"Day_2"=c(rep(NA,3),rnorm(k-3)),"Day_3"=rnorm(k),"Day_4"=rnorm(k),"Day_5"=rnorm(k),"Day_6"=rnorm(k),"Day_7"=rnorm(k),"Day_8"=c(rnorm(k-1),NA),"type"=c(rep("peptide",k-3),rep("lipid",2),"metabolite"))
 x
 ```
 
+* after `pre_process()`:
+```{r}
+x1 <- pre_process(x, replaceNA = TRUE,scale = TRUE)
+head(x1,10)
+```
 
-## If Your Datasets are NOT Multi-Omics:
 
-You can still utilize our dashboard by ensuring that your data inputs are reformatted into the standard longitudinal format. While the datasets may not be multi-omics, you can manually assign the type column with any category label to describe major groups in the data. In our case study, we utilized "Kingdom" as the type label column for the cheese data.
-
-
-
-## Choose Your Annotation
+# Choose Your Annotation
 
 In addition to specifying the data type mentioned above, our methods support three levels of information: functional annotation, taxonomy annotation, and feature annotation. These annotations will be matched with ID columns in the annotation data, serving as another crucial input for generating the dashboard. We facilitate automatic feature link generation using KeggID and GOID, for which users should set the corresponding column names beforehand.
 
-# Network Navigation
+Here is an example of annotation formats that align with your data inputs.
 
-To effectively navigate the dashboard generated by MolPad, you'll follow three main steps:
+```{r, echo=FALSE}
+head(pathway)
+```
+If your data has more than two layers of labels (like the cheese dataset), you can specify which two layers you want to focus on in the network by using the `gAnnotation()` function.
 
-## 1. Choose a Primary Functional Annotation and Adjust Edge Density
+```{r,eval=FALSE}
+Annotation_path_taxon <- gAnnotation(annotations,"phylum","class")
+```
+
+# Network Generation
+
+To generate the network, we first scale and cluster the trajectories across the input molecular features. Trajectories are clustered using K-means, and a built-in elbow method is used to select the optimal K. We build network between clustered trajectories by adapting the GENIE3 algorithm. Specifically, the network is learned through a series of regressions, where each cluster centroid is predicted from the expression patterns of all the other cluster centroids using random forests. We choose random forests because of their potential to model interacting features and non-linearity without strong assumptions. 
+
+<center>
+  
+  ![Fig 2: Each cluster centroid is predicted from all the other cluster centroids.](../man/figures/predict.png){ width=50% }
+</center>
+
+
+To determine which feature clusters are predictive of a given trajectory, the Mean Decrease Accuracy of a subset of top predictors whose expression directly influences the expression of the target cluster is taken as an indication of a putative link. 
+
+```{r}
+cluster_result <- data |>
+  gClusters(ncluster = 5,elbow.max=15)
+
+network_result <- cluster_result |>
+  gNetwork(ntop = 3)
+
+gNetwork_view(network_result)
+```
+
+
+# Dashboard Navigation
+
+Here is the workflow of inputs related to the gDashboard function. This is the key function that processes the data and runs the dashboard, requiring input from the previous steps.
+
+```{r,eval=FALSE}
+gDashboard(data,
+           cluster_result,
+           Annotation_path_taxon,
+           network_result,
+           id_colname = "ko_term" ,
+           id_type = "KEGG")
+```
+
+<center>
+  
+  ![Fig 3: `gDashboard()` function](../man/figures/gdashboard.png){ width=70% }
+</center>
+
+Once you've launched the Shiny dashboard, you can zoom in or make adjustments to explore interesting findings within your data. To effectively navigate the dashboard generated by MolPad, you'll follow three main steps:
+
+### Choose a Primary Functional Annotation and Adjust Edge Density
 Start by selecting a primary functional annotation from the available options. Then, fine-tune the edge density by adjusting the threshold value on the importance score. Nodes that turn bright green indicate clusters containing the most features related to the chosen functional annotation.
 
-## 2. Explore the Network
+### Explore the Network
 Brushing on the network unveils patterns of taxonomic composition and typical trajectories. You can also zoom into specific taxonomic annotations by applying filters.
 
-## 3. Investigate Feature Details and Related Function Annotations
+### Investigate Feature Details and Related Function Annotations
 Delve into the feature table to examine the specifics of the features within the selected clusters. Explore additional related function annotations using the drop-down options. Click on the provided links to access online information about the items of interest. The interface encourages iterative exploration, enabling you to conduct multiple steps to answer specific questions, such as comparing pattern distributions between two functions or identifying functionally important community members metabolizing a feature of interest.
 
-<div align="center">
+<center>
   
-  ![Fig 1: Dashboard Overview.](../man/figures/dashboard.png){ width=70% }
+  ![Fig 4: MolPad Dashboard Overview.](../man/figures/screenshot.png){ width=100% }
+</center>
+
+
+# Related Visualization Outputs
+
+The following visualizations are integrated into the dashboard, so there's no need to run function for each plot individually. We've linked a stacked bar plot and a ribbon plot with the network to facilitate focus and context explorations. This setup helps in detecting similar longitudinal patterns and understanding their relationships.
+
+### Network Plot
+```{r,echo=FALSE}
+data("test_data")
+
+make_the_graph(test_graphptw, test_network, 0.03, "Muscular System","nicely")
+```
+
+### Stack Bar Plot
+```{r,echo=FALSE}
+make_stackbar_plot(test_maindata, c("Group_1","Group_2","Group_3","Group_4"), c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+```
+
+### Ribbon Plot
+
+```{r,echo=FALSE}
+make_line_plot(test_maindata, c("Group_1","Group_2","Group_3","Group_4"), c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
+
+```

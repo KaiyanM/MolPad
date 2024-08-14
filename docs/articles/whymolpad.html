@@ -52,8 +52,6 @@
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
     <a class="dropdown-item" href="../articles/cheese.html">Case study</a>
-    <a class="dropdown-item" href="../articles/data_input.html">Data input</a>
-    <a class="dropdown-item" href="../articles/navigate.html">Network navigation</a>
     <a class="dropdown-item" href="../articles/FAQ.html">FAQs</a>
   </div>
 </li>
@@ -86,48 +84,106 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kaiyanm.github.io/MolPad/">MolPad</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="why-molpad">Why MolPad?<a class="anchor" aria-label="anchor" href="#why-molpad"></a>
 </h2>
-<p>With the increasing multi-omics data and longitudinal designs
-integrated into microbiome experiments, there is a growing need to
-present the network, especially with complex variations across
-biological modalities. Network perspective helps detect the underlying
+With the increasing multi-omics data and longitudinal designs integrated
+into microbiome experiments, there is a growing need to present the
+network, especially with complex variations across biological
+modalities. Network perspective helps detect the underlying
 co-occurrence among microbiome samples, allowing for high-level insights
 into the global structure. Yet when it comes to experimental data that
 records time series for 100,000 features, the network will collapse into
-some entangled clumps and therefore unable to read.</p>
-<p>For the aim of network interpretation, MolPad shows improvements in
-two important aspects:</p>
-<p>Capture groups of features that share longitudinal patterns and
-functional properties within the network. Annotate the network under
-complex experimental datasets, as a way to dig in specific components
-with notable features.</p>
+some entangled clumps and therefore unable to read.
+<center>
+<img src="../reference/figures/meme1.jpg" style="width:50.0%">
+</center>
+<p>For the aim of network interpretation, MolPad shows improvements in 3
+important aspects:</p>
+<ul>
+<li>Capture groups of features that share longitudinal patterns and
+functional properties within the network.</li>
+<li>Annotate the network under complex experimental datasets, as a way
+to dig in specific components with notable features.</li>
+<li>Streamlines exploration through modularized functions and an
+interactive dashboard.</li>
+</ul>
 <p>This package especially facilitates the exploration of longitudinal
 molecular co-expression in microbiome experiments using a
-focus-plus-context and interactive approach, empowering researchers to
-uncover global patterns and insights in longitudinal microbiomics
-data.</p>
-<p>Furthermore, MolPad streamlines exploration through interactive
-features such as taxonomic composition visualization, feature trajectory
-clustering, and automatic links to online annotation. Unlike existing
-tools, MolPad stands out for its rich network interactivity and support
-for contextualization. It is also equipped with a beginner-friendly
-interface and self-contained data processing functions, making it
-accessible to users with limited programming experience.</p>
+focus-plus-context and approach, empowering researchers to uncover
+global patterns and insights in longitudinal microbiomics data.</p>
+<p>Unlike existing tools, MolPad stands out for its rich network
+interactivity and support for contextualization. It is also equipped
+with a beginner-friendly interface and self-contained data processing
+functions, making it accessible to users with limited programming
+experience.</p>
 </div>
-  </main>
+<div class="section level2">
+<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
+</h2>
+<ul>
+<li>Trajectory clustering</li>
+</ul>
+<p>By organizing data into clusters, it helps identify patterns,
+relationships, and underlying structures within a dataset. In essence,
+clustering detects groups of features or observations that behave
+similarly, allowing for deeper insights and more effective
+decision-making.</p>
+<ul>
+<li>Network extracting</li>
+</ul>
+<p>We build network between clustered trajectories by adapting the
+GENIE3 algorithm. Specifically, the network is learned through a series
+of regressions, where each cluster centroid is predicted from the
+expression patterns of all the other cluster centroids using random
+forests. We choose random forests because of their potential to model
+interacting features and non-linearity without strong assumptions.</p>
+<ul>
+<li>Interactive Dashboard</li>
+</ul>
+<p>This package provides an interactive dashboard designed to help users
+explore data and uncover relationships within complex networks. By
+utilizing focus-plus-context visualization, the dashboard allows users
+to zoom in on specific details while keeping the broader dataset in
+view. This approach enables a deeper understanding of the data, making
+it easier to identify patterns and make informed decisions.</p>
+</div>
+<div class="section level2">
+<h2 id="what-does-it-look-like">What does it look like?<a class="anchor" aria-label="anchor" href="#what-does-it-look-like"></a>
+</h2>
+<div class="section level4">
+<h4 id="molpad-dashboard-overview">MolPad Dashboard Overview<a class="anchor" aria-label="anchor" href="#molpad-dashboard-overview"></a>
+</h4>
+<center>
+<img src="../reference/figures/dashboard.png" style="width:100.0%">
+</center>
+<p>Above is the overview of the MolPad Dashboard. To explore the
+dashboard effectively, you can start by following the sequence A-B-C-D.
+This approach will guide you through the cluster-level network,
+taxonomic-level bar plot, type-level line plot, and feature-level table.
+From there, you can modify detailed settings to identify and investigate
+special patterns within your data.</p>
+</div>
+<div class="section level4">
+<h4 id="discovering-related-patterns">Discovering related patterns<a class="anchor" aria-label="anchor" href="#discovering-related-patterns"></a>
+</h4>
+<center>
+<img src="../reference/figures/pattern1.png" style="width:100.0%">
+</center>
+<p>Here is a short example of discovering related patterns using the
+network plot: The shade of the edges represents the proximity of nodes.
+In the brushed area, Groups 1-7-8 (circled by solid black lines) and
+Groups 1-2 (circled by blue dashed lines) are strongly linked. For
+Groups 1, 7, and 8, the patterns form a W-shape with a noticeable peak
+at the same time section. Although Group 1 shows higher volatility
+compared to Group 2, both groups display a highly overlapping increasing
+trend.</p>
+<p>For more detailed instructions, please visit the “Get Started” page
+and the relevant function reference page.</p>
+</div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 

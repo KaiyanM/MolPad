@@ -45,10 +45,6 @@ navbar:
       menu:
         - text: Case study
           href: articles/cheese.html
-        - text: Data input
-          href: articles/data_input.html
-        - text: Network navigation 
-          href: articles/navigate.html
         - text: FAQs
           href: articles/FAQ.html
     - text: Reference

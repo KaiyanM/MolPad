@@ -4,11 +4,9 @@ pkgdown_sha: ~
 articles:
   FAQ: FAQ.html
   cheese: cheese.html
-  data_input: data_input.html
   getstarted: getstarted.html
-  navigate: navigate.html
   whymolpad: whymolpad.html
-last_built: 2024-08-10T15:59Z
+last_built: 2024-08-14T18:00Z
 urls:
   reference: https://kaiyanm.github.io/MolPad/reference
   article: https://kaiyanm.github.io/MolPad/articles
