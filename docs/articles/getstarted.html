@@ -102,6 +102,7 @@
 <p>after that, load the package:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://kaiyanm.github.io/MolPad/">MolPad</a></span><span class="op">)</span></span></code></pre></div>
+<p><br></p>
 </div>
 <div class="section level2">
 <h2 id="before-input">Before Input<a class="anchor" aria-label="anchor" href="#before-input"></a>
@@ -136,6 +137,7 @@ your choice be guided by domain knowledge and the specific requirements
 of your analysis to increase the quality of the following
 steps.</p></li>
 </ul>
+<p><br></p>
 </div>
 </div>
 <div class="section level2">
@@ -175,16 +177,18 @@ the <code>type</code> label for the cheese datasets.</p>
 <div class="section level4">
 <h4 id="data-format-and-pre-process">Data Format and Pre-process<a class="anchor" aria-label="anchor" href="#data-format-and-pre-process"></a>
 </h4>
-<center>
+<br><center>
 <div class="float">
 <img src="../reference/figures/preprocess.png" style="width:70.0%" alt="Fig 1: Reshape a list of datasets into a standard format."><div class="figcaption">Fig 1: Reshape a list of datasets into a
 standard format.</div>
 </div>
 </center>
+<p><br></p>
 <p>In the figure, A, B, and C can represent datasets from different
 sources or different aspects of measurements. Below are two examples of
 what the input data might look like and how to transform it into the
 required format through <code><a href="../reference/pre_process.html">pre_process()</a></code> modules.</p>
+<p><br></p>
 <div class="section level5">
 <h5 id="if-your-input-is-a-list-of-datasets">If your input is a list of datasets:<a class="anchor" aria-label="anchor" href="#if-your-input-is-a-list-of-datasets"></a>
 </h5>
@@ -293,61 +297,63 @@ have an ID column and identical column names.</p>
 <span><span class="co">#&gt; 8  1.2235141 -1.2241931 0.6790383 -0.28487806 -0.74817082 DataSource_A</span></span>
 <span><span class="co">#&gt; 9  1.1466328 -1.4265286 0.5357111 -0.51799361 -0.52413804 DataSource_A</span></span>
 <span><span class="co">#&gt; 10 1.1813273 -1.2944121 0.6417621 -0.46906150 -0.66447461 DataSource_A</span></span></code></pre></div>
+<p><br></p>
 </div>
 <div class="section level5">
 <h5 id="if-your-input-is-a-single-dataset">If your input is a single dataset:<a class="anchor" aria-label="anchor" href="#if-your-input-is-a-single-dataset"></a>
 </h5>
 <p>Here is a dataset that already includes a labeled ‘type’ column:</p>
-<pre><code><span><span class="co">#&gt;    ID       Day_1       Day_2        Day_3       Day_4      Day_5        Day_6</span></span>
-<span><span class="co">#&gt; 1   1          NA          NA  0.104083550 -1.07999900  1.3416214 -1.733564471</span></span>
-<span><span class="co">#&gt; 2   2          NA          NA  0.882578509  0.08440181  0.7165712  0.004811372</span></span>
-<span><span class="co">#&gt; 3   3  0.40203917          NA  0.675076590  0.97017740 -0.8210872  0.659073443</span></span>
-<span><span class="co">#&gt; 4   4  1.02859068  0.30178418  0.412617771  0.39306149 -0.3427640  0.837009714</span></span>
-<span><span class="co">#&gt; 5   5 -2.14036218 -0.06315709  0.656982200 -0.18301850 -1.3967562 -0.123327229</span></span>
-<span><span class="co">#&gt; 6   6 -2.04354192  1.30960484  1.371349945 -1.67403067 -1.2946150  0.760315504</span></span>
-<span><span class="co">#&gt; 7   7  0.31164367  2.26615374  0.972843085 -0.03956293  1.0190965  1.180680430</span></span>
-<span><span class="co">#&gt; 8   8 -0.79692858 -0.86038791 -3.417872877  0.62118867 -2.1983197 -0.104229763</span></span>
-<span><span class="co">#&gt; 9   9 -0.12033042  1.17585682 -0.001075426  0.01122359  0.3430992 -0.189234532</span></span>
-<span><span class="co">#&gt; 10 10  0.02592915  0.48551867  0.841254390 -0.46430744  0.6891800  0.751766756</span></span>
-<span><span class="co">#&gt;         Day_7      Day_8       type</span></span>
-<span><span class="co">#&gt; 1   0.4638261  2.1318716    peptide</span></span>
-<span><span class="co">#&gt; 2  -0.2949926 -0.9310538    peptide</span></span>
-<span><span class="co">#&gt; 3  -0.2520195  0.7809977    peptide</span></span>
-<span><span class="co">#&gt; 4  -1.0120371 -0.1162361    peptide</span></span>
-<span><span class="co">#&gt; 5  -2.0085970 -0.8959521    peptide</span></span>
-<span><span class="co">#&gt; 6   0.7874222 -0.5106016    peptide</span></span>
-<span><span class="co">#&gt; 7  -0.7719437 -1.4686258    peptide</span></span>
-<span><span class="co">#&gt; 8   0.3541200  0.8224521      lipid</span></span>
-<span><span class="co">#&gt; 9   0.5674059 -0.9313882      lipid</span></span>
-<span><span class="co">#&gt; 10 -0.4097464         NA metabolite</span></span></code></pre>
+<pre><code><span><span class="co">#&gt;    ID      Day_1      Day_2       Day_3       Day_4       Day_5      Day_6</span></span>
+<span><span class="co">#&gt; 1   1         NA         NA -0.82919412  0.08237778  1.30438699  0.4875914</span></span>
+<span><span class="co">#&gt; 2   2         NA         NA -0.41606256  1.42523475 -0.44792066  1.1425154</span></span>
+<span><span class="co">#&gt; 3   3  1.0354708         NA  0.78841026 -1.49585251 -0.41361867 -0.3271995</span></span>
+<span><span class="co">#&gt; 4   4 -0.3005323  0.6998150 -1.86018783  1.14167433 -1.04204735 -2.4930409</span></span>
+<span><span class="co">#&gt; 5   5 -0.1307903  0.7839983  0.25834857  0.62421147 -0.07202124 -0.9214203</span></span>
+<span><span class="co">#&gt; 6   6 -0.9910321  1.8059465 -1.25395397 -0.45260649 -0.57303842  0.9990113</span></span>
+<span><span class="co">#&gt; 7   7 -0.9160734  1.4475673 -3.10452531 -0.06560360 -1.27374744 -0.5703149</span></span>
+<span><span class="co">#&gt; 8   8 -0.7381729 -0.4844302  1.10281675  0.12049188  0.20892638 -0.3115689</span></span>
+<span><span class="co">#&gt; 9   9 -0.2581716 -0.5906591  0.09794986  2.44249606  1.13135657  0.4886958</span></span>
+<span><span class="co">#&gt; 10 10  1.8831483 -1.2490571  0.55981559 -2.31731640  0.97323395 -0.7994677</span></span>
+<span><span class="co">#&gt;         Day_7       Day_8       type</span></span>
+<span><span class="co">#&gt; 1  -1.4632070  0.05832042    peptide</span></span>
+<span><span class="co">#&gt; 2  -0.4292379 -0.79047610    peptide</span></span>
+<span><span class="co">#&gt; 3  -0.3508094 -0.34995898    peptide</span></span>
+<span><span class="co">#&gt; 4  -0.3011731  0.67869535    peptide</span></span>
+<span><span class="co">#&gt; 5   1.1761504 -0.86303628    peptide</span></span>
+<span><span class="co">#&gt; 6  -0.8993647 -0.44801227    peptide</span></span>
+<span><span class="co">#&gt; 7   1.1593812 -0.90149427    peptide</span></span>
+<span><span class="co">#&gt; 8   0.5463595 -1.51687039      lipid</span></span>
+<span><span class="co">#&gt; 9  -0.5016034 -0.08241911      lipid</span></span>
+<span><span class="co">#&gt; 10 -0.9442708          NA metabolite</span></span></code></pre>
 <ul>
 <li>after <code><a href="../reference/pre_process.html">pre_process()</a></code>:</li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="va">x</span>, replaceNA <span class="op">=</span> <span class="cn">TRUE</span>,scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">x1</span>,<span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    ID       Day_1      Day_2       Day_3       Day_4      Day_5       Day_6</span></span>
-<span><span class="co">#&gt; 1   1 -0.12499488 -0.1249949 -0.04022866 -1.00455207  0.9676290 -1.53681943</span></span>
-<span><span class="co">#&gt; 2   2 -0.10246242 -0.1024624  1.46237249  0.04718422  1.1680372 -0.09393173</span></span>
-<span><span class="co">#&gt; 3   3  0.16412393 -0.4940273  0.61109508  1.09418472 -1.8381738  0.58489741</span></span>
-<span><span class="co">#&gt; 4   4  1.27432720  0.1728189  0.34079228  0.31115385 -0.8040231  0.98397755</span></span>
-<span><span class="co">#&gt; 5   5 -1.35954882  0.7001734  1.41425156  0.58132077 -0.6222015  0.64050965</span></span>
-<span><span class="co">#&gt; 6   6 -1.35505505  1.0595199  1.10398207 -1.08897287 -0.8157586  0.66398092</span></span>
-<span><span class="co">#&gt; 7   7 -0.10291149  1.5438734  0.45418630 -0.39882285  0.4931574  0.62930098</span></span>
-<span><span class="co">#&gt; 8   8 -0.06748422 -0.1105542 -1.84632390  0.89499455 -1.0186109  0.40265173</span></span>
-<span><span class="co">#&gt; 9   9 -0.36947382  1.7376966 -0.17560476 -0.15561064  0.3839091 -0.48148903</span></span>
-<span><span class="co">#&gt; 10 10 -0.41003145  0.4704748  1.15201231 -1.34925296  0.8606601  0.98056711</span></span>
+<span><span class="co">#&gt;    ID       Day_1       Day_2      Day_3      Day_4      Day_5       Day_6</span></span>
+<span><span class="co">#&gt; 1   1  0.05451890  0.05451890 -0.9508450  0.1543986  1.6360347  0.64570353</span></span>
+<span><span class="co">#&gt; 2   2 -0.07554744 -0.07554744 -0.5950354  1.7039742 -0.6348129  1.35097605</span></span>
+<span><span class="co">#&gt; 3   3  1.49874204  0.17759695  1.1835204 -1.7309438 -0.3501343 -0.23987305</span></span>
+<span><span class="co">#&gt; 4   4  0.10376561  0.87801613 -1.1033792  1.2200072 -0.4701534 -1.59319589</span></span>
+<span><span class="co">#&gt; 5   5 -0.31530188  0.89803359  0.2008348  0.6860993 -0.2373532 -1.36395879</span></span>
+<span><span class="co">#&gt; 6   6 -0.71746086  1.90776216 -0.9642373 -0.2120986 -0.3251351  1.15037885</span></span>
+<span><span class="co">#&gt; 7   7 -0.27002806  1.37506283 -1.7931878  0.3218978 -0.5189688 -0.02938062</span></span>
+<span><span class="co">#&gt; 8   8 -0.74469269 -0.43190500  1.5246885  0.3137802  0.4227931 -0.21881953</span></span>
+<span><span class="co">#&gt; 9   9 -0.58919072 -0.91616395 -0.2389755  2.0666865  0.7772922  0.14528989</span></span>
+<span><span class="co">#&gt; 10 10  1.56649401 -0.74805373  0.5886154 -1.5374455  0.8941115 -0.41582898</span></span>
 <span><span class="co">#&gt;         Day_7      Day_8       type</span></span>
-<span><span class="co">#&gt; 1   0.2527477  1.6112132    peptide</span></span>
-<span><span class="co">#&gt; 2  -0.6254920 -1.7532453    peptide</span></span>
-<span><span class="co">#&gt; 3  -0.9065915  0.7844915    peptide</span></span>
-<span><span class="co">#&gt; 4  -1.8183370 -0.4607098    peptide</span></span>
-<span><span class="co">#&gt; 5  -1.2288927 -0.1256124    peptide</span></span>
-<span><span class="co">#&gt; 6   0.6835002 -0.2511966    peptide</span></span>
-<span><span class="co">#&gt; 7  -1.0158949 -1.6028889    peptide</span></span>
-<span><span class="co">#&gt; 8   0.7137346  1.0315924      lipid</span></span>
-<span><span class="co">#&gt; 9   0.7485573 -1.6879846      lipid</span></span>
-<span><span class="co">#&gt; 10 -1.2447220 -0.4597079 metabolite</span></span></code></pre></div>
+<span><span class="co">#&gt; 1  -1.7195596  0.1252300    peptide</span></span>
+<span><span class="co">#&gt; 2  -0.6114859 -1.0625212    peptide</span></span>
+<span><span class="co">#&gt; 3  -0.2699967 -0.2689116    peptide</span></span>
+<span><span class="co">#&gt; 4   0.1032697  0.8616699    peptide</span></span>
+<span><span class="co">#&gt; 5   1.4181669 -1.2865208    peptide</span></span>
+<span><span class="co">#&gt; 6  -0.6314225 -0.2077865    peptide</span></span>
+<span><span class="co">#&gt; 7   1.1744856 -0.2598810    peptide</span></span>
+<span><span class="co">#&gt; 8   0.8387456 -1.7045902      lipid</span></span>
+<span><span class="co">#&gt; 9  -0.8285852 -0.4163531      lipid</span></span>
+<span><span class="co">#&gt; 10 -0.5228315  0.1749388 metabolite</span></span></code></pre></div>
+<p><br></p>
 </div>
 </div>
 </div>
@@ -375,6 +381,7 @@ dataset), you can specify which two layers you want to focus on in the
 network by using the <code><a href="../reference/gAnnotation.html">gAnnotation()</a></code> function.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">Annotation_path_taxon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gAnnotation.html">gAnnotation</a></span><span class="op">(</span><span class="va">annotations</span>,<span class="st">"phylum"</span>,<span class="st">"class"</span><span class="op">)</span></span></code></pre></div>
+<p><br></p>
 </div>
 <div class="section level2">
 <h2 id="network-generation">Network Generation<a class="anchor" aria-label="anchor" href="#network-generation"></a>
@@ -388,12 +395,13 @@ regressions, where each cluster centroid is predicted from the
 expression patterns of all the other cluster centroids using random
 forests. We choose random forests because of their potential to model
 interacting features and non-linearity without strong assumptions.</p>
-<center>
+<br><center>
 <div class="float">
 <img src="../reference/figures/predict.png" style="width:50.0%" alt="Fig 2: Each cluster centroid is predicted from all the other cluster centroids."><div class="figcaption">Fig 2: Each cluster centroid is predicted from
 all the other cluster centroids.</div>
 </div>
 </center>
+<p><br></p>
 <p>To determine which feature clusters are predictive of a given
 trajectory, the Mean Decrease Accuracy of a subset of top predictors
 whose expression directly influences the expression of the target
@@ -405,8 +413,11 @@ cluster is taken as an indication of a putative link.</p>
 <span><span class="va">network_result</span> <span class="op">&lt;-</span> <span class="va">cluster_result</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/gNetwork.html">gNetwork</a></span><span class="op">(</span>ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">network_result</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/gNetwork_view.html">gNetwork_view</a></span><span class="op">(</span><span class="va">network_result</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (`geom_segment()`).</span></span>
+<span><span class="co">#&gt; Warning: Removed 1 rows containing missing values (`geom_point()`).</span></span></code></pre></div>
 <p><img src="getstarted_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<p><br></p>
 </div>
 <div class="section level2">
 <h2 id="dashboard-navigation">Dashboard Navigation<a class="anchor" aria-label="anchor" href="#dashboard-navigation"></a>
@@ -421,17 +432,19 @@ requiring input from the previous steps.</p>
 <span>           <span class="va">network_result</span>,</span>
 <span>           id_colname <span class="op">=</span> <span class="st">"ko_term"</span> ,</span>
 <span>           id_type <span class="op">=</span> <span class="st">"KEGG"</span><span class="op">)</span></span></code></pre></div>
-<center>
+<br><center>
 <div class="float">
 <img src="../reference/figures/gdashboard.png" style="width:70.0%" alt="Fig 3: gDashboard() function"><div class="figcaption">Fig 3: <code><a href="../reference/gDashboard.html">gDashboard()</a></code> function</div>
 </div>
 </center>
+<p><br></p>
 <p>Once you’ve launched the Shiny dashboard, you can zoom in or make
 adjustments to explore interesting findings within your data. To
 effectively navigate the dashboard generated by MolPad, you’ll follow
 three main steps:</p>
 <div class="section level4">
-<h4 id="choose-a-primary-functional-annotation-and-adjust-edge-density">Choose a Primary Functional Annotation and Adjust Edge Density<a class="anchor" aria-label="anchor" href="#choose-a-primary-functional-annotation-and-adjust-edge-density"></a>
+<h4 id="choose-a-primary-functional-annotation-and-adjust-edge-density">1. Choose a Primary Functional Annotation and Adjust Edge
+Density<a class="anchor" aria-label="anchor" href="#choose-a-primary-functional-annotation-and-adjust-edge-density"></a>
 </h4>
 <p>Start by selecting a primary functional annotation from the available
 options. Then, fine-tune the edge density by adjusting the threshold
@@ -440,14 +453,14 @@ clusters containing the most features related to the chosen functional
 annotation.</p>
 </div>
 <div class="section level4">
-<h4 id="explore-the-network">Explore the Network<a class="anchor" aria-label="anchor" href="#explore-the-network"></a>
+<h4 id="explore-the-network">2. Explore the Network<a class="anchor" aria-label="anchor" href="#explore-the-network"></a>
 </h4>
 <p>Brushing on the network unveils patterns of taxonomic composition and
 typical trajectories. You can also zoom into specific taxonomic
 annotations by applying filters.</p>
 </div>
 <div class="section level4">
-<h4 id="investigate-feature-details-and-related-function-annotations">Investigate Feature Details and Related Function Annotations<a class="anchor" aria-label="anchor" href="#investigate-feature-details-and-related-function-annotations"></a>
+<h4 id="investigate-feature-details-and-related-function-annotations">3. Investigate Feature Details and Related Function Annotations<a class="anchor" aria-label="anchor" href="#investigate-feature-details-and-related-function-annotations"></a>
 </h4>
 <p>Delve into the feature table to examine the specifics of the features
 within the selected clusters. Explore additional related function
@@ -457,11 +470,13 @@ encourages iterative exploration, enabling you to conduct multiple steps
 to answer specific questions, such as comparing pattern distributions
 between two functions or identifying functionally important community
 members metabolizing a feature of interest.</p>
+<p><br></p>
 <center>
 <div class="float">
 <img src="../reference/figures/screenshot.png" style="width:100.0%" alt="Fig 4: MolPad Dashboard Overview."><div class="figcaption">Fig 4: MolPad Dashboard Overview.</div>
 </div>
 </center>
+<p><br></p>
 </div>
 </div>
 <div class="section level2">
@@ -472,19 +487,47 @@ there’s no need to run function for each plot individually. We’ve linked
 a stacked bar plot and a ribbon plot with the network to facilitate
 focus and context explorations. This setup helps in detecting similar
 longitudinal patterns and understanding their relationships.</p>
+<p><br></p>
 <div class="section level4">
 <h4 id="network-plot">Network Plot<a class="anchor" aria-label="anchor" href="#network-plot"></a>
 </h4>
+<p>The network plot is a powerful visualization tool that displays the
+relationships between different groups or features within your data. In
+MolPad, the network plot helps to identify clusters of features that
+share similar patterns, revealing underlying connections that might not
+be immediately obvious. By visualizing these connections, users can gain
+a clearer understanding of the structure within their data, making it
+easier to pinpoint significant associations and trends.</p>
 <p><img src="getstarted_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+<p><br></p>
 </div>
 <div class="section level4">
 <h4 id="stack-bar-plot">Stack Bar Plot<a class="anchor" aria-label="anchor" href="#stack-bar-plot"></a>
 </h4>
+<p>The stacked bar plot provides a detailed view of the composition of
+each cluster or group in your dataset. By stacking different categories
+on top of each other within a single bar, this plot allows for a quick
+comparison of relative proportions across multiple groups. This is
+particularly useful in microbiome experiments where understanding the
+distribution of taxa across different conditions or time points is
+crucial. The stacked bar plot makes it easy to see how these
+distributions change between experimental conditions, facilitating
+deeper insights.</p>
 <p><img src="getstarted_files/figure-html/unnamed-chunk-17-1.png" width="700"></p>
+<p><br></p>
 </div>
 <div class="section level4">
 <h4 id="ribbon-plot">Ribbon Plot<a class="anchor" aria-label="anchor" href="#ribbon-plot"></a>
 </h4>
+<p>The ribbon plot is designed to visualize changes over time, making it
+an ideal tool for tracking longitudinal data. In MolPad, the ribbon plot
+illustrates how the abundance or expression levels of features vary
+across different time points or conditions. The smooth, flowing design
+of the ribbons helps to emphasize trends and patterns, enabling users to
+quickly identify periods of significant change or stability. This plot
+is particularly advantageous when comparing multiple groups, as it
+clearly shows overlapping trends and divergences, providing a
+comprehensive view of temporal dynamics in the data.</p>
 <p><img src="getstarted_files/figure-html/unnamed-chunk-18-1.png" width="700"></p>
 </div>
 </div>

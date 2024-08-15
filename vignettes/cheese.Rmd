@@ -98,3 +98,18 @@ gDashboard(cheesedata,
            id_colname = c("GO_ID","KEGG_ID"),
            id_type = c("GO","KEGG"))
 ```
+
+# Results
+
+For example, when we filter for Actinomycetota (Actinobacteria) as the functional group, we see that there are no edges connecting to group 10 and group 3- the clusters that have the most features associated with Actinomycetoa for Cheese sample A (Fig 1.3.A). 
+
+<center>
+  
+  ![Fig 1](../man/figures/cheesecase1.png){ width=100% }
+  *Fig 1: Dashboard showing Actinomycetota filtered network (A) with enrichment pattern for Cheese Sample-A (B) and Cheese Sample-C (C); Cluster pattern for Group 9, which also is enriched for Type IV secretion genes (D).*
+  
+</center>
+
+Looking at the pattern traces of these groups, (Fig 1.3.B), there is a peak in samples A4 (week 9) and A5 (week 13), which mirrors the 16S rRNA results of Saak et al. Since these two clusters do not have edges connecting them to other groups, this suggests that the Actinomycetoa features found in these groups follow distinct longitudinal succession patterns that are independent. When looking at Actinomycetoa within Cheese Sample C we see a different pattern. Groups 2 and 5, have the most features associated with Actinomycetoa, but they are highly connected to the other groups (Fig 1.3.A). From these results, we can hypothesize that though Actinomycetoa features are more abundant in later time points for both cheese samples, their dynamics are differentially influenced. 
+
+The authors found that Type VI secretion was enriched in Pseudomonadota bacteria (specifically, Psychrobacter), and hypothesized this enrichment was due to the importance of physical species interactions that occur with this habitat. Using MolPad, we searched for other secretion systems associated genes, to understand their dynamics within the community. Focusing on KEGG annotated Type IV secretion genes, we found that Group 9 contained 12/13 of these genes. Within this group, features that cluster are ones that peak in Cheese sample C5 (week 13, Fig 1.3.D). This is also the most taxonomically diverse sample. From this, we can hypothesize that increased taxonomic diversity is also associated with increases in genes that are related to competitive species interactions. 
