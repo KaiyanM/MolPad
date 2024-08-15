@@ -298,56 +298,56 @@ have an ID column and identical column names.</p>
 <h5 id="if-your-input-is-a-single-dataset">If your input is a single dataset:<a class="anchor" aria-label="anchor" href="#if-your-input-is-a-single-dataset"></a>
 </h5>
 <p>Here is a dataset that already includes a labeled ‘type’ column:</p>
-<pre><code><span><span class="co">#&gt;    ID      Day_1      Day_2       Day_3      Day_4       Day_5      Day_6</span></span>
-<span><span class="co">#&gt; 1   1         NA         NA -1.17485031  1.2062127  1.88115375 -0.8729663</span></span>
-<span><span class="co">#&gt; 2   2         NA         NA  0.40516079 -0.8241496  0.92997037  1.0567471</span></span>
-<span><span class="co">#&gt; 3   3 -1.1921416         NA -0.06701077 -2.7317659  0.48229874 -1.4051413</span></span>
-<span><span class="co">#&gt; 4   4 -2.7801597  1.1853134  1.25503279 -1.4775515 -0.64129021 -1.4341540</span></span>
-<span><span class="co">#&gt; 5   5  0.4012437 -1.1449160  0.89213227  0.4713003 -1.55710756  1.1143766</span></span>
-<span><span class="co">#&gt; 6   6  0.2744053  1.4567672  0.54405158 -0.6289747  0.74762995  0.7669416</span></span>
-<span><span class="co">#&gt; 7   7  0.8654952 -0.2621673 -1.95658624  0.9295762 -0.03226082 -0.2024099</span></span>
-<span><span class="co">#&gt; 8   8  0.1154924 -0.6012784 -0.79133213  1.4951410  0.01856763 -1.0385365</span></span>
-<span><span class="co">#&gt; 9   9 -1.4124645 -0.5322794  0.38977106 -0.1159478 -1.99806718  1.2890455</span></span>
-<span><span class="co">#&gt; 10 10 -1.0877990  0.6316820  0.90134953 -1.5829052  2.45372228 -0.8747928</span></span>
-<span><span class="co">#&gt;         Day_7       Day_8       type</span></span>
-<span><span class="co">#&gt; 1  -0.2803250 -0.83232673    peptide</span></span>
-<span><span class="co">#&gt; 2   0.7826227 -0.08501400    peptide</span></span>
-<span><span class="co">#&gt; 3   0.9343347 -1.30032240    peptide</span></span>
-<span><span class="co">#&gt; 4   1.2480531  0.74650804    peptide</span></span>
-<span><span class="co">#&gt; 5   0.3294889  0.10198086    peptide</span></span>
-<span><span class="co">#&gt; 6   0.9716911 -0.04437639    peptide</span></span>
-<span><span class="co">#&gt; 7  -0.6098363  1.46197240    peptide</span></span>
-<span><span class="co">#&gt; 8   0.7379569  1.39698235      lipid</span></span>
-<span><span class="co">#&gt; 9  -0.8221077  0.83239894      lipid</span></span>
-<span><span class="co">#&gt; 10 -1.3312973          NA metabolite</span></span></code></pre>
+<pre><code><span><span class="co">#&gt;    ID       Day_1       Day_2        Day_3       Day_4      Day_5        Day_6</span></span>
+<span><span class="co">#&gt; 1   1          NA          NA  0.104083550 -1.07999900  1.3416214 -1.733564471</span></span>
+<span><span class="co">#&gt; 2   2          NA          NA  0.882578509  0.08440181  0.7165712  0.004811372</span></span>
+<span><span class="co">#&gt; 3   3  0.40203917          NA  0.675076590  0.97017740 -0.8210872  0.659073443</span></span>
+<span><span class="co">#&gt; 4   4  1.02859068  0.30178418  0.412617771  0.39306149 -0.3427640  0.837009714</span></span>
+<span><span class="co">#&gt; 5   5 -2.14036218 -0.06315709  0.656982200 -0.18301850 -1.3967562 -0.123327229</span></span>
+<span><span class="co">#&gt; 6   6 -2.04354192  1.30960484  1.371349945 -1.67403067 -1.2946150  0.760315504</span></span>
+<span><span class="co">#&gt; 7   7  0.31164367  2.26615374  0.972843085 -0.03956293  1.0190965  1.180680430</span></span>
+<span><span class="co">#&gt; 8   8 -0.79692858 -0.86038791 -3.417872877  0.62118867 -2.1983197 -0.104229763</span></span>
+<span><span class="co">#&gt; 9   9 -0.12033042  1.17585682 -0.001075426  0.01122359  0.3430992 -0.189234532</span></span>
+<span><span class="co">#&gt; 10 10  0.02592915  0.48551867  0.841254390 -0.46430744  0.6891800  0.751766756</span></span>
+<span><span class="co">#&gt;         Day_7      Day_8       type</span></span>
+<span><span class="co">#&gt; 1   0.4638261  2.1318716    peptide</span></span>
+<span><span class="co">#&gt; 2  -0.2949926 -0.9310538    peptide</span></span>
+<span><span class="co">#&gt; 3  -0.2520195  0.7809977    peptide</span></span>
+<span><span class="co">#&gt; 4  -1.0120371 -0.1162361    peptide</span></span>
+<span><span class="co">#&gt; 5  -2.0085970 -0.8959521    peptide</span></span>
+<span><span class="co">#&gt; 6   0.7874222 -0.5106016    peptide</span></span>
+<span><span class="co">#&gt; 7  -0.7719437 -1.4686258    peptide</span></span>
+<span><span class="co">#&gt; 8   0.3541200  0.8224521      lipid</span></span>
+<span><span class="co">#&gt; 9   0.5674059 -0.9313882      lipid</span></span>
+<span><span class="co">#&gt; 10 -0.4097464         NA metabolite</span></span></code></pre>
 <ul>
 <li>after <code><a href="../reference/pre_process.html">pre_process()</a></code>:</li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pre_process.html">pre_process</a></span><span class="op">(</span><span class="va">x</span>, replaceNA <span class="op">=</span> <span class="cn">TRUE</span>,scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">x1</span>,<span class="fl">10</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    ID        Day_1        Day_2       Day_3      Day_4       Day_5      Day_6</span></span>
-<span><span class="co">#&gt; 1   1  0.008597843  0.008597843 -1.09683801  1.1435431  1.77860614 -0.8127904</span></span>
-<span><span class="co">#&gt; 2   2 -0.447471473 -0.447471473  0.19277896 -1.7498239  1.02210294  1.2224403</span></span>
-<span><span class="co">#&gt; 3   3 -0.441410527  0.547410475  0.49182844 -1.7184509  0.94745284 -0.6180830</span></span>
-<span><span class="co">#&gt; 4   4 -1.630535552  0.912190891  0.95689610 -0.7952818 -0.25905733 -0.7674546</span></span>
-<span><span class="co">#&gt; 5   5  0.344720529 -1.294343452  0.86510515  0.4189866 -1.73130237  1.1007035</span></span>
-<span><span class="co">#&gt; 6   6 -0.368036510  1.471062960  0.05138357 -1.7731949  0.36803862  0.3980768</span></span>
-<span><span class="co">#&gt; 7   7  0.784162467 -0.266948560 -1.84634181  0.8438933 -0.05264932 -0.2112478</span></span>
-<span><span class="co">#&gt; 8   8 -0.052700517 -0.791462196 -0.98734685  1.3692764 -0.15259897 -1.2421356</span></span>
-<span><span class="co">#&gt; 9   9 -0.997585556 -0.210975411  0.61304925  0.1610948 -1.52093119  1.4167193</span></span>
-<span><span class="co">#&gt; 10 10 -0.706874862  0.537777671  0.73297750 -1.0652593  1.85666812 -0.5526896</span></span>
-<span><span class="co">#&gt;         Day_7       Day_8       type</span></span>
-<span><span class="co">#&gt; 1  -0.2551646 -0.77455197    peptide</span></span>
-<span><span class="co">#&gt; 2   0.7892585 -0.58181382    peptide</span></span>
-<span><span class="co">#&gt; 3   1.3223938 -0.53114106    peptide</span></span>
-<span><span class="co">#&gt; 4   0.9524206  0.63082169    peptide</span></span>
-<span><span class="co">#&gt; 5   0.2686542  0.02747584    peptide</span></span>
-<span><span class="co">#&gt; 6   0.7165536 -0.86388409    peptide</span></span>
-<span><span class="co">#&gt; 7  -0.5910160  1.34014780    peptide</span></span>
-<span><span class="co">#&gt; 8   0.5888615  1.26810619      lipid</span></span>
-<span><span class="co">#&gt; 9  -0.4699913  1.00862012      lipid</span></span>
-<span><span class="co">#&gt; 10 -0.8831320  0.08053239 metabolite</span></span></code></pre></div>
+<span><span class="co">#&gt;    ID       Day_1      Day_2       Day_3       Day_4      Day_5       Day_6</span></span>
+<span><span class="co">#&gt; 1   1 -0.12499488 -0.1249949 -0.04022866 -1.00455207  0.9676290 -1.53681943</span></span>
+<span><span class="co">#&gt; 2   2 -0.10246242 -0.1024624  1.46237249  0.04718422  1.1680372 -0.09393173</span></span>
+<span><span class="co">#&gt; 3   3  0.16412393 -0.4940273  0.61109508  1.09418472 -1.8381738  0.58489741</span></span>
+<span><span class="co">#&gt; 4   4  1.27432720  0.1728189  0.34079228  0.31115385 -0.8040231  0.98397755</span></span>
+<span><span class="co">#&gt; 5   5 -1.35954882  0.7001734  1.41425156  0.58132077 -0.6222015  0.64050965</span></span>
+<span><span class="co">#&gt; 6   6 -1.35505505  1.0595199  1.10398207 -1.08897287 -0.8157586  0.66398092</span></span>
+<span><span class="co">#&gt; 7   7 -0.10291149  1.5438734  0.45418630 -0.39882285  0.4931574  0.62930098</span></span>
+<span><span class="co">#&gt; 8   8 -0.06748422 -0.1105542 -1.84632390  0.89499455 -1.0186109  0.40265173</span></span>
+<span><span class="co">#&gt; 9   9 -0.36947382  1.7376966 -0.17560476 -0.15561064  0.3839091 -0.48148903</span></span>
+<span><span class="co">#&gt; 10 10 -0.41003145  0.4704748  1.15201231 -1.34925296  0.8606601  0.98056711</span></span>
+<span><span class="co">#&gt;         Day_7      Day_8       type</span></span>
+<span><span class="co">#&gt; 1   0.2527477  1.6112132    peptide</span></span>
+<span><span class="co">#&gt; 2  -0.6254920 -1.7532453    peptide</span></span>
+<span><span class="co">#&gt; 3  -0.9065915  0.7844915    peptide</span></span>
+<span><span class="co">#&gt; 4  -1.8183370 -0.4607098    peptide</span></span>
+<span><span class="co">#&gt; 5  -1.2288927 -0.1256124    peptide</span></span>
+<span><span class="co">#&gt; 6   0.6835002 -0.2511966    peptide</span></span>
+<span><span class="co">#&gt; 7  -1.0158949 -1.6028889    peptide</span></span>
+<span><span class="co">#&gt; 8   0.7137346  1.0315924      lipid</span></span>
+<span><span class="co">#&gt; 9   0.7485573 -1.6879846      lipid</span></span>
+<span><span class="co">#&gt; 10 -1.2447220 -0.4597079 metabolite</span></span></code></pre></div>
 </div>
 </div>
 </div>
@@ -401,7 +401,6 @@ cluster is taken as an indication of a putative link.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cluster_result</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/gClusters.html">gClusters</a></span><span class="op">(</span>ncluster <span class="op">=</span> <span class="fl">5</span>,elbow.max<span class="op">=</span><span class="fl">15</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Quick-TRANSfer stage steps exceeded maximum (= 7515250)</span></span>
 <span></span>
 <span><span class="va">network_result</span> <span class="op">&lt;-</span> <span class="va">cluster_result</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/gNetwork.html">gNetwork</a></span><span class="op">(</span>ntop <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
@@ -460,7 +459,7 @@ between two functions or identifying functionally important community
 members metabolizing a feature of interest.</p>
 <center>
 <div class="float">
-<img src="../reference/figures/dashboard.png" style="width:100.0%" alt="Fig 4: MolPad Dashboard Overview."><div class="figcaption">Fig 4: MolPad Dashboard Overview.</div>
+<img src="../reference/figures/screenshot.png" style="width:100.0%" alt="Fig 4: MolPad Dashboard Overview."><div class="figcaption">Fig 4: MolPad Dashboard Overview.</div>
 </div>
 </center>
 </div>
