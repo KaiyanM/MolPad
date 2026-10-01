@@ -26,8 +26,7 @@ make_line_plot <- function(dfgroup_long, selected_groups, selected_taxa) {
 
   dfgroup_long |>
     filter(
-      (type %in% c("Metabolite", "Lipid") | 
-      (taxonomic.scope %in% selected_taxa)),
+      taxonomic.scope %in% selected_taxa,
       cluster %in% selected_groups
     ) |>
     group_by(day, type, cluster) |>

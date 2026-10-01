@@ -2,6 +2,7 @@
 % Please edit documentation in R/color_palettes__.R
 \docType{package}
 \name{color_palettes__}
+\alias{-package}
 \alias{color_palettes__}
 \title{Color palettes}
 \usage{

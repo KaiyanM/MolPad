@@ -111,7 +111,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
           if (is.null(input$plot_brush$xmin)) {
             "Group_2"
           } else {
-            coords_filt()[, 1]
+            coords_filt()[[1]]
           }
         })
 
@@ -162,12 +162,12 @@ gDashboard <- function(data, cluster, annotation, networkres,
 
         info_filt <- reactive({
           if (is.null((input$plot_brush$xmin))) {
-            reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[, 1], ][1:10, ]
+            reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[[1]], ][1:10, ]
           } else {
             if (is.null(input$s_tax)) {
-              reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[, 1], ]
+              reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[[1]], ]
             } else {
-              reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[, 1], ] |> filter(taxonomic.scope %in% input$s_tax)
+              reshaped_df$output_tableview[reshaped_df$output_tableview$cluster %in% coords_filt()[[1]], ] |> filter(taxonomic.scope %in% input$s_tax)
             }
           }
         })
