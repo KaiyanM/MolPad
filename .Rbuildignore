@@ -3,3 +3,4 @@
 ^pkgdown$
 ^\.github$
 ^LICENSE\.md$
+^questions$
