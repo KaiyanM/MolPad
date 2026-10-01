@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+{{STYLES}}
+</head>
+<body>
+
+<header class="mp-header">
+  <div class="mp-logo" id="mp-title">{{TITLE}}</div>
+  <nav class="mp-nav">
+    <button id="nav-main" class="mp-nav-btn active" type="button">Main</button>
+    <button id="nav-info" class="mp-nav-btn" type="button">Info</button>
+  </nav>
+</header>
+
+<main id="tab-main" class="mp-grid">
+
+  <section id="box-network" class="mp-box mp-col-7">
+    <div class="mp-controls">
+      <label class="mp-field mp-grow">
+        <span>Select a Functional Annotation:</span>
+        <select id="s_ptw"></select>
+      </label>
+      <label class="mp-field">
+        <span>Graph Layout:</span>
+        <select id="s_layout">
+          <option value="force">force</option>
+          <option value="circle">circle</option>
+          <option value="grid">grid</option>
+        </select>
+      </label>
+      <label class="mp-field mp-grow">
+        <span>Importance Score: <output id="obs_value"></output></span>
+        <input id="obs" type="range" min="0" max="1" step="0.1" value="0">
+      </label>
+      <button id="btn_reset" class="mp-btn" type="button" title="Clear the brush and select every cluster">Select all</button>
+    </div>
+    <h4 class="mp-plot-title">Pattern Network Among All Pathways</h4>
+    <div id="network" class="mp-plot"></div>
+    <div id="network_legend" class="mp-legend"></div>
+    <p class="mp-hint">Drag a rectangle to select clusters, click a node to toggle it, drag nodes to move them.</p>
+  </section>
+
+  <section id="box-right" class="mp-box mp-col-5">
+    <label class="mp-field">
+      <span>Select a Taxonomic Scope: <small>(none selected = all)</small></span>
+      <select id="s_tax" multiple size="4"></select>
+    </label>
+    <div id="stackbar" class="mp-plot"></div>
+    <h4 class="mp-plot-title">Pattern of Selected Groups</h4>
+    <div id="ribbon" class="mp-plot"></div>
+  </section>
+
+  <section id="box-table" class="mp-box mp-col-12">
+    <div class="mp-controls">
+      <label class="mp-field">
+        <span>Filter by Functional Annotation:</span>
+        <select id="s_p"></select>
+      </label>
+      <label class="mp-field mp-grow">
+        <span>Search:</span>
+        <input id="table_search" type="search" placeholder="ID, cluster, annotation...">
+      </label>
+      <label class="mp-field">
+        <span>Rows per page:</span>
+        <select id="table_pagesize">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+        </select>
+      </label>
+      <div class="mp-pager">
+        <button id="table_prev" class="mp-btn" type="button">&#8249;</button>
+        <span id="table_info"></span>
+        <button id="table_next" class="mp-btn" type="button">&#8250;</button>
+      </div>
+    </div>
+    <div id="table" class="mp-table-wrap"></div>
+  </section>
+
+</main>
+
+<section id="tab-info" class="mp-grid" hidden>
+  <div class="mp-box mp-col-9">
+    <h3>Network Navigation</h3>
+    <ol class="mp-steps">
+      <li>Select a functional annotation on the top left. Nodes turn bright green when more of their features carry that annotation. Lower the importance score to show weaker connections.</li>
+      <li>Drag a rectangle on the network, or click nodes, to select clusters. The stacked bar, the pattern plot and the table update to the selection. Use the taxonomic scope box to focus on specific taxa.</li>
+      <li>Browse the annotated features of the selected clusters in the table. Database ids link to their online records. Filter by annotation, search, sort by clicking a header, or change the page size.</li>
+    </ol>
+    <p>This page is a static file: every filter runs in your browser, so you can share the file as is.</p>
+  </div>
+  <div class="mp-box mp-col-3">
+    <h3>More Information</h3>
+    <p>Please check our GitHub repository:<br>
+      <a href="https://github.com/KaiyanM/MolPad" target="_blank" rel="noopener">KaiyanM/MolPad</a></p>
+  </div>
+</section>
+
+<script id="molpad-data" type="application/json">{{DATA_JSON}}</script>
+{{SCRIPTS}}
+</body>
+</html>

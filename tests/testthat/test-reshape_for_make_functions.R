@@ -1,3 +1,5 @@
+data("test_data", package = "MolPad", envir = environment())
+
 reshaped <- reshape_for_make_functions(test_data_processed, 
                            test_cluster, 
                            test_annotations_processed, 

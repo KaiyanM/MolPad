@@ -1,0 +1,21 @@
+
+1. pattern question
+increase/decrease/trending
+similarity of shape
+
+2. 1st-level explore
+for a certain functional annotation, what are ... (components)
+2.1. what are the major shapes?
+2.2. what are the components (2nd-level Taxonomic Scope categories/3rd-level detailed features)?
+
+3. filter
+given 1st-level
+given 1st-level and 2nd-level
+given 1st-level and 2nd-level and 3rd-level
+(this should be updated in the new version)
+
+4. network explore
+adjust importance score (filter down/up complexity of the network edges)
+adjust layout pattern (kk/grid...)
+(this should be updated in d3 - layout might be allowed to drag, but mostly fixed)
+(maybe the agent can be allowed to drag some nodes together then brush)

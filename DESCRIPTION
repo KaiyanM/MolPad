@@ -16,14 +16,17 @@ Imports:
     ggraph,
     grid,
     igraph,
+    jsonlite,
     purrr,
     randomForest,
     rlang,
     shiny,
     shinydashboard,
+    stats,
     stringr,
     tibble,
     tidyr,
+    utils
 Suggests: 
     knitr,
     rmarkdown,

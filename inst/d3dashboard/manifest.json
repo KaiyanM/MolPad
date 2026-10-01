@@ -1,0 +1,16 @@
+{
+  "css": ["css/dashboard.css"],
+  "lib": ["lib/d3.v7.min.js"],
+  "js": [
+    "js/utils.js",
+    "js/palettes.js",
+    "js/data.js",
+    "js/state.js",
+    "js/controls.js",
+    "js/network.js",
+    "js/stackbar.js",
+    "js/ribbon.js",
+    "js/table.js",
+    "js/app.js"
+  ]
+}

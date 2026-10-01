@@ -65,3 +65,10 @@ devtools::load_all("D:/GitHub/MolPad")
 
 
 devtools::install("D:/GitHub/MolPad")
+
+
+
+data(test_data)
+gDashboard_d3(test_data_processed, test_cluster, test_annotations_processed,
+              test_network, dashboardtitle = "Test",
+              id_colname = c("GO_ID", "KEGG_ID"), id_type = c("GO", "KEGG"))

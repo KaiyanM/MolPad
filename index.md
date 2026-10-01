@@ -45,6 +45,20 @@ library(MolPad)
   <img src="man/figures/flow.png" width="450"/></a>  
 </p>
 
+### Static D3 dashboard
+
+`gDashboard_d3()` takes the same inputs as `gDashboard()` but writes a static HTML page rendered with D3.js instead of starting a Shiny app. The page runs entirely in the browser, so it can be opened from disk, shared as a single file, or hosted on any static web server.
+
+```r
+data("test_data")
+
+gDashboard_d3(test_data_processed, test_cluster, test_annotations_processed, test_network,
+              dashboardtitle = "Test",
+              id_colname = c("GO_ID", "KEGG_ID"), id_type = c("GO", "KEGG"))
+```
+
+The HTML, CSS and JavaScript live in `inst/d3dashboard/`, one file per view, and the JSON the page expects is documented in `inst/d3dashboard/SCHEMA.md`.
+
 ## Getting Help
 
 If you need assistance with MolPad, there are two primary ways to seek help:
