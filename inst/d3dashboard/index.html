@@ -37,11 +37,12 @@
         <input id="obs" type="range" min="0" max="1" step="0.1" value="0">
       </label>
       <button id="btn_reset" class="mp-btn" type="button" title="Clear the brush and select every cluster">Select all</button>
+      <button id="btn_clear" class="mp-btn" type="button" title="Unselect every cluster, then click nodes to add them one by one">Clear all</button>
     </div>
     <h4 class="mp-plot-title">Pattern Network Among All Pathways</h4>
     <div id="network" class="mp-plot"></div>
     <div id="network_legend" class="mp-legend"></div>
-    <p class="mp-hint">Drag a rectangle to select clusters, click a node to toggle it, drag nodes to move them.</p>
+    <p class="mp-hint">Drag a rectangle to select clusters, click a node to add or remove it, drag nodes to move them. Click empty space or "Select all" for every cluster; "Clear all" starts from none.</p>
   </section>
 
   <section id="box-right" class="mp-box mp-col-5">

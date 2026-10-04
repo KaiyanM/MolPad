@@ -44,7 +44,7 @@
 
   function init() {
     var D = MP.D, S = MP.state.get();
-    ["s_ptw", "s_layout", "obs", "obs_value", "s_tax", "s_p", "btn_reset"].forEach(function (id) {
+    ["s_ptw", "s_layout", "obs", "obs_value", "s_tax", "s_p", "btn_reset", "btn_clear"].forEach(function (id) {
       el[id] = document.getElementById(id);
     });
 
@@ -87,6 +87,10 @@
     el.btn_reset.addEventListener("click", function () {
       MP.network.clearBrush();
       MP.state.set({ selectedClusters: D.clusters.slice() }, "controls");
+    });
+    el.btn_clear.addEventListener("click", function () {
+      MP.network.clearBrush();
+      MP.state.set({ selectedClusters: [] }, "controls");
     });
 
     // Keep the DOM in sync when state changes from elsewhere (brush, clicks).
