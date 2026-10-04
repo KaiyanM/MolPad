@@ -15,10 +15,13 @@
 #' 
 #' 
 #' @param typenameList A vector of strings. This parameter is used to clarify the source or names for each data.frame, and is only applicable when the input of \code{data} is a list of data.frame. By default, it will be set as "Dataset_1", "Dataset_2", ..., etc.
-#' @param replaceNa Logical; if `replaceNa` is TRUE (default), replace NA with 0.
+#' @param replaceNA Logical; if `replaceNA` is TRUE (default), replace NA with 0.
 #' @param scale Logical; if `scale` is TRUE (default), standardize the data.frame by row with \code{base::scale}. This converts each original value into a z-score. See also `scale_by_row__()`.
 #' @param autoColName A string; if `autoColName` is not-NULL (default), it will automatically set uniform column names for all the data.frames. 
 #' This parameter is only applicable when the input of \code{data} is a list of data.frame.
+#' @param subject_sep Optional. Describes which time columns belong to which subject when the data holds several time series side by side (for example two cheeses measured over the same weeks).
+#' Either a named list of column names, such as `list(A = c("A_1", "A_2", "A_3"), C = c("C_1", "C_2", "C_3"))`, or a string such as `"A:A_1-A_3;C:C_1-C_3"`, where `x-y` means every column from `x` to `y` and several columns or ranges can be joined with commas.
+#' Every time column must belong to exactly one subject. By default (`NULL`) all time columns form a single series.
 #'
 #' @details
 #' We consider two distinct scenarios for this application:
@@ -28,18 +31,25 @@
 #' * In the other scenario, all the data is of uniform quality, but it can be categorized into larger groups that exhibit significant differences.
 #' In both of these cases, the pre_process() function serves as a valuable and versatile tool. Yet, this function is optional when generating the dashboard. Users can perform their own processing as long as the format matches the required output. However, they should be mindful that the number of samples (timepoints) must be greater than 5 to avoid potential errors in the subsequent prediction section.
 #' 
+#' When `subject_sep` is given, each row is scaled separately within each subject, so the pattern of one subject is not flattened by a difference in level between subjects. A subject in which a feature does not vary (for example all zero) is set to 0 for that feature, and features that do not vary in any subject are removed. Clustering with `gClusters()` still uses all time columns together, and the line plot of the dashboard shows one facet per subject on a shared time axis.
+#'
 #' @returns The function returns a long data.frame with columns \code{ID}, \code{value on time_1}, ..., \code{value on time_k}, and \code{type}.
-#' 
+#' When `subject_sep` is given, the grouping is recorded in `attr(x, "subject_sep")`: a data.frame with one row per time column and the columns `column`, `subject` and `time` (the label of the column on the shared time axis, e.g. `"1"` for `A_1`).
+#'
 #' @examples
 #' data(test_data)
 #' head(test_data, 10)
 #' a <- pre_process(test_data)
 #' head(a, 10)
-#' 
+#' # two subjects: T1-T5 and T6-T10 are scaled separately
+#' b <- pre_process(test_data, subject_sep = list(first = paste0("T", 1:5), second = paste0("T", 6:10)))
+#' attr(b, "subject_sep")
+#'
 #' @importFrom dplyr bind_rows
 #' @export
 pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
-                        scale = TRUE, autoColName = "Sec_") {
+                        scale = TRUE, autoColName = "Sec_", subject_sep = NULL) {
+  subject_map <- NULL
   if(is.data.frame(data)==FALSE){
     print("Reformat a list of datasets:")
     # set default type names
@@ -56,8 +66,15 @@ pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
         data[[i]][is.na(data[[i]])] <- 0
       }
       # scale by feature (by row)
+      if (!is.null(subject_sep)) {
+        subject_map <- parse_subject_sep__(subject_sep, data[[i]])
+      }
       if (scale) {
-        data[[i]] <- scale_by_row__(data[[i]])
+        if (is.null(subject_map)) {
+          data[[i]] <- scale_by_row__(data[[i]])
+        } else {
+          data[[i]] <- scale_subjects__(data[[i]], subject_map)
+        }
       }
       # add type name to corresponding data
       data[[i]]$type <- rep(typenameList[i], nrow(data[[i]]))
@@ -75,10 +92,22 @@ pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
     if (replaceNA) {
       data[is.na(data)] <- 0
     }
+    if (!is.null(subject_sep)) {
+      subject_map <- parse_subject_sep__(subject_sep, data)
+    }
     if(scale){
-      data <- scale_by_row__(data) |> na.omit()
+      if (is.null(subject_map)) {
+        data <- scale_by_row__(data) |> na.omit()
+      } else {
+        data <- scale_subjects__(data, subject_map) |> na.omit()
+      }
     }
   }
-  
+
+  # log which columns belong to which subject for the plotting functions
+  if (!is.null(subject_map)) {
+    attr(data, "subject_sep") <- subject_map
+  }
+
   return(data)
 }

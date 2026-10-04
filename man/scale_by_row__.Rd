@@ -5,7 +5,12 @@
 \alias{scale_by_row__}
 \title{Scale by row}
 \usage{
-scale_by_row__(data)
+scale_by_row__(data, groups = NULL)
+}
+\arguments{
+\item{data}{A data frame with an ID column and numeric time columns.}
+
+\item{groups}{Optional named list of column names. When given, each row is scaled separately within every group of columns (for example one group per subject) instead of across all numeric columns.}
 }
 \description{
 Scales the values for each sample, where each row is independently processed.
@@ -16,5 +21,6 @@ The input is expected to be a data frame with the first column as the ID and the
 \examples{
 data(test_data)
 scale_by_row__(test_data[1:5,1:10])
+scale_by_row__(test_data[1:5,1:11], groups = list(a = paste0("T", 1:5), b = paste0("T", 6:10)))
 
 }

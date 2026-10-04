@@ -26,6 +26,23 @@
       features: raw.features
     };
 
+    // Subjects: groups of time points drawn as separate ribbon facets. Without
+    // any, all time points form one unnamed subject.
+    D.subjects = (raw.subjects || []).map(function (s) {
+      var idx = s.columns.map(function (c) { return D.timepoints.indexOf(String(c)); });
+      if (idx.some(function (i) { return i < 0; })) {
+        throw new Error("MolPad: subject \"" + s.name + "\" lists a column that is not in timepoints.");
+      }
+      return { name: String(s.name), idx: idx, labels: (s.labels || s.columns).map(String) };
+    });
+    if (D.subjects.length) {
+      D.timeLabels = raw.time_labels ? raw.time_labels.map(String) :
+        Array.from(new Set(d3.merge(D.subjects.map(function (s) { return s.labels; }))));
+    } else {
+      D.subjects = [{ name: "", idx: d3.range(D.timepoints.length), labels: D.timepoints }];
+      D.timeLabels = D.timepoints;
+    }
+
     // Clusters: declared list plus anything only seen in features/edges.
     var seen = new Set(raw.clusters.map(String));
     raw.features.forEach(function (f) { seen.add(String(f.cluster)); });

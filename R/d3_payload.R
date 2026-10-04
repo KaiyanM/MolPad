@@ -20,6 +20,7 @@
 d3_payload <- function(data, cluster, annotation, networkres,
                        dashboardtitle = "MolPad Dashboard",
                        id_colname = NULL, id_type = NULL) {
+  subject_map <- get_subject_map__(data)
   data <- as.data.frame(data)
   annotation <- as.data.frame(annotation)
   networkres <- as.data.frame(networkres)
@@ -44,6 +45,18 @@ d3_payload <- function(data, cluster, annotation, networkres,
 
   # ---- time points: every column between ID (first) and type (last) ---------
   timepoints <- colnames(data)[-c(1, ncol(data))]
+
+  # ---- subjects: groups of time columns drawn as separate ribbon facets ------
+  if (is.null(subject_map)) {
+    subjects <- list()
+    time_labels <- timepoints
+  } else {
+    subjects <- lapply(unique(subject_map$subject), function(s) {
+      rows <- subject_map$subject == s
+      list(name = s, columns = I(subject_map$column[rows]), labels = I(subject_map$time[rows]))
+    })
+    time_labels <- subject_time_levels__(subject_map)
+  }
 
   # ---- per-feature table: cluster labels + annotation columns ---------------
   graphptw <- reshape_for_make_functions(data, cluster, annotation, NULL, NULL)$output_graphptw
@@ -92,9 +105,11 @@ d3_payload <- function(data, cluster, annotation, networkres,
   weight_slider$max <- max(weight_slider$max, weight_slider$step)
 
   list(
-    schema_version = 1L,
+    schema_version = 2L,
     title = as.character(dashboardtitle)[1],
     timepoints = I(timepoints),
+    subjects = subjects,
+    time_labels = I(time_labels),
     types = I(d3_unique_chr(data$type)),
     taxa = I(d3_unique_chr(annotation$taxonomic.scope)),
     pathways = I(d3_unique_chr(annotation$Pathway)),

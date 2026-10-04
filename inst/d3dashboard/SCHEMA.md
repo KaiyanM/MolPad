@@ -26,12 +26,27 @@ The page reads the data with
 
 ```jsonc
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "title": "MolPad Dashboard",
 
   // Time point labels, in order. Each feature's "values" array is aligned
   // with this list.
-  "timepoints": ["T1", "T2", "T3"],
+  "timepoints": ["A_1", "A_2", "A_3", "C_1", "C_3"],
+
+  // Optional (schema_version 2). Use [] or leave out when all time points
+  // form one series. Otherwise each subject lists the entries of
+  // "timepoints" that belong to it ("columns") and, aligned with them, their
+  // labels on the shared time axis ("labels"). The ribbon plot then draws one
+  // facet per subject, stacked top to bottom inside every cluster panel.
+  "subjects": [
+    { "name": "A", "columns": ["A_1", "A_2", "A_3"], "labels": ["1", "2", "3"] },
+    { "name": "C", "columns": ["C_1", "C_3"],        "labels": ["1", "3"] }
+  ],
+
+  // Optional. The shared time axis, in order. Defaults to the union of the
+  // subject labels in first-appearance order, or to "timepoints" when there
+  // are no subjects.
+  "time_labels": ["1", "2", "3"],
 
   // Values of the `type` column, in first-appearance order.
   "types": ["type_A", "type_B"],
@@ -66,7 +81,7 @@ The page reads the data with
       "ID": "1",                       // string
       "cluster": "Group_2",            // one of "clusters"
       "type": "type_A",                // one of "types"
-      "values": [-0.25, -0.68, 1.2],   // aligned with "timepoints"; null for missing
+      "values": [-0.25, -0.68, 1.2, 0.4, -0.4], // aligned with "timepoints"; null for missing
       "GO_ID": "GO:0003674,GO:0003824",// annotation columns follow, as raw text
       "KEGG_ID": "K07124",
       "Pathway": "Nervous System",
@@ -95,8 +110,9 @@ The page reads the data with
 * **Node colour**: for the selected pathway, the number of features in each
   cluster whose `Pathway` equals it (0 for none), on a grey to green gradient.
 * **Stacked bar**: number of features per selected cluster and taxonomic scope.
-* **Ribbon plot**: for each selected cluster and type, the minimum, mean and
-  maximum of `values` at each time point (nulls ignored).
+* **Ribbon plot**: for each selected cluster, subject and type, the minimum,
+  mean and maximum of `values` at each time point (nulls ignored). The facets
+  of one cluster share the time axis and the value axis.
 * **Table**: the features of the selected clusters, filtered by taxonomic
   scope and by the table's own pathway filter, searchable and sortable.
 

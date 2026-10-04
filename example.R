@@ -28,7 +28,7 @@ library(dplyr)
 cheesedata <- cheese |> 
   select(ID, A_1:C_5, phylum) |> 
   rename(type=phylum) |> 
-  pre_process()
+  pre_process(subject_sep = "A:A_1-A_5;C:C_1-C_5")
 
 pathchee <- gAnnotation(annotations,"phylum","class")
 cluschee <- gClusters(cheesedata,ncluster = 10,elbow.max=15)
@@ -72,3 +72,10 @@ data(test_data)
 gDashboard_d3(test_data_processed, test_cluster, test_annotations_processed,
               test_network, dashboardtitle = "Test",
               id_colname = c("GO_ID", "KEGG_ID"), id_type = c("GO", "KEGG"))
+
+gDashboard_d3(cheesedata,
+           cluschee,
+           pathchee,
+           networkchee,
+           id_colname = c("GO_ID","KEGG_ID"),
+           id_type = c("GO","KEGG"))

@@ -69,7 +69,7 @@ gDashboard <- function(data, cluster, annotation, networkres,
                   id = "toto",
                   box(selectInput("s_tax", "Select a Taxonomic Scope:", uni_t, selected = NULL, multiple = TRUE),
                     plotOutput("plot3", height = 120),
-                    plotOutput("plot2", height = 320),
+                    plotOutput("plot2", height = 400),
                     width = 5, height = 550
                   )
                 )

@@ -37,8 +37,23 @@ reshape_for_make_functions <- function(data, cluster, annotation, id_colname, id
       c(-ID, -cluster, -type),
       names_to = "day",
       values_to = "value"
-    ) |>
-    mutate(day = factor(day, levels = colnames(data)[c(-1, -ncol(data))])) |>
+    )
+
+  #subjects logged by pre_process(): one facet per subject on a shared time axis
+  subject_map <- get_subject_map__(data)
+  if (is.null(subject_map)) {
+    output_maindata <- output_maindata |>
+      mutate(day = factor(day, levels = colnames(data)[c(-1, -ncol(data))]))
+  } else {
+    idx <- match(output_maindata$day, subject_map$column)
+    output_maindata <- output_maindata |>
+      mutate(
+        day = factor(subject_map$time[idx], levels = subject_time_levels__(subject_map)),
+        subject = factor(subject_map$subject[idx], levels = unique(subject_map$subject))
+      )
+  }
+
+  output_maindata <- output_maindata |>
     left_join(select(annotation, ID, taxonomic.scope), by = "ID")
   
   if(is.null(id_colname)|is.null(id_type)){

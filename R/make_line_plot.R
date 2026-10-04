@@ -9,14 +9,15 @@
 #' @details
 #' this function makes a ribbon plot for every brush action in the Shiny to show the min, max, and mean value of each clustered pattern group across time. The ribbon plot is grouped and colored by the `type` variable in input datasets.
 #' See also `ggplot2::geom_ribbon`.
-#' 
+#' If the data was processed with `pre_process(subject_sep = ...)`, every cluster is split into one facet per subject, stacked from top to bottom on a shared time axis.
+#'
 #' @examples data(test_data)
 #' make_line_plot(test_maindata, "Group_5", c("hormonal proteins","structural proteins","enzymes","storage proteins","antibodies","transport proteins"))
 #' 
 
 #' @importFrom grid unit
 #' @importFrom dplyr filter summarise_at n_distinct
-#' @importFrom ggplot2 scale_fill_manual scale_color_manual element_text
+#' @importFrom ggplot2 scale_fill_manual scale_color_manual element_text facet_grid facet_wrap
 #' @export
 make_line_plot <- function(dfgroup_long, selected_groups, selected_taxa) {
   colorinput <- extend.color__(
@@ -24,12 +25,23 @@ make_line_plot <- function(dfgroup_long, selected_groups, selected_taxa) {
     color_palettes__("darkwarm")
   )
 
-  dfgroup_long |>
+  # one facet row per subject when pre_process() was given `subject_sep`
+  has_subject <- "subject" %in% colnames(dfgroup_long)
+
+  selected <- dfgroup_long |>
     filter(
       taxonomic.scope %in% selected_taxa,
       cluster %in% selected_groups
-    ) |>
-    group_by(day, type, cluster) |>
+    )
+  if (has_subject) {
+    selected <- group_by(selected, day, type, cluster, subject)
+    facets <- facet_grid(subject ~ cluster, scales = "free_y")
+  } else {
+    selected <- group_by(selected, day, type, cluster)
+    facets <- facet_wrap(cluster ~ ., scales = "free")
+  }
+
+  selected |>
     summarise_at(
       "value",
       list(minvalue = min, meanvalue = mean, maxvalue = max)
@@ -40,7 +52,7 @@ make_line_plot <- function(dfgroup_long, selected_groups, selected_taxa) {
       alpha = 0.2
     ) +
     geom_line(aes(color = type, group = type), alpha = 0.8) +
-    facet_wrap(cluster ~ ., scales = "free") +
+    facets +
     scale_fill_manual(values = colorinput) +
     scale_colour_manual(values = colorinput) +
     ggtitle("Pattern of Selected Groups") +

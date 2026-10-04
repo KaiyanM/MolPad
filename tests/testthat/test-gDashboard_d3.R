@@ -9,10 +9,14 @@ payload <- d3_payload(test_data_processed,
                       id_type = c("GO", "KEGG"))
 
 test_that("payload has every key of the JSON contract", {
-  expect_named(payload, c("schema_version", "title", "timepoints", "types", "taxa",
+  expect_named(payload, c("schema_version", "title", "timepoints", "subjects", "time_labels",
+                          "types", "taxa",
                           "pathways", "clusters", "annotation_columns", "id_links",
                           "features", "edges", "weight_slider"))
   expect_equal(payload$title, "Test")
+  expect_equal(payload$schema_version, 2L)
+  expect_length(payload$subjects, 0)
+  expect_equal(as.character(payload$time_labels), paste0("T", 1:10))
   expect_equal(as.character(payload$timepoints), paste0("T", 1:10))
   expect_equal(as.character(payload$types), c("type_A", "type_B", "type_C", "type_D"))
   expect_equal(as.character(payload$clusters), paste0("Group_", 1:5))
@@ -121,4 +125,22 @@ test_that("gDashboard_d3 can write a multi-file bundle", {
   expect_true(grepl('<script src="js/app.js"></script>', html, fixed = TRUE))
   expect_true(grepl('<link rel="stylesheet" href="css/dashboard.css">', html, fixed = TRUE))
   expect_true(grepl('id="molpad-data"', html, fixed = TRUE))
+})
+
+test_that("subjects from pre_process() are passed to the page", {
+  spec <- list(A = c("A_1", "A_2", "A_3", "A_4", "A_5"), C = c("C_1", "C_3", "C_4", "C_5", "C_6"))
+  two <- test_data
+  colnames(two)[2:11] <- unlist(spec)
+  processed <- pre_process(two, subject_sep = spec)
+  p <- d3_payload(processed, test_cluster, test_annotations_processed, test_network)
+  expect_equal(as.character(p$timepoints), unname(unlist(spec)))
+  expect_equal(as.character(p$time_labels), as.character(1:6))
+  expect_equal(vapply(p$subjects, function(s) s$name, ""), c("A", "C"))
+  expect_equal(as.character(p$subjects[[2]]$columns), spec$C)
+  expect_equal(as.character(p$subjects[[2]]$labels), c("1", "3", "4", "5", "6"))
+  expect_true(all(lengths(p$features$values) == 10))
+
+  json <- d3_payload_json(p)
+  expect_true(grepl('"subjects":[{"name":"A","columns":["A_1"', json, fixed = TRUE))
+  expect_true(grepl('"subjects":[]', d3_payload_json(payload), fixed = TRUE))
 })

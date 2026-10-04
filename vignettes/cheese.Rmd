@@ -41,13 +41,13 @@ str(annotations)
 ### Data and Annotations
 Here we select a 'type' column with `phylum` to describe the characteristic of cheese data. Also, the columns `phylum` and `class` are taken as tags for elemental composition.
 
-In this section, we will introduce data preparing steps for analysis. The annotations dataset contains various columns that describe the characteristics and properties of samples. First, we select the 'type' column with `phylum` to provide a broad categorization of the microbial communities present on the cheese surface. This categorization helps in understanding the overall composition and diversity of microbes at a high taxonomic level. Then we run the `pre_process()` function to clean and standardize the data.
+In this section, we will introduce data preparing steps for analysis. The annotations dataset contains various columns that describe the characteristics and properties of samples. First, we select the 'type' column with `phylum` to provide a broad categorization of the microbial communities present on the cheese surface. This categorization helps in understanding the overall composition and diversity of microbes at a high taxonomic level. Then we run the `pre_process()` function to clean and standardize the data. Cheese A and cheese C are two separate time series, so we describe them with `subject_sep`: each feature is then scaled within each cheese, clustering still uses the A and C patterns together, and the line plot shows A and C as two stacked facets on the same time axis (cheese C has no sample at time point 2).
 
 ```{r}
 cheesedata <- cheese |> 
    		 select(ID, A_1:C_5, phylum) |> 
    		 rename(type=phylum) |> 
-      		pre_process()
+      		pre_process(subject_sep = "A:A_1-A_5;C:C_1-C_5")
 ```
 
 To further annotate the dataset, we also use the columns `phylum` and `class` as tags for the elemental composition of the microbial communities. The `phylum` column represents a major taxonomic rank, giving us a broad overview of the microbial distribution. The `class` column provides more detailed information, allowing us to delve deeper into the specific types of microbes present.

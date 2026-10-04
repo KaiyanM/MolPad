@@ -13,6 +13,7 @@ Generate the line and ribbon plot for the dashboard.
 \details{
 this function makes a ribbon plot for every brush action in the Shiny to show the min, max, and mean value of each clustered pattern group across time. The ribbon plot is grouped and colored by the \code{type} variable in input datasets.
 See also \code{ggplot2::geom_ribbon}.
+If the data was processed with \code{pre_process(subject_sep = ...)}, every cluster is split into one facet per subject, stacked from top to bottom on a shared time axis.
 }
 \examples{
 data(test_data)

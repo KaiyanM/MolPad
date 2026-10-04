@@ -73,6 +73,8 @@ Our visualization pipeline starts with a pre-processing module that includes bui
 
 If your datasets are not multi-omics, you can simply apply it to our dashboard by reformatting your data into the standard longitudinal format. In this case, manually assign a category label to the `type` column to represent the major groups. After that you can still input your data into the `pre_processing()` module for cleaning and preparation. In our case study, we used "Kingdom" as the `type` label for the cheese datasets.
 
+If the time columns hold several subjects measured side by side (for example two cheeses, `A_1`...`A_5` and `C_1`...`C_5`), describe them with the `subject_sep` argument, e.g. `pre_process(x, subject_sep = "A:A_1-A_5;C:C_1-C_5")`. Each feature is then scaled within each subject, the clustering still uses all columns together, and the line plot of the dashboard shows one facet per subject.
+
 ### Data Format and Pre-process
 
 <br />
