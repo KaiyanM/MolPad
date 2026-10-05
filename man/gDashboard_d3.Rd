@@ -71,7 +71,8 @@ slider for the edges, force/circle/grid layouts and draggable nodes;
 \item a stacked bar chart of taxonomic scope per selected cluster;
 \item a ribbon plot of min/mean/max expression per \code{type} over time, one panel
 per selected cluster;
-\item a searchable, sortable table of the selected features. Columns listed in
+\item a searchable, sortable table of the selected features, with a sort and
+filter menu on every column header. Columns listed in
 \code{id_colname} are rendered as links to the database named in \code{id_type}.
 }
 

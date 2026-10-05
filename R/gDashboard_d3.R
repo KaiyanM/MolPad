@@ -16,7 +16,8 @@
 #' * a stacked bar chart of taxonomic scope per selected cluster;
 #' * a ribbon plot of min/mean/max expression per `type` over time, one panel
 #'   per selected cluster;
-#' * a searchable, sortable table of the selected features. Columns listed in
+#' * a searchable, sortable table of the selected features, with a sort and
+#'   filter menu on every column header. Columns listed in
 #'   `id_colname` are rendered as links to the database named in `id_type`.
 #'
 #' Clusters are selected by brushing a rectangle on the network or by clicking

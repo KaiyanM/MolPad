@@ -294,6 +294,82 @@ table.mp-table th {
 table.mp-table th:hover { background: #f0f0f0; }
 table.mp-table th .mp-sort { color: var(--mp-muted); font-size: 11px; margin-left: 4px; }
 
+.mp-filter-btn {
+  font: inherit;
+  font-size: 11px;
+  line-height: 1;
+  margin-left: 6px;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+  color: var(--mp-muted);
+  cursor: pointer;
+}
+
+.mp-filter-btn:hover { border-color: var(--mp-accent-dark); color: var(--mp-accent-dark); }
+.mp-filter-btn.mp-active { background: var(--mp-accent); border-color: var(--mp-accent-dark); color: #fff; }
+
+.mp-menu {
+  position: fixed;
+  z-index: 1000;
+  width: 250px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+  font-size: 13px;
+}
+
+.mp-menu[hidden] { display: none; }
+
+.mp-menu-item {
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  cursor: pointer;
+}
+
+.mp-menu-item:hover:not(:disabled) { background: var(--mp-row-hover); }
+.mp-menu-item:disabled { color: var(--mp-muted); opacity: .6; cursor: default; }
+.mp-menu-item.mp-on { font-weight: 600; color: var(--mp-accent-dark); }
+
+.mp-menu-search {
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 6px 0;
+  padding: 5px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.mp-menu-list {
+  max-height: 220px;
+  overflow-y: auto;
+  border-top: 1px solid #eee;
+}
+
+.mp-menu-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  cursor: pointer;
+}
+
+.mp-menu-check:hover { background: var(--mp-row-hover); }
+.mp-menu-check input { accent-color: var(--mp-accent); margin: 0; }
+.mp-menu-check span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mp-menu-check small { color: var(--mp-muted); }
+.mp-menu-note { color: var(--mp-muted); font-style: italic; padding: 6px 4px; }
+
 table.mp-table tbody tr:hover > * { background: var(--mp-row-hover); }
 
 table.mp-table a { color: #1a5276; }

@@ -114,7 +114,8 @@ The page reads the data with
   mean and maximum of `values` at each time point (nulls ignored). The facets
   of one cluster share the time axis and the value axis.
 * **Table**: the features of the selected clusters, filtered by taxonomic
-  scope and by the table's own pathway filter, searchable and sortable.
+  scope and by the table's own pathway filter, searchable and sortable, with a
+  sort and filter menu on every column header.
 
 ## Writing the JSON from R
 
