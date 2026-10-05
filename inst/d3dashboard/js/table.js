@@ -6,7 +6,8 @@
 
   var container, el = {};
   /* filters: column -> Set of allowed value keys (absent = no filter). */
-  var local = { page: 1, pageSize: 5, query: "", sortKey: null, sortDir: 1, filters: {} };
+  /* terms: the global search, split on commas; a row matches any term. */
+  var local = { page: 1, pageSize: 5, terms: [], sortKey: null, sortDir: 1, filters: {} };
   var cache = { rows: [], columns: [] };
   /* The sort & filter menu lives on <body> so table redraws and the
      horizontal scroll container do not destroy or clip it. */
@@ -25,7 +26,9 @@
       draw();
     });
     el.table_search.addEventListener("input", MP.utils.debounce(function () {
-      local.query = el.table_search.value.trim().toLowerCase();
+      local.terms = el.table_search.value.toLowerCase().split(",")
+        .map(function (t) { return t.trim(); })
+        .filter(function (t) { return t !== ""; });
       local.page = 1;
       draw();
       if (menu.col !== null) renderMenuList();
@@ -34,7 +37,7 @@
     el.table_next.addEventListener("click", function () { local.page += 1; draw(); });
     el.table_clear.addEventListener("click", function () {
       local.filters = {};
-      local.query = "";
+      local.terms = [];
       el.table_search.value = "";
       local.page = 1;
       draw();
@@ -98,10 +101,13 @@
     var cols = cache.columns;
     var data = cache.rows;
 
-    if (local.query) {
-      var q = local.query;
+    if (local.terms.length) {
+      var terms = local.terms;
       data = data.filter(function (f) {
-        return cols.some(function (c) { return cellText(f, c).toLowerCase().indexOf(q) >= 0; });
+        return cols.some(function (c) {
+          var text = cellText(f, c).toLowerCase();
+          return terms.some(function (t) { return text.indexOf(t) >= 0; });
+        });
       });
     }
 
@@ -146,7 +152,7 @@
       : "No matching features";
     el.table_prev.disabled = local.page <= 1;
     el.table_next.disabled = local.page >= pages;
-    el.table_clear.disabled = !local.query && !Object.keys(local.filters).length;
+    el.table_clear.disabled = !local.terms.length && !Object.keys(local.filters).length;
 
     var html = ['<table class="mp-table"><thead><tr>'];
     cols.forEach(function (c) {
