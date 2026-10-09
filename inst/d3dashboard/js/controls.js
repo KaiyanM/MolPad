@@ -18,6 +18,14 @@
     return Array.from(select.selectedOptions).map(function (o) { return o.value; });
   }
 
+  /* Restart the highlight animation on a drop-down (see .mp-flash). */
+  function flash(select) {
+    if (!select) return;
+    select.classList.remove("mp-flash");
+    void select.offsetWidth;
+    select.classList.add("mp-flash");
+  }
+
   /* Per-pathway counts among the currently selected clusters and taxa. */
   function pathwayCounts() {
     var counts = new Map();
@@ -95,8 +103,22 @@
 
     // Keep the DOM in sync when state changes from elsewhere (brush, clicks).
     MP.state.subscribe(["selectedClusters", "taxa", "tablePathway", "pathway"], function (S2, keys) {
-      if (keys.indexOf("pathway") >= 0 && el.s_ptw.value !== S2.pathway) el.s_ptw.value = S2.pathway;
+      if (keys.indexOf("pathway") >= 0 && el.s_ptw.value !== S2.pathway) {
+        el.s_ptw.value = S2.pathway;
+        flash(el.s_ptw);
+      }
       refreshTablePathway();
+      // The table filter follows the network annotation, so show that it moved.
+      if (keys.indexOf("tablePathway") >= 0) flash(el.s_p);
+    });
+
+    // Every drop-down flashes when its value is chosen, by hand or by the virtual mouse.
+    document.addEventListener("change", function (event) {
+      var t = event.target;
+      if (t && t.tagName === "SELECT") flash(t);
+    });
+    document.addEventListener("animationend", function (event) {
+      if (event.animationName === "mp-flash") event.target.classList.remove("mp-flash");
     });
   }
 

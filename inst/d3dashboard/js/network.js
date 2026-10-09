@@ -262,6 +262,32 @@
     brushActive = false;
   }
 
+  /* Brush rectangle (SVG coordinates) that holds only the node `id`.
+     Used by the virtual mouse; null when the node does not exist. */
+  function nodeBox(id) {
+    var d = nodeById.get(id);
+    if (!d || !svg) return null;
+    var hw = NODE_W / 2 + 6, hh = NODE_H / 2 + 6;
+    var crowded = nodes.some(function (o) {
+      return o !== d && Math.abs(o.x - d.x) <= hw && Math.abs(o.y - d.y) <= hh;
+    });
+    if (crowded) { hw = 6; hh = 6; }
+    return {
+      x0: MP.utils.clamp(d.x - hw, 0, width), y0: MP.utils.clamp(d.y - hh, 0, height),
+      x1: MP.utils.clamp(d.x + hw, 0, width), y1: MP.utils.clamp(d.y + hh, 0, height),
+      svg: svg.node()
+    };
+  }
+
+  /* Move the brush rectangle. Only the final move selects, through onBrushEnd
+     like a brush drawn by hand; earlier moves just draw the rectangle. */
+  function brushTo(extent, final) {
+    if (!gBrush) return;
+    programmatic = !final;
+    gBrush.call(brush.move, extent);
+    programmatic = false;
+  }
+
   function highlight() {
     var S = MP.state.get();
     var sel = new Set(S.selectedClusters);
@@ -306,5 +332,8 @@
     applyLayout();
   }
 
-  MP.network = { init: init, render: render, resize: resize, clearBrush: clearBrush };
+  MP.network = {
+    init: init, render: render, resize: resize, clearBrush: clearBrush,
+    nodeBox: nodeBox, brushTo: brushTo
+  };
 })(window.MolPad = window.MolPad || {});

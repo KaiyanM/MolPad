@@ -51,6 +51,8 @@
     MP.ribbon.init("#ribbon");
     MP.table.init("#table");
     views.forEach(function (v) { v.render(); });
+    MP.cursor.init();
+    MP.chat.init();
 
     document.getElementById("nav-main").addEventListener("click", function () { showTab("main"); });
     document.getElementById("nav-info").addEventListener("click", function () { showTab("info"); });

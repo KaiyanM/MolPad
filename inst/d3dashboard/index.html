@@ -103,6 +103,20 @@
   </div>
 </section>
 
+<aside id="chat" class="mp-chat">
+  <div class="mp-chat-head">
+    <span>Assistant</span>
+    <button id="chat_toggle" class="mp-chat-toggle" type="button" title="Hide or show the dialogue">&#8211;</button>
+  </div>
+  <div id="chat_body" class="mp-chat-body">
+    <div id="chat_log" class="mp-chat-log"></div>
+    <form id="chat_form" class="mp-chat-form">
+      <input id="chat_input" type="text" autocomplete="off" placeholder="brush node:Group_2">
+      <button class="mp-btn" type="submit">Send</button>
+    </form>
+  </div>
+</aside>
+
 <script id="molpad-data" type="application/json">{{DATA_JSON}}</script>
 {{SCRIPTS}}
 </body>

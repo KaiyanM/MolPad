@@ -144,3 +144,11 @@ test_that("subjects from pre_process() are passed to the page", {
   expect_true(grepl('"subjects":[{"name":"A","columns":["A_1"', json, fixed = TRUE))
   expect_true(grepl('"subjects":[]', d3_payload_json(payload), fixed = TRUE))
 })
+
+test_that("the dialogue and virtual mouse scripts are shipped before app.js", {
+  js <- d3_assets()$js
+  added <- c("js/cursor.js", "js/agent.js", "js/chat.js")
+  expect_true(all(added %in% js))
+  expect_true(all(match(added, js) < match("js/app.js", js)))
+  expect_true(all(file.exists(file.path(d3_asset_dir(), added))))
+})

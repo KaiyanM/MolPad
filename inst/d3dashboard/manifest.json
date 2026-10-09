@@ -11,6 +11,9 @@
     "js/stackbar.js",
     "js/ribbon.js",
     "js/table.js",
+    "js/cursor.js",
+    "js/agent.js",
+    "js/chat.js",
     "js/app.js"
   ]
 }
