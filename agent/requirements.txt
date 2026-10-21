@@ -1,0 +1,8 @@
+langgraph>=1.0
+langchain-openai>=1.0
+langchain-google-genai>=4.0
+python-dotenv
+pandas
+pydantic>=2
+pytest
+scipy

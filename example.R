@@ -79,3 +79,31 @@ gDashboard_d3(cheesedata,
            networkchee,
            id_colname = c("GO_ID","KEGG_ID"),
            id_type = c("GO","KEGG"))
+
+write.csv(cheesedata,"cheesedata.csv")
+write.csv(pathchee,"pathchee.csv")
+write.csv(networkchee,"networkchee.csv")
+class(cluschee[[1]])
+
+km <- cluschee[[1]]
+write.csv(km$centers, "cluschee_centers.csv")
+write.csv(
+  data.frame(cluster = km$cluster),
+  "cluster_labels.csv",
+  row.names = FALSE
+)
+
+library(jsonlite)
+jsonlite::write_json(
+  list(
+    totss = km$totss,
+    tot.withinss = km$tot.withinss,
+    betweenss = km$betweenss,
+    size = km$size,
+    iter = km$iter,
+    k = nrow(km$centers)
+  ),
+  "model_metadata.json",
+  auto_unbox = TRUE,
+  pretty = TRUE
+)

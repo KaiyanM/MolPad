@@ -225,10 +225,15 @@
 
   function onNodeClick(event, d) {
     if (d._moved) { d._moved = false; return; }
-    var S = MP.state.get();
-    var sel = S.selectedClusters.slice();
-    var i = sel.indexOf(d.id);
-    if (i >= 0) sel.splice(i, 1); else sel.push(d.id);
+    toggleNode(d.id);
+  }
+
+  /* Add the node to the selection, or remove it when it is already selected. */
+  function toggleNode(id) {
+    if (!nodeById.get(id)) return;
+    var sel = MP.state.get().selectedClusters.slice();
+    var i = sel.indexOf(id);
+    if (i >= 0) sel.splice(i, 1); else sel.push(id);
     clearBrush();
     MP.state.set({ selectedClusters: sel }, "network");
   }
@@ -262,21 +267,43 @@
     brushActive = false;
   }
 
-  /* Brush rectangle (SVG coordinates) that holds only the node `id`.
-     Used by the virtual mouse; null when the node does not exist. */
-  function nodeBox(id) {
+  /* Brush rectangle (SVG coordinates) around the nodes `ids` (one id or an
+     array): from the top-left to the bottom-right node centre, plus a margin.
+     The margin shrinks until no other node centre is inside. `others` lists
+     the nodes still inside at the tightest margin, so an empty `others` means
+     the rectangle selects exactly `ids`. Used by the virtual mouse; null when
+     a node does not exist. */
+  function nodeBox(ids) {
+    if (!Array.isArray(ids)) ids = [ids];
+    var picked = ids.map(function (id) { return nodeById.get(id); });
+    if (!svg || !picked.length || picked.some(function (d) { return !d; })) return null;
+    var xs = picked.map(function (d) { return d.x; });
+    var ys = picked.map(function (d) { return d.y; });
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var margins = [[NODE_W / 2 + 6, NODE_H / 2 + 6], [6, 6], [1, 1]];
+    var box = null;
+    for (var i = 0; i < margins.length; i++) {
+      var b = {
+        x0: MP.utils.clamp(minX - margins[i][0], 0, width),
+        y0: MP.utils.clamp(minY - margins[i][1], 0, height),
+        x1: MP.utils.clamp(maxX + margins[i][0], 0, width),
+        y1: MP.utils.clamp(maxY + margins[i][1], 0, height)
+      };
+      b.others = nodes.filter(function (o) {
+        return picked.indexOf(o) < 0 && o.x >= b.x0 && o.x <= b.x1 && o.y >= b.y0 && o.y <= b.y1;
+      }).map(function (o) { return o.id; });
+      box = b;
+      if (!b.others.length) break;
+    }
+    box.svg = svg.node();
+    return box;
+  }
+
+  /* Centre of a node in SVG coordinates; null when the node does not exist. */
+  function nodePoint(id) {
     var d = nodeById.get(id);
-    if (!d || !svg) return null;
-    var hw = NODE_W / 2 + 6, hh = NODE_H / 2 + 6;
-    var crowded = nodes.some(function (o) {
-      return o !== d && Math.abs(o.x - d.x) <= hw && Math.abs(o.y - d.y) <= hh;
-    });
-    if (crowded) { hw = 6; hh = 6; }
-    return {
-      x0: MP.utils.clamp(d.x - hw, 0, width), y0: MP.utils.clamp(d.y - hh, 0, height),
-      x1: MP.utils.clamp(d.x + hw, 0, width), y1: MP.utils.clamp(d.y + hh, 0, height),
-      svg: svg.node()
-    };
+    return d && svg ? { x: d.x, y: d.y, svg: svg.node() } : null;
   }
 
   /* Move the brush rectangle. Only the final move selects, through onBrushEnd
@@ -334,6 +361,6 @@
 
   MP.network = {
     init: init, render: render, resize: resize, clearBrush: clearBrush,
-    nodeBox: nodeBox, brushTo: brushTo
+    nodeBox: nodeBox, nodePoint: nodePoint, brushTo: brushTo, toggleNode: toggleNode
   };
 })(window.MolPad = window.MolPad || {});

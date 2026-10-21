@@ -22,9 +22,14 @@
     var text = el.chat_input.value.trim();
     if (!text) return;
     el.chat_input.value = "";
-    say(text, "user");
+    // Pasted JSON is a step list from the Python agent; anything else is one command.
+    var list = text.charAt(0) === "{" || text.charAt(0) === "[";
+    say(list ? "(step list)" : text, "user");
     busy(true);
-    MP.agent.run(text).then(function (report) {
+    var job = list
+      ? new Promise(function (resolve) { resolve(MP.agent.play(text, say)); })
+      : MP.agent.run(text);
+    job.then(function (report) {
       say(report, "bot");
     }, function (err) {
       say(err && err.message ? err.message : String(err), "error");
