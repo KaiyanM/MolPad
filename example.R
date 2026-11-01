@@ -80,6 +80,16 @@ gDashboard_d3(cheesedata,
            id_colname = c("GO_ID","KEGG_ID"),
            id_type = c("GO","KEGG"))
 
+gDashboard_d3(cheesedata,
+              cluschee,
+              pathchee,
+              networkchee,
+              id_colname = c("GO_ID","KEGG_ID"),
+              id_type = c("GO","KEGG"),
+              output_dir = "D:/GitHub/MolPad/dashboards/cheese")
+
+#python -m agent.serve --dashboard /mnt/d/GitHub/MolPad/dashboards/cheese/index.html                         --context agent/contexts/cheese.json
+
 write.csv(cheesedata,"cheesedata.csv")
 write.csv(pathchee,"pathchee.csv")
 write.csv(networkchee,"networkchee.csv")

@@ -217,7 +217,7 @@ class Session:
     OPS = (
         "filter_cols", "filter_level1", "filter_level2", "filter_level3",
         "select_by_pattern", "select_by_ribbon", "select_by_comparison", "select_by_feature_number", "select_by_network",
-        "select_by_feature_lookup", "select_given", "select_all",
+        "select_by_feature_lookup", "select_given", "select_all", "select_examples",
         "describe_pattern", "describe_level2", "describe_level3", "describe_weight",
         "describe_feature_number",
     )
@@ -693,6 +693,16 @@ class Session:
         self.targets, self.groups = list(self.ds.clusters), []
         return {"clusters": "all"}
 
+    def select_examples(self, by="level2_composition", values=None, top_n=None):
+        """Example clusters for what the question names (agent/examples.py)."""
+        from .examples import EXAMPLE_FINDERS
+
+        if by not in EXAMPLE_FINDERS:
+            raise ValueError(f"no example finder '{by}'; choose from {list(EXAMPLE_FINDERS)}")
+        out = EXAMPLE_FINDERS[by](self, values=values, top_n=top_n)
+        self._set(out["groups"])
+        return out
+
     # ---- descriptors -----------------------------------------------------
 
     def _target_rows(self, df):
@@ -744,6 +754,8 @@ class Session:
         for cl, g in rows.groupby("cluster"):
             n = g[self.cfg.level2].value_counts()
             out[cl] = {"total": len(g), "counts": n.to_dict(), "fractions": (n / len(g)).round(3).to_dict()}
+        if self.level2:   # shares are of the features the level-2 filter kept, not the whole cluster
+            out = {cl: {**v, "within": list(self.level2)} for cl, v in out.items()}
         return out
 
     def describe_level3(self, column, mode="frequency"):

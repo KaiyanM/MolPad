@@ -437,6 +437,29 @@
     return job;
   }
 
+  /* Playback pace, so the reader can follow the pointer and read each message.
+     ?pace=0.5 in the page address plays twice as fast, ?pace=0 without pauses. */
+  var PAUSE_BEFORE_CMD = 800;     // ms before the pointer moves to the next control
+  var PAUSE_AFTER_CMD = 1200;     // ms to look at the dashboard after a command
+  var READ_BASE = 1200, READ_PER_WORD = 250, READ_MIN = 2500, READ_MAX = 9000;
+
+  function pace() {
+    var m = /[?&]pace=([0-9.]+)/.exec(window.location.search || "");
+    var k = m ? parseFloat(m[1]) : 1;
+    return isFinite(k) && k >= 0 ? k : 1;
+  }
+
+  function pause(ms) {
+    var t = Math.round(ms * pace());
+    return t > 0 ? MP.cursor.wait(t) : Promise.resolve();
+  }
+
+  /* Time to read a message: grows with its length, within READ_MIN..READ_MAX. */
+  function readingTime(text) {
+    var words = String(text).split(/\s+/).filter(function (w) { return w; }).length;
+    return Math.min(READ_MAX, Math.max(READ_MIN, READ_BASE + READ_PER_WORD * words));
+  }
+
   /* Play the step list written by the Python agent: an array of steps, or an
      object with a `steps` array (JSON text is parsed). Dashboard steps run as
      commands, message steps are printed, data steps are not played: they hold
@@ -462,15 +485,17 @@
             .filter(function (d) { return d; });
           say(String(step.text), "bot", evidence);
           done += 1;
-          return MP.cursor.wait(900);
+          return pause(readingTime(step.text));
         }
-        say(String(step.command), "user");
-        return run(step.command).then(function (report) {
+        return pause(PAUSE_BEFORE_CMD).then(function () {
+          say(String(step.command), "user");
+          return run(step.command);
+        }).then(function (report) {
           say(report, "bot");
           done += 1;
         }, function (err) {
           say(err && err.message ? err.message : String(err), "error");
-        }).then(function () { return MP.cursor.wait(350); });
+        }).then(function () { return pause(PAUSE_AFTER_CMD); });
       });
     });
     return chain.then(function () { return "Played " + done + " steps."; });

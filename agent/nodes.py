@@ -207,7 +207,8 @@ def _variants(f):
     if contrast == "level1" and len(f["level1"]) > 1:
         return [(v, v, f["level2"]) for v in f["level1"]]
     if contrast == "level2" and len(f["level2"]) > 1:
-        return [(v, l1, [v]) for v in f["level2"]]
+        # with several level-1 values, each class already implies its own: do not filter by the first
+        return [(v, l1 if len(f["level1"]) < 2 else None, [v]) for v in f["level2"]]
     if contrast == "with_and_without_level2" and f["level2"]:
         return [(l1 or "all", l1, []), (" + ".join([l1 or "all"] + f["level2"]), l1, f["level2"])]
     return [(None, l1, f["level2"])]
@@ -289,6 +290,10 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
                    "select_by_network", criterion=st.get("criterion"), threshold=thr)
             elif kind == "feature_lookup":
                 do("evaluate features and select cluster", "select_by_feature_lookup", top_n=st.get("top_n"))
+            elif kind == "example":
+                by = st.get("example_by") or "level2_composition"
+                do(f"infer example clusters by {by.replace('_', ' ').replace('level2', 'level-2')}",
+                   "select_examples", by=by, top_n=st.get("top_n"))
             elif kind == "given":
                 do("select current cluster" if not st.get("clusters") else "select named cluster",
                    "select_given", clusters=st.get("clusters"))
@@ -308,7 +313,9 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
             do("evaluate feature number", "describe_feature_number")
         if d.get("pattern"):
             do("evaluate pattern", "describe_pattern")
-        if d.get("level2"):
+        # several classes in the filter: always read each shown cluster's class mix, so a
+        # message never names a class for a cluster without a finding behind it
+        if d.get("level2") or len(level2) > 1:
             do("evaluate level2", "describe_level2")
         dcol = _match(d.get("level3_column") or "", ds.cfg.level3)
         if dcol:

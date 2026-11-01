@@ -160,6 +160,11 @@ def _select_by_feature_lookup(args, r):
             + ", ".join(f"{c} ({per[c]})" for c in _order(per))]
 
 
+def _select_examples(args, r):
+    lines = [f"{g['label']}: {_list(g['clusters'])} ({g['why']})" for g in r.get("groups") or []]
+    return lines or [f"no example cluster for {', '.join(r.get('values') or [])}"]
+
+
 def _select_given(args, r):
     return [f"clusters: {_list(r.get('clusters'))}"]
 
@@ -198,7 +203,10 @@ def _describe_level2(args, r):
     for cl in _order(r):
         fr = r[cl]["fractions"]
         top = sorted(fr, key=lambda k: -fr[k])[:2]
-        lines.append(f"{cl} ({_f(r[cl]['total'])} features): " + ", ".join(f"{k} {_pct(fr[k])}" for k in top))
+        within = r[cl].get("within")
+        scope = f" kept by the filter ({', '.join(within)})" if within else ""
+        lines.append(f"{cl} ({_f(r[cl]['total'])} features{scope}): "
+                     + ", ".join(f"{k} {_pct(fr[k])}" for k in top))
     return lines
 
 
@@ -244,7 +252,7 @@ RULES = {
     "select_by_pattern": _select_by_pattern, "select_by_ribbon": _select_by_ribbon,
     "select_by_comparison": _select_by_comparison, "select_by_feature_number": _select_by_feature_number,
     "select_by_network": _select_by_network, "select_by_feature_lookup": _select_by_feature_lookup,
-    "select_given": _select_given, "select_all": _select_all,
+    "select_given": _select_given, "select_all": _select_all, "select_examples": _select_examples,
     "describe_pattern": _describe_pattern, "describe_level2": _describe_level2,
     "describe_level3": _describe_level3, "describe_weight": _describe_weight,
     "describe_feature_number": _describe_feature_number,

@@ -9,6 +9,7 @@ PATTERN_CRITERIA = ("increase", "decrease", "increase_and_decrease", "peak_at", 
 RIBBON_CRITERIA = ("tightest_ribbon", "widest_ribbon", "expanding_ribbon", "contracting_ribbon")
 RIBBON_MEASURES = ("mean_width", "max_width", "area", "all")
 COMPARE_TOOLS = ("opposite", "similar", "shifted", "diverging", "converging")
+EXAMPLE_FINDERS = ("level2_composition",)   # agent/examples.py
 NETWORK_CRITERIA = ("most_edges", "strongest_edge", "isolated", "connected_pairs", "neighbours",
                     "connectivity", "components")
 
@@ -65,7 +66,7 @@ class CurveSlice(BaseModel):
 
 
 class SelectorStep(BaseModel):
-    kind: Literal["pattern", "ribbon", "feature_number", "network", "feature_lookup", "given", "all"]
+    kind: Literal["pattern", "ribbon", "feature_number", "network", "feature_lookup", "example", "given", "all"]
     criterion: Optional[Literal[PATTERN_CRITERIA + RIBBON_CRITERIA + NETWORK_CRITERIA]] = Field(
         None, description="required for pattern, ribbon and network")
     measure: Optional[Literal[RIBBON_MEASURES]] = Field(
@@ -85,6 +86,8 @@ class SelectorStep(BaseModel):
     threshold: Optional[str] = Field(
         None, description="network: 'current', 'max', 'min' or a number for the importance score")
     clusters: list[str] = Field(default_factory=list, description="given: clusters named by the user")
+    example_by: Optional[Literal[EXAMPLE_FINDERS]] = Field(
+        None, description="example: the evidence an example cluster is picked by")
 
 
 class Selector(BaseModel):

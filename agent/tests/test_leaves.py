@@ -86,8 +86,11 @@ def test_L7_one_by_one_groups():
     assert [g["label"] for g in groups] == ["increase", "decrease"]
     leaf, steps = play([u])
     assert leaf == "L7"
-    assert commands(steps).count("MESSAGE") == 2
-    assert commands(steps)[-2:] == [f"brush node:{groups[1]['clusters'][0]}", "MESSAGE"]
+    assert commands(steps).count("MESSAGE") == 3            # one per group, then the comparison
+    assert commands(steps)[-3:] == [f"brush node:{groups[1]['clusters'][0]}", "MESSAGE", "MESSAGE"]
+    msgs = [s["about"] for s in steps if s["kind"] == "message"]
+    assert all(m["why"].startswith("picked as ") and "why" in m["write"] for m in msgs[:2])
+    assert "compare the groups" in msgs[2]["write"]
     check_order(steps)
 
 
@@ -96,7 +99,8 @@ def test_L7_vague_criterion_splits_candidates():
     leaf, steps = play([u], grouping="one_by_one")
     assert leaf == "L7"
     cmds = commands(steps)
-    assert len(cmds) == 6 and all(c.startswith("brush node:") for c in cmds[0::2])
+    assert len(cmds) == 7 and all(c.startswith("brush node:") for c in cmds[0:6:2])
+    assert cmds[-1] == "MESSAGE"
 
 
 def test_L7_evidence_chain_ends_with_conclusion():
@@ -170,3 +174,23 @@ def test_table_search_is_not_repeated_per_group():
     _, steps = play([u], grouping="one_by_one")
     cmds = commands(steps)
     assert cmds.count("search table:K03196") == 1 and cmds.count("MESSAGE") > 1
+
+
+def test_L7_examples_per_class_say_why():
+    u = unit(filters={"level2": ["Flavobacteriia", "Bacilli"]},
+             steps=[{"kind": "example", "example_by": "level2_composition"}], descriptor={"pattern": True})
+    leaf, steps = play([u], grouping="one_by_one")
+    assert leaf == "L7"
+    assert commands(steps) == ["set filter2:Flavobacteriia,Bacilli", "brush node:Group_3", "MESSAGE",
+                               "brush node:Group_4", "MESSAGE", "MESSAGE"]
+    assert "evaluate level2" in [s["action"] for s in steps if s["kind"] == "data"]
+    msgs = [s["about"] for s in steps if s["kind"] == "message"]
+    assert "of its features are Flavobacteriia" in msgs[0]["why"]
+    assert "of its features are Bacilli" in msgs[1]["why"]
+
+
+def test_level2_contrast_with_two_level1_keeps_every_class():
+    u = unit(filters={"level1": ["Bacteroidota", "Bacillota"], "level2": ["Flavobacteriia", "Bacilli"],
+                      "contrast": "level2"},
+             steps=[{"kind": "example", "example_by": "level2_composition"}])
+    assert [r["targets"] for r in u["runs"]] == [["Group_3"], ["Group_4"]]

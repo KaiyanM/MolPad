@@ -189,6 +189,10 @@ kind
     connectivity (for the clusters picked so far: connected or isolated?)
   threshold: 'max' / 'min' when the question moves the importance score, else leave empty.
 - feature_lookup: where does this id / gene fall (the filter slots already hold the ids).
+- example: the question names two or more classes (level 2) and asks how each behaves or whether
+  they differ, without naming clusters ("Do X and Y peak at different weeks?"). One example
+  cluster is shown per class. example_by: level2_composition (the cluster whose features are
+  mostly that class). Put the classes in the level-2 filter slot.
 - given: only when the user wrote cluster ids (put them in `clusters`) or says "the selected
   clusters". Never add it after another step.
 - all: "each cluster", "rank the clusters", a count over the whole network; no selection needed.
@@ -230,6 +234,7 @@ Examples
 "Which cluster pairs remain connected when the importance score is raised to its maximum?" -> network connected_pairs threshold=max
 "At the lowest importance score, which clusters are still isolated?" -> network isolated threshold=min
 "Which edge has the highest weight, and what are the two clusters' patterns?" -> network strongest_edge
+"Do Flavobacteriia (Bacteroidota) and Bacilli (Bacillota) peak at different weeks?" -> example example_by=level2_composition
 "How many features does each cluster contain, and which is the largest?" -> all
 "How many connected components does the network have?" -> all
 "Rank the clusters by number of Actinomycetota features." -> all"""
@@ -314,4 +319,9 @@ Rules
 - State every assumption listed under ASSUMPTIONS in the first message.
 - If a finding says "failed", or a filter left no features, say so plainly.
 - If ids came from model knowledge, say they were not looked up.
+- A slot with clusters in focus opens with exactly one sentence saying why they are shown, from
+  its "why" field and the class mix in the findings, e.g. "Group_3 is the Flavobacteriia example:
+  21% of its features are Flavobacteriia." Then answer for those clusters. At most 3 sentences.
+- Name a class for a cluster only when a finding states that cluster's class mix or example
+  reason. Never infer a cluster's class from the question.
 - A slot with a "write" instruction: follow it."""

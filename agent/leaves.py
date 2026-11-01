@@ -102,11 +102,31 @@ class _Playback:
         self.steps.append(message_step(about))
 
 
+WHY_FIRST = ("first sentence: why these clusters are in focus, from `why` and the class mix in the "
+             "findings; then what they show for the question")
+
+
+def _why(run, group):
+    """Why a group is shown: the example finder's reason, else the selector's label and rule."""
+    if group.get("why"):
+        return group["why"]
+    rule = next((st["findings"][0] for st in run.get("steps", []) if st["op"].startswith("select_")
+                 and st["findings"] and st["findings"][0].startswith(("metric:", "rule:"))), None)
+    label = group.get("label")
+    return "; ".join(x for x in (f"picked as {label}" if label else "picked by the selector", rule) if x)
+
+
+def _focus(run, group):
+    """The message-slot fields of a group in focus."""
+    return {"group": group.get("label"), "clusters": group["clusters"], "why": _why(run, group),
+            "write": WHY_FIRST}
+
+
 def _groups(run, one_by_one=False):
     """Groups of a run; split into single clusters when each is its own answer."""
     groups = run.get("groups") or []
     if one_by_one and len(groups) == 1 and len(groups[0]["clusters"]) > 1:
-        return [{"label": groups[0].get("label"), "clusters": [c], "joined": False}
+        return [{"label": groups[0].get("label"), "clusters": [c], "joined": False, "why": groups[0].get("why")}
                 for c in groups[0]["clusters"]]
     return groups
 
@@ -160,6 +180,7 @@ def assemble(leaf, units, display):
         s["id"] = f"d{i}"
     play = _Playback()
     one_by_one = leaf == "L7" or display["grouping"] == "one_by_one"
+    shown = 0   # groups put in focus one after another
 
     for ui, unit in enumerate(units):
         for ri, run in enumerate(unit["runs"]):
@@ -176,11 +197,13 @@ def assemble(leaf, units, display):
                 play.table(run)
                 play.say(**where)
             elif leaf in ("L5", "L6"):
-                group = {"clusters": run["targets"], "joined": run.get("joined", False)}
+                one = run["groups"][0] if len(run["groups"]) == 1 else {}
+                group = {"clusters": run["targets"], "joined": run.get("joined", False),
+                         "label": one.get("label"), "why": one.get("why")}
                 play.filters(run)
                 play.show(group["clusters"], group["joined"])
                 play.table(run)
-                play.say(**where, clusters=group["clusters"])
+                play.say(**where, **_focus(run, group))
             elif leaf == "L7":
                 groups = _groups(run, one_by_one)
                 if not groups:
@@ -191,17 +214,26 @@ def assemble(leaf, units, display):
                     play.filters(run)
                     play.show(g["clusters"], g.get("joined", False))
                     play.table(run)
-                    play.say(**where, group=g.get("label"), clusters=g["clusters"])
+                    play.say(**where, **_focus(run, g))
+                shown += len(groups)
             elif leaf == "L8":
                 play.filters(run)
                 play.slider(run)
-                for g in _groups(run, display["grouping"] == "one_by_one"):
+                groups = _groups(run, display["grouping"] == "one_by_one")
+                for g in groups:
                     play.show(g["clusters"], brush=True)
-                    play.say(**where, group=g.get("label"), clusters=g["clusters"])
+                    play.say(**where, **_focus(run, g))
+                shown += len(groups)
             else:
                 raise ValueError(f"unknown leaf {leaf}")
 
     if len(units) > 1:
         play.say(leaf=leaf, write="conclusion: argued yes/no over the steps above; say that the "
                  "dashboard gives evidence and does not prove cause")
+    elif shown > 1:
+        play.say(leaf=leaf, question=units[0]["question"],
+                 write="compare the groups shown above and answer the question in one or two sentences. "
+                       "Compare per sample group: in each group, set the clusters' peaks (or flat "
+                       "shapes) side by side; never compare a timepoint of one sample group with "
+                       "a timepoint of another")
     return attach_evidence(steps + play.steps)
