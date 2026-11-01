@@ -429,6 +429,15 @@ table.mp-table a { color: #1a5276; }
 .mp-chat-msg.user { text-align: right; color: var(--mp-accent-dark); }
 .mp-chat-msg.bot { color: var(--mp-text); }
 .mp-chat-msg.error { color: #a23b3b; }
+.mp-chat-status {
+  margin-left: auto; margin-right: 6px; border: 0; background: none; padding: 0;
+  font-size: 0.8em; cursor: pointer; color: var(--mp-logo);
+}
+.mp-chat-status::before { content: ""; display: inline-block; width: 7px; height: 7px;
+  margin-right: 5px; border-radius: 50%; background: #b9b4b4; vertical-align: middle; }
+.mp-chat-status.online::before { background: #4f9a7a; }
+.mp-chat-status.offline::before { background: #c08a5a; }
+.mp-chat-thinking { font-style: italic; color: var(--mp-logo); }
 .mp-chat-evidence { margin-top: 4px; font-size: 0.85em; color: var(--mp-logo); white-space: normal; }
 .mp-chat-evidence > summary { cursor: pointer; }
 .mp-ev-step { margin: 4px 0 6px 10px; }

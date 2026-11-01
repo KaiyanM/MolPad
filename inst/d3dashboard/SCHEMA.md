@@ -130,11 +130,38 @@ Produce the structure above, read `manifest.json` for the file order, fill the
 four placeholders of `index.html`, and write the result next to (or with) the
 `css/`, `lib/` and `js/` folders. No build step is needed.
 
-## Agent step list (chat box)
+## Agent link (chat box)
 
-The Python agent (`python -m agent.run --play "question"`) prints a JSON array of
-steps that can be pasted into the chat box. This is separate from the payload
-above; it does not change `schema_version`.
+The chat box can ask the Python agent questions. The agent reads its data from
+this same page, so both sides see the same data:
+
+```
+R:       gDashboard_d3(...)                       # writes index.html
+Python:  python -m agent.serve --dashboard index.html [--context my_data.json]
+```
+
+The page looks for the agent at `http://127.0.0.1:8765`, or at the address in
+`?agent=<url>` in the page address, and shows "Agent connected" or "Agent
+offline" in the chat header (click it to check again). Typed text that is not a
+command and not a pasted step list is sent as a question:
+
+```
+GET  /health  -> {"ok", "model", "judge_tier", "title", "clusters", "timepoints"}
+POST /ask     {"question": "...", "state": {"pathway", "min_weight",
+               "selected_clusters", "layout", "taxa"}}
+              -> {"question", "trace", "steps"}   (steps as below; 409 while busy)
+```
+
+The server listens on 127.0.0.1 only and answers pages opened from a file or
+from localhost. The context file (JSON) describes the data for the LLM:
+`background`, `level1_name`, `level2_name`, `missing`; see
+`agent/contexts/cheese.json`.
+
+## Agent step list
+
+`/ask` replies with, and `python -m agent.run --play "question"` prints, a JSON
+array of steps. A printed list can also be pasted into the chat box. This is
+separate from the payload above; it does not change `schema_version`.
 
 | kind | fields | played as |
 |---|---|---|

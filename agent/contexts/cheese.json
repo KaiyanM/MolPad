@@ -1,0 +1,6 @@
+{
+  "background": "This is metagenomic data from two cheeses (sample groups A and C) sampled over ripening. Each feature is a contig. The data takes phylum as level 1 and class as level 2; level 3 is the contig itself with its KEGG and GO ids. Features are grouped into clusters by the shape of their trajectory.",
+  "level1_name": "phylum",
+  "level2_name": "class",
+  "missing": "-"
+}

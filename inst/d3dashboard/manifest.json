@@ -1,6 +1,10 @@
 {
-  "css": ["css/dashboard.css"],
-  "lib": ["lib/d3.v7.min.js"],
+  "css": [
+    "css/dashboard.css"
+  ],
+  "lib": [
+    "lib/d3.v7.min.js"
+  ],
   "js": [
     "js/utils.js",
     "js/palettes.js",
@@ -13,6 +17,7 @@
     "js/table.js",
     "js/cursor.js",
     "js/agent.js",
+    "js/link.js",
     "js/chat.js",
     "js/app.js"
   ]

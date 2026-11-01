@@ -10,7 +10,7 @@ matches what the user sees:
 """
 
 import re
-from functools import lru_cache
+from dataclasses import replace
 
 import numpy as np
 import pandas as pd
@@ -37,39 +37,106 @@ def _py(x):
 
 
 class Dataset:
-    """The dashboard inputs, loaded once."""
+    """The dashboard inputs, loaded once.
 
-    def __init__(self, cfg: LevelConfig = CONFIG):
+    Two sources, the same result:
+        Dataset.from_payload(payload, cfg)  the JSON that gDashboard_d3() embeds in the page
+        Dataset.from_csv(cfg)               the CSV copy named in config.py (tests, eval_trace)
+    """
+
+    def __init__(self, cfg, features, edges, timepoints, subjects, times, slider=None, clusters=()):
+        """features: one row per feature with the id, "cluster", the colour column, one column per
+        timepoint and the annotation columns. edges: from, to, weight. subjects: {name: [columns]}.
+        times: {column: numeric time}. slider: {"min", "max", "value"}, else computed as the page does.
+        clusters: nodes to show even without features or weighted edges (the page's own list)."""
         self.cfg = cfg
+        self.features = features
+        self.edges = edges[["from", "to", "weight"]].reset_index(drop=True)
+        self.timepoints = list(timepoints)
+        self.subjects = {k: list(v) for k, v in subjects.items()}
+        self.times = dict(times)
+
+        names = (set(self.features["cluster"]) | set(self.edges["from"]) | set(self.edges["to"])
+                 | {str(c) for c in clusters})
+        self.clusters = sorted(names, key=self.cluster_number)
+        self.level1_values = sorted(self.features[cfg.level1].dropna().unique())
+        self.level2_values = sorted(self.features[cfg.level2].dropna().unique())
+        self.level2_by_level1 = {
+            k: sorted(v.dropna().unique()) for k, v in self.features.groupby(cfg.level1)[cfg.level2]
+        }
+
+        absw = self.edges["weight"].abs()
+        slider = slider or {}
+        self.default_threshold = float(slider.get("value", round(float(absw.median()), 1)))
+        self.slider_min = float(slider.get("min", 0.0))
+        self.slider_max = float(slider.get("max", round(float(absw.quantile(0.75)), 1)))
+
+    # ---- loaders ---------------------------------------------------------
+
+    @classmethod
+    def from_csv(cls, cfg: LevelConfig = CONFIG):
         d = cfg.data_dir
         data = pd.read_csv(d / cfg.data_file, index_col=0)
         labels = pd.read_csv(d / cfg.labels_file)
         ann = pd.read_csv(d / cfg.annotation_file, index_col=0)
         net = pd.read_csv(d / cfg.network_file, index_col=0)
 
-        self.timepoints = [c for c in data.columns if c not in (cfg.id_col, cfg.color)]
-        self.subjects = {}
-        for c in self.timepoints:
-            self.subjects.setdefault(c.split(cfg.subject_sep)[0], []).append(c)
-
+        timepoints = [c for c in data.columns if c not in (cfg.id_col, cfg.color)]
+        subjects = {}
+        for c in timepoints:
+            subjects.setdefault(c.split(cfg.subject_sep)[0], []).append(c)
         data["cluster"] = cfg.cluster_prefix + labels.iloc[:, 0].astype(str).values
-        self.features = data.merge(ann, on=cfg.id_col, how="inner")
-        self.edges = pd.DataFrame(
-            {"from": net["from"], "to": net["var_names"], "weight": net["weight"]}
-        )
+        features = data.merge(ann, on=cfg.id_col, how="inner")
+        edges = pd.DataFrame({"from": net["from"], "to": net["var_names"], "weight": net["weight"]})
+        return cls(cfg, features, edges, timepoints, subjects, _times(timepoints))
 
-        names = set(self.features["cluster"]) | set(self.edges["from"]) | set(self.edges["to"])
-        self.clusters = sorted(names, key=self.cluster_number)
-        self.level1_values = sorted(self.features[cfg.level1].dropna().unique())
-        self.level2_values = sorted(self.features[cfg.level2].dropna().unique())
-        self.level2_by_level1 = {
-            k: sorted(v.unique()) for k, v in self.features.groupby(cfg.level1)[cfg.level2]
-        }
+    @classmethod
+    def from_payload(cls, payload: dict, cfg: LevelConfig = None):
+        """Build from the dashboard JSON (inst/d3dashboard/SCHEMA.md).
 
-        absw = self.edges["weight"].abs()
-        self.default_threshold = round(float(absw.median()), 1)
-        self.slider_min = 0.0
-        self.slider_max = round(float(absw.quantile(0.75)), 1)
+        Level 1 is Pathway, level 2 taxonomic.scope and the colour column type, as the page fixes
+        them. Level 3 is the id plus the columns that have id links. Features without a
+        taxonomic scope are left out, as the page does (state.js selectedFeatures).
+        """
+        cfg = cfg or LevelConfig()
+        timepoints = [str(t) for t in payload["timepoints"]]
+        rows = []
+        for f in payload["features"]:
+            r = {k: v for k, v in f.items() if k != "values"}
+            r.update(zip(timepoints, f["values"]))
+            rows.append(r)
+        features = pd.DataFrame(rows)
+        for c in timepoints:
+            features[c] = pd.to_numeric(features[c], errors="coerce")
+        features = features[features[cfg.level2].notna()].reset_index(drop=True)
+
+        edges = pd.DataFrame(payload.get("edges") or [], columns=["from", "to", "weight"])
+        edges["weight"] = pd.to_numeric(edges["weight"], errors="coerce")
+        edges = edges[edges["weight"].notna()]
+
+        subjects, times = {}, {}
+        for s in payload.get("subjects") or []:
+            subjects[str(s["name"])] = [str(c) for c in s["columns"]]
+            for c, label in zip(s["columns"], s.get("labels") or []):
+                t = _number(label)
+                if t is not None:
+                    times[str(c)] = t
+        if not subjects:
+            subjects = {"all": list(timepoints)}
+        for c, t in _times(timepoints).items():
+            times.setdefault(c, t)
+
+        links = payload.get("id_links") or {}
+        notes = {"GO": "GO term ids such as GO:0005524", "KEGG": "KEGG ortholog ids such as K03196"}
+        level3 = (cfg.id_col,) + tuple(c for c in links if c in features.columns)
+        cfg = replace(cfg, level3=level3,
+                      level3_notes=("feature id",) + tuple(notes.get(links[c].get("type"), "database ids")
+                                                           for c in level3[1:]),
+                      cluster_prefix=_prefix(payload.get("clusters") or features["cluster"].unique()))
+        return cls(cfg, features, edges, timepoints, subjects, times, payload.get("weight_slider"),
+                   payload.get("clusters") or ())
+
+    # ---- helpers ---------------------------------------------------------
 
     def cluster_number(self, name):
         m = re.search(r"(\d+)$", str(name))
@@ -77,9 +144,19 @@ class Dataset:
 
     def cluster_name(self, text):
         """'3', 'cluster_3', 'group 3' -> 'Group_3'; None when it is not a cluster."""
+        if str(text) in self.clusters:
+            return str(text)
         m = re.search(r"(\d+)\s*$", str(text))
         name = f"{self.cfg.cluster_prefix}{m.group(1)}" if m else None
         return name if name in self.clusters else None
+
+    def axis(self, cols):
+        """Time axis of some timepoint columns, with their numeric times."""
+        return patterns.TimeAxis.of(cols, [self.times[c] for c in cols]
+                                    if all(c in self.times for c in cols) else None)
+
+    def time_of(self, col):
+        return self.times.get(col, _number(col))
 
     def default_state(self):
         """Dashboard state at page load (inst/d3dashboard/js/state.js)."""
@@ -92,16 +169,46 @@ class Dataset:
         }
 
     def time_position(self, col):
-        """0..1 position of a timepoint inside its subject, from the numeric suffix."""
-        cols = self.subjects[col.split(self.cfg.subject_sep)[0]]
-        t = [float(c.split(self.cfg.subject_sep)[-1]) for c in cols]
+        """0..1 position of a timepoint inside its sample group."""
+        cols = next(c for c in self.subjects.values() if col in c)
+        t = [self.time_of(c) for c in cols]
         span = (max(t) - min(t)) or 1.0
-        return (float(col.split(self.cfg.subject_sep)[-1]) - min(t)) / span
+        return (self.time_of(col) - min(t)) / span
 
 
-@lru_cache(maxsize=1)
+def _number(label):
+    m = re.search(r"(-?\d+(?:\.\d+)?)\s*$", str(label))
+    return float(m.group(1)) if m else None
+
+
+def _times(cols):
+    """Numeric time of each column from its trailing number; positions when that fails."""
+    t = {c: _number(c) for c in cols}
+    return t if all(v is not None for v in t.values()) else {c: float(i) for i, c in enumerate(cols)}
+
+
+def _prefix(clusters):
+    """Common text before the number of the cluster names: 'Group_3' -> 'Group_'."""
+    heads = {re.sub(r"\d+$", "", str(c)) for c in clusters}
+    return heads.pop() if len(heads) == 1 else ""
+
+
+_ACTIVE = None
+
+
+def use_dataset(ds: Dataset) -> Dataset:
+    """Make `ds` the dataset every node and data action works on."""
+    global _ACTIVE
+    _ACTIVE = ds
+    return ds
+
+
 def load_dataset() -> Dataset:
-    return Dataset()
+    """The active dataset; the CSVs of config.py until use_dataset() sets another."""
+    global _ACTIVE
+    if _ACTIVE is None:
+        _ACTIVE = Dataset.from_csv()
+    return _ACTIVE
 
 
 class Session:
@@ -152,7 +259,7 @@ class Session:
 
     def _shape(self, values, cols):
         """Trend, peak and a one-word shape for one mean curve (agent/patterns)."""
-        axis = patterns.TimeAxis.of(cols)
+        axis = self.ds.axis(cols)
         tr = patterns.trend(values, axis)
         pk = patterns.peaks(values, axis)
         return {"mean": [round(float(x), 2) for x in values], "peak": pk["highest"]["at"],
@@ -313,7 +420,7 @@ class Session:
         subjects = {s: c for s, c in self._subjects(subject).items() if c}
         rb = {}
         for cl, g in self.df.groupby("cluster"):
-            rb[cl] = {s: patterns.ribbon(g[cols].values, patterns.TimeAxis.of(cols), th)
+            rb[cl] = {s: patterns.ribbon(g[cols].values, self.ds.axis(cols), th)
                       for s, cols in subjects.items()}
         order = [c for c in self.ds.clusters if c in rb]
 
@@ -383,8 +490,7 @@ class Session:
             raise ValueError(f"no sample group '{subject}'; choose from {list(self.ds.subjects)}")
 
         def time(x):
-            m = re.search(r"(-?\d+(?:\.\d+)?)\s*$", str(x)) if x not in (None, "") else None
-            return float(m.group(1)) if m else None
+            return None if x in (None, "") else self.ds.time_of(str(x))
 
         return self.ds.subjects[subject], (time(side.get("start")), time(side.get("end")))
 
@@ -412,8 +518,8 @@ class Session:
 
         def rel(cl_a, side_a, cl_b, side_b, on):
             (cols_a, range_a), (cols_b, range_b) = side_a, side_b
-            return patterns.compare(means.loc[cl_a, cols_a].values, patterns.TimeAxis.of(cols_a),
-                                    means.loc[cl_b, cols_b].values, patterns.TimeAxis.of(cols_b),
+            return patterns.compare(means.loc[cl_a, cols_a].values, self.ds.axis(cols_a),
+                                    means.loc[cl_b, cols_b].values, self.ds.axis(cols_b),
                                     on, range_a, range_b, th)
 
         def brief(r):
@@ -425,7 +531,8 @@ class Session:
 
         def ranked(results):
             hits = [k for k, r in results.items() if tool in r["relations"]]
-            return sorted(hits, key=lambda k: -(patterns.strength(results[k], tool) or 0))
+            # rounded, so a tie keeps dashboard order whatever the float noise of the input
+            return sorted(hits, key=lambda k: -round(patterns.strength(results[k], tool) or 0, 6))
 
         def note(r):
             if tool == "shifted":
@@ -436,7 +543,7 @@ class Session:
 
         def span(side):
             cols, (start, end) = side
-            t = patterns.TimeAxis.of(cols).times
+            t = self.ds.axis(cols).times
             return [t[0] if start is None else start, t[-1] if end is None else end]
 
         if between == "clusters":
@@ -463,7 +570,7 @@ class Session:
             subject = a.get("subject") or b.get("subject") or self.subject or names[0]
             side_a, side_b = self._side(a, subject), self._side(b, subject)
             if not any(v is not None for side in (side_a, side_b) for v in side[1]):
-                t = patterns.TimeAxis.of(side_a[0]).times      # first half against second half
+                t = self.ds.axis(side_a[0]).times      # first half against second half
                 mid = (t[0] + t[-1]) / 2
                 side_a, side_b = (side_a[0], (t[0], mid)), (side_b[0], (mid, t[-1]))
             label, on = f"{tool} in {subject}: time {span(side_a)[0]:g}-{span(side_a)[1]:g} vs " \
@@ -600,15 +707,15 @@ class Session:
         base = self.ds.features
         if self.level2:
             base = base[base[self.cfg.level2].isin(self.level2)]
-        sep = self.cfg.subject_sep
-        all_times = sorted({float(c.split(sep)[-1]) for c in self.ds.timepoints})
+        all_times = sorted({self.ds.time_of(c) for c in self.ds.timepoints})
 
         def part(df):
             out = {}
             for cl, g in self._target_rows(df).groupby("cluster"):
                 out[cl] = {}
                 for subject, cols in self._subjects().items():
-                    d = patterns.describe(g[cols].values, cols, groups=g[self.cfg.color].values,
+                    d = patterns.describe(g[cols].values, cols, times=self.ds.axis(cols).times,
+                                          groups=g[self.cfg.color].values,
                                           expected_times=all_times)
                     out[cl][subject] = {
                         "shape": d["shape"],
