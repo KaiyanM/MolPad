@@ -129,3 +129,18 @@ single-element vector still becomes a JSON array.
 Produce the structure above, read `manifest.json` for the file order, fill the
 four placeholders of `index.html`, and write the result next to (or with) the
 `css/`, `lib/` and `js/` folders. No build step is needed.
+
+## Agent step list (chat box)
+
+The Python agent (`python -m agent.run --play "question"`) prints a JSON array of
+steps that can be pasted into the chat box. This is separate from the payload
+above; it does not change `schema_version`.
+
+| kind | fields | played as |
+|---|---|---|
+| `dashboard` | `command` (`"function:param"`), `action`, `supported` | the command, with the virtual pointer |
+| `message` | `text`, `evidence` (ids of data steps) | a line of the dialogue, with an Evidence dropdown |
+| `data` | `id` (`"d1"`, ...), `action`, `op`, `args`, `findings` (short lines), `result` (full numbers) | not played; shown inside the Evidence dropdown of the messages that list its id |
+
+The message text gives the conclusion only. The findings and numbers it rests
+on are in the data steps it lists in `evidence`.

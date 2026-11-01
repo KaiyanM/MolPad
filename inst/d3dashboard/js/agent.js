@@ -439,8 +439,10 @@
 
   /* Play the step list written by the Python agent: an array of steps, or an
      object with a `steps` array (JSON text is parsed). Dashboard steps run as
-     commands, message steps are printed, data steps are skipped. `say(text,
-     kind)` receives each line; a failed step is reported and the rest go on. */
+     commands, message steps are printed, data steps are not played: they hold
+     the evidence (findings and numbers) that a message lists by id. `say(text,
+     kind, evidence)` receives each line; a failed step is reported and the rest
+     go on. */
   function play(input, say) {
     var steps = typeof input === "string" ? JSON.parse(input) : input;
     if (steps && !Array.isArray(steps)) steps = steps.steps;
@@ -448,11 +450,17 @@
     say = say || function () {};
     var done = 0;
     var chain = Promise.resolve();
+    var byId = {};
+    steps.forEach(function (step) {
+      if (step && step.kind === "data" && step.id) byId[step.id] = step;
+    });
     steps.forEach(function (step) {
       if (!step || step.kind === "data") return;
       chain = chain.then(function () {
         if (step.kind === "message") {
-          say(String(step.text), "bot");
+          var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
+            .filter(function (d) { return d; });
+          say(String(step.text), "bot", evidence);
           done += 1;
           return MP.cursor.wait(900);
         }

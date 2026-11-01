@@ -4,10 +4,37 @@
 
   var el = {};
 
-  function say(text, kind) {
-    var p = document.createElement("p");
-    p.className = "mp-chat-msg " + kind;
-    p.textContent = text;
+  function node(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  /* A closed "Evidence" dropdown under an agent message: per data step its
+     action, its findings, and a second dropdown with the full numbers. */
+  function evidenceBox(evidence) {
+    var box = node("details", "mp-chat-evidence");
+    box.appendChild(node("summary", null, "Evidence (" + evidence.length + ")"));
+    evidence.forEach(function (step) {
+      var item = node("div", "mp-ev-step");
+      item.appendChild(node("div", "mp-ev-action", step.action));
+      var list = node("ul", "mp-ev-findings");
+      (step.findings || []).forEach(function (line) { list.appendChild(node("li", null, line)); });
+      item.appendChild(list);
+      var raw = node("details", "mp-ev-raw");
+      raw.appendChild(node("summary", null, "Numbers"));
+      raw.appendChild(node("pre", null, JSON.stringify(step.result, null, 1)));
+      item.appendChild(raw);
+      box.appendChild(item);
+    });
+    return box;
+  }
+
+  function say(text, kind, evidence) {
+    var p = node("div", "mp-chat-msg " + kind);
+    p.appendChild(node("span", null, text));
+    if (evidence && evidence.length) p.appendChild(evidenceBox(evidence));
     el.chat_log.appendChild(p);
     el.chat_log.scrollTop = el.chat_log.scrollHeight;
   }

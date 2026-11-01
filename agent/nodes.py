@@ -16,7 +16,6 @@ from .schemas import (Completeness, Descriptor, Display, Filters, Keywords, Kind
 DEBUG = os.getenv("AGENT_DEBUG", "").strip() not in ("", "0")
 
 MAX_SUB_CLAIMS = 4
-RESULT_CHARS = 10000  # per data result shown to the message writer
 
 
 class AgentState(TypedDict, total=False):
@@ -264,7 +263,7 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
 
         # a pattern / network step without a criterion is a descriptor the LLM put in the wrong slot
         chosen = [st for st in selector.get("steps") or []
-                  if st.get("criterion") or st["kind"] not in ("pattern", "network")]
+                  if st.get("criterion") or st["kind"] not in ("pattern", "ribbon", "network")]
         for st in chosen or [{"kind": "all"}]:
             kind = st["kind"]
             if kind == "pattern" and st.get("criterion") == "compare":
@@ -276,6 +275,10 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
                 do("evaluate pattern and select cluster", "select_by_pattern",
                    criterion=st.get("criterion"), subject=_match(st.get("subject") or "", ds.subjects),
                    timepoint=tp, position=st.get("position"), top_n=st.get("top_n"))
+            elif kind == "ribbon":
+                do("evaluate ribbon and select cluster", "select_by_ribbon",
+                   criterion=st.get("criterion"), measure=st.get("measure"),
+                   subject=_match(st.get("subject") or "", ds.subjects), top_n=st.get("top_n"))
             elif kind == "feature_number":
                 do("evaluate feature number and select cluster", "select_by_feature_number",
                    top_n=st.get("top_n"))
@@ -339,7 +342,9 @@ def run_data(state: AgentState):
         if run["label"]:
             _debug("data", f"-- filter variant: {run['label']}")
         for st in run["steps"]:
-            _debug("data", f"{st['action']}  {_filled(st['args'])}  =>  {json.dumps(st['result'])[:140]}")
+            _debug("data", f"{st['action']}  {_filled(st['args'])}")
+            for line in st["findings"]:
+                _debug("  finding", line)
         groups = "; ".join((f"{g['label']}: " if g.get("label") else "") + ", ".join(g["clusters"])
                            for g in run["groups"])
         _debug("data", f"target groups: {groups or '(none: answer covers all clusters)'}"
@@ -394,15 +399,17 @@ def compose_messages(state: AgentState):
     """Write every message text from the data results, then drop the scaffolding."""
     steps = state["steps"]
     slots = [s for s in steps if s["kind"] == "message"]
-    data = [{"action": s["action"], "args": s["args"], "result": json.dumps(s["result"])[:RESULT_CHARS]}
-            for s in steps if s["kind"] == "data"]
+    # the writer reads the findings only; the full results stay in the steps as evidence
+    data = "\n".join(f"[{s['id']}] {s['action']}\n" + "\n".join(f"  - {line}" for line in s["findings"])
+                     for s in steps if s["kind"] == "data") or "(no data actions)"
     notes = list(state.get("assumptions") or []) + list((state.get("keyword_map") or {}).get("notes", []))
     for u in state.get("units") or []:
         notes += [f"ignored, not in the data: {d}" for d in u["dropped"]]
     user = (f"QUESTION: {state['question']}\n\n"
             f"ASSUMPTIONS: {json.dumps(notes)}\n\n"
-            f"DATA ACTIONS AND RESULTS:\n{json.dumps(data, indent=1)}\n\n"
-            "MESSAGE SLOTS:\n" + "\n".join(f"{i + 1}. {json.dumps(s['about'])}" for i, s in enumerate(slots)))
+            f"FINDINGS OF THE DATA ACTIONS:\n{data}\n\n"
+            "MESSAGE SLOTS:\n" + "\n".join(f"{i + 1}. {json.dumps(s['about'])}  findings: {', '.join(s['evidence']) or 'none'}"
+                                         for i, s in enumerate(slots)))
     user += f"\n\nWrite exactly {len(slots)} message(s), one per slot."
     texts = _judge(Messages, prompts.COMPOSE, state, user)["texts"]
     if len(texts) != len(slots):   # the writer sometimes merges slots; ask once more
@@ -411,7 +418,8 @@ def compose_messages(state: AgentState):
     out, i = [], 0
     for s in steps:
         if s["kind"] == "message":
-            s = {"kind": "message", "text": texts[i] if i < len(texts) else ""}
+            s = {"kind": "message", "text": texts[i] if i < len(texts) else "",
+                 "evidence": s.get("evidence", [])}
             i += 1
             if not s["text"].strip():   # never play an empty message
                 continue

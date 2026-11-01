@@ -165,12 +165,21 @@ N4 = """You choose the rule that picks the clusters a data question is about. Gi
 steps when a second rule works on the result of the first.
 
 kind
-- pattern: increase, decrease, peak, hump, opposite shape, tightest / widest ribbon. criterion:
+- pattern: increase, decrease, peak, hump, opposite shape, colour lines disagree. criterion:
     increase | decrease | increase_and_decrease (the question asks for both groups)
     peak_at (set `timepoint` for an exact column such as C_5, else `position` early / mid / late)
     compare (two curves are set against each other; see "compare" below)
-    tightest_ribbon | widest_ribbon | color_divergence (the colour lines disagree)
+    color_divergence (the colour mean lines disagree)
   Set `subject` when the shape is read in one sample group.
+- ribbon: the clusters are chosen by the ribbon of the pattern plot, the band between the highest
+  and lowest feature: tight / narrow / wide / spread out ribbon, "its features follow almost the
+  same trajectory", the ribbon widens or narrows. criterion:
+    tightest_ribbon | widest_ribbon
+    expanding_ribbon | contracting_ribbon (the width grows / shrinks over time)
+  measure (tightest / widest only): mean_width | max_width | area when the question names one
+  ("on average", "at any timepoint", "area"); leave it empty when it is vague: then each
+  definition gives its own answer. Leave top_n empty for a vague ribbon question, even after
+  "which cluster". Set `subject` when the ribbon is read in one sample group.
 - feature_number: most features, most enriched, largest, dominant, top clusters. Set top_n when the
   question gives a number ("which cluster" = 1, "the two clusters" = 2); leave it empty for "the
   clusters that hold most of its features".
@@ -205,7 +214,9 @@ Examples
 "Which clusters increase steadily in cheese A, and which decrease?" -> pattern increase_and_decrease, subject=A
 "Which clusters peak in the middle of ripening rather than at the start or end?" -> pattern peak_at position=mid
 "Which GO terms recur among contigs in a cluster that peaks at C_5?" -> pattern peak_at timepoint=C_5
-"Which cluster has the tightest ribbon?" -> pattern tightest_ribbon
+"Which cluster has the tightest ribbon, meaning its features follow almost the same trajectory?" -> ribbon tightest_ribbon
+"Which cluster has the smallest ribbon area in cheese C?" -> ribbon tightest_ribbon measure=area subject=C
+"Whose ribbon widens over ripening?" -> ribbon expanding_ribbon
 "Are there clusters whose cheese A and cheese C halves have opposite shapes?" -> pattern compare tool=opposite between=subjects a={subject: A} b={subject: C}
 "Which clusters rise early in cheese A and then fall back?" -> pattern compare tool=opposite between=windows a={subject: A} b={subject: A}
 "Do any clusters behave differently in A_1 to A_3 than in A_3 to A_5?" -> pattern compare tool=opposite between=windows a={subject: A, start: A_1, end: A_3} b={subject: A, start: A_3, end: A_5}
@@ -280,22 +291,27 @@ Examples
 
 COMPOSE = """You write the messages an analysis agent prints next to an interactive dashboard.
 
-You get the user's question, the backend data actions with their results, and a numbered list of
-message slots. Each slot says where in the playback it appears and which clusters are in focus at
-that moment. Write one message per slot, in order.
+You get the user's question, the findings of the backend data actions (short lines, each data
+action with an id such as [d2]), and a numbered list of message slots. Each slot says where in the
+playback it appears, which clusters are in focus at that moment, and which findings it rests on.
+Write one message per slot, in order.
+
+The user sees every number behind a message in an Evidence dropdown under it. So a message gives
+the conclusion, not the data.
 
 Rules
-- Use only numbers, cluster ids and names that appear in the results. Never invent a value.
-- Each message answers the part of the question its slot covers, and all of that part: if the
-  question also asks for a pattern, a composition or a count, report it from the matching result
-  (for a pattern, take shape, peak, ribbon width and constant features from the "text" the
-  backend wrote per cluster and sample group; you may shorten it but not change it; say how
-  several patterns compare). Keep it to 1-4 sentences.
-- A slot's "report" list names descriptors that must appear in its message: pattern (from
-  "evaluate pattern"), level2 (class counts or fractions), level3 (ids), weight (edges or
-  neighbours), feature_number (counts per cluster). Leaving one out is an error.
-- Name the metric when the backend chose one for a vague criterion.
+- Answer the part of the question the slot covers directly, in 1-3 sentences. State the conclusion
+  and at most the one number that decides it (the winning value, or the margin when it is small).
+- Do not list values per cluster, per timepoint or per class; do not repeat the findings line by line.
+- Use only cluster ids, names and numbers that appear in the findings. Never invent a value.
+- A slot's "report" list names descriptors the message must cover: pattern (shape and peak, from
+  "evaluate pattern"), level2 (the dominant classes), level3 (the ids), weight (edges or
+  neighbours), feature_number (how many features). Cover each in a few words; leaving one out is
+  an error. When several patterns are reported, say how they compare.
+- Name the metric in a few words when the backend chose one for a vague criterion. When several
+  definitions were tried (e.g. ribbon mean width, max width, area), name the definition this
+  message is about and say whether the definitions agree.
 - State every assumption listed under ASSUMPTIONS in the first message.
-- If a result has an "error", or a filter left no features, say so plainly.
-- If ids came from an external concept, say they come from model knowledge and were not looked up.
+- If a finding says "failed", or a filter left no features, say so plainly.
+- If ids came from model knowledge, say they were not looked up.
 - A slot with a "write" instruction: follow it."""

@@ -2,20 +2,26 @@
 
 Pure Python, no LLM. A step is one of
 
-    {"kind": "data",      "action", "op", "args", "result"}
+    {"kind": "data",      "id", "action", "op", "args", "findings", "result"}
     {"kind": "dashboard", "action", "command", "supported"}
-    {"kind": "message",   "text", "about"}
+    {"kind": "message",   "text", "about", "evidence"}
 
 Data steps come first because they decide what is shown. Dashboard steps and
 messages then follow in playback order. Message texts are left empty here and
-written afterwards from `about` and the data results.
+written afterwards from `about` and the findings of the data steps.
+
+A data step keeps its findings (short lines, see findings.py) apart from its
+result (the full numbers). A message lists in `evidence` the ids of the data
+steps it rests on, so the dashboard can show their numbers under it.
 """
 
 from .config import SUPPORTED_COMMANDS
+from .findings import conclude
 
 
 def data_step(action, op, args, result):
-    return {"kind": "data", "action": action, "op": op, "args": args, "result": result}
+    return {"kind": "data", "action": action, "op": op, "args": args,
+            "findings": conclude(op, args, result), "result": result}
 
 
 def dash_step(action, fn, param=None):
@@ -25,7 +31,26 @@ def dash_step(action, fn, param=None):
 
 
 def message_step(about, text=""):
-    return {"kind": "message", "text": text, "about": about}
+    return {"kind": "message", "text": text, "about": about, "evidence": []}
+
+
+def attach_evidence(steps):
+    """Give each message the ids of the data steps it rests on.
+
+    A message about one (sub-)question run gets the data steps of that run; a message
+    without one (the conclusion of an evidence chain) gets all of them.
+    """
+    data = [s for s in steps if s["kind"] == "data" and s.get("id")]
+    for s in steps:
+        if s["kind"] != "message":
+            continue
+        about = s.get("about") or {}
+        if "unit" in about:
+            s["evidence"] = [d["id"] for d in data
+                             if d.get("unit") == about["unit"] and d.get("run") == about.get("run")]
+        else:
+            s["evidence"] = [d["id"] for d in data]
+    return steps
 
 
 class _Playback:
@@ -129,7 +154,10 @@ def leaf_L2(note):
 
 def assemble(leaf, units, display):
     """Steps for L3-L8. `units` is one entry per (sub-)question, each with its runs."""
-    steps = [s for u in units for r in u["runs"] for s in r["steps"]]
+    steps = [{**s, "id": None, "unit": ui, "run": ri}
+             for ui, u in enumerate(units) for ri, r in enumerate(u["runs"]) for s in r["steps"]]
+    for i, s in enumerate(steps, 1):
+        s["id"] = f"d{i}"
     play = _Playback()
     one_by_one = leaf == "L7" or display["grouping"] == "one_by_one"
 
@@ -176,4 +204,4 @@ def assemble(leaf, units, display):
     if len(units) > 1:
         play.say(leaf=leaf, write="conclusion: argued yes/no over the steps above; say that the "
                  "dashboard gives evidence and does not prove cause")
-    return steps + play.steps
+    return attach_evidence(steps + play.steps)

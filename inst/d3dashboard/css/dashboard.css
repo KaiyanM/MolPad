@@ -429,6 +429,14 @@ table.mp-table a { color: #1a5276; }
 .mp-chat-msg.user { text-align: right; color: var(--mp-accent-dark); }
 .mp-chat-msg.bot { color: var(--mp-text); }
 .mp-chat-msg.error { color: #a23b3b; }
+.mp-chat-evidence { margin-top: 4px; font-size: 0.85em; color: var(--mp-logo); white-space: normal; }
+.mp-chat-evidence > summary { cursor: pointer; }
+.mp-ev-step { margin: 4px 0 6px 10px; }
+.mp-ev-action { font-weight: 600; }
+.mp-ev-findings { margin: 2px 0; padding-left: 16px; }
+.mp-ev-raw > summary { cursor: pointer; }
+.mp-ev-raw pre { max-height: 180px; overflow: auto; margin: 2px 0; padding: 4px;
+  background: rgba(0, 0, 0, 0.04); font-size: 0.9em; white-space: pre; }
 .mp-chat-form { display: flex; gap: 6px; padding: 8px 10px; }
 .mp-chat-form input {
   flex: 1;

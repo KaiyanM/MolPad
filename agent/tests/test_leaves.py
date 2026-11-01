@@ -92,7 +92,7 @@ def test_L7_one_by_one_groups():
 
 
 def test_L7_vague_criterion_splits_candidates():
-    u = unit(steps=[{"kind": "pattern", "criterion": "tightest_ribbon"}])
+    u = unit(steps=[{"kind": "ribbon", "criterion": "tightest_ribbon", "measure": "mean_width"}])
     leaf, steps = play([u], grouping="one_by_one")
     assert leaf == "L7"
     cmds = commands(steps)

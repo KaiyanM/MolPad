@@ -86,6 +86,44 @@ def test_spread_ribbon_and_consistency():
     assert P.spread(one_wide, AXIS)["ribbon_width"]["widest_at"] == "A_3"
 
 
+def test_width_measures_and_area_on_uneven_times():
+    m = np.array([[0, 0, 0, 0, 0], [1, 2, 3, 2, 1]], dtype=float)
+    w = P.width(m, AXIS)
+    assert w["per_timepoint"]["A_3"] == 3 and w["mean"] == pytest.approx(1.8)
+    assert w["max"] == 3 and w["widest_at"] == "A_3" and w["narrowest_at"] == "A_1"
+    assert w["area"] == pytest.approx(8.0)                   # trapezoid over times 1..5
+    assert w["variability"]["sd"] == pytest.approx(np.std([1, 2, 3, 2, 1], ddof=1))
+    uneven = P.TimeAxis.of(["C_1", "C_3", "C_4", "C_5"])     # no C_2: the first step counts twice
+    u = P.width(np.array([[0, 0, 0, 0], [2, 2, 2, 2.0]]), uneven)
+    assert u["area"] == pytest.approx(8.0) and u["area_per_time"] == pytest.approx(2.0)
+    gap = m.copy()
+    gap[:, 1] = np.nan                                        # a timepoint with no values is skipped
+    assert P.width(gap, AXIS)["n_timepoints"] == 4 and "A_2" not in P.width(gap, AXIS)["per_timepoint"]
+
+
+@pytest.mark.parametrize("w, direction", [
+    ([0.2, 0.5, 0.9, 1.2, 1.6], "expanding"),
+    ([1.6, 1.2, 0.9, 0.5, 0.2], "contracting"),
+    ([1.0, 1.02, 0.98, 1.01, 1.0], "steady"),
+    ([0.2, 1.5, 0.2, 1.5, 0.2], "mixed"),
+])
+def test_width_trend(w, direction):
+    assert P.width_trend(w, AXIS)["direction"] == direction
+
+
+def test_ribbon_and_score():
+    m = np.array([[0, 0, 0, 0, 0], [0.2, 0.5, 0.9, 1.2, 1.6]])
+    r = P.ribbon(m, AXIS)
+    assert r["trend"]["direction"] == "expanding" and r["n_features"] == 2
+    assert P.ribbon_score(r, "mean_width") == pytest.approx(0.88)
+    assert P.ribbon_score(r, "max_width") == pytest.approx(1.6)
+    assert P.ribbon_score(r, "slope") > 0
+    assert set(P.TIGHTNESS) == {"mean_width", "max_width", "area"}
+    with pytest.raises(ValueError):
+        P.ribbon_score(r, "relative_width")
+    assert "ribbon widens" in P.describe(m, LABELS)["text"]
+
+
 def test_divergence_between_subgroups():
     m = np.vstack([np.tile([0, 0, 0, 0, 0.0], (5, 1)), np.tile([0, 0, 2, 0, 0.0], (5, 1))])
     d = P.divergence(m, ["x"] * 5 + ["y"] * 5, AXIS)

@@ -57,6 +57,23 @@ def test_pattern_groups(ds):
     assert set(r["shape_per_cluster"]["Group_1"]) == {"A"}
 
 
+def test_ribbon_definitions(ds):
+    r = Session(ds).run("select_by_ribbon", criterion="tightest_ribbon")
+    assert set(r["definitions"]) == {"mean_width", "max_width", "area"} and r["measure"] == "all"
+    picks = {tuple(d["ranking"]) for d in r["definitions"].values()}
+    assert len(r["groups"]) == len(picks)                    # definitions that agree share a group
+    assert all(len(d["ranking"]) == 1 for d in r["definitions"].values())
+    assert r["definitions_agree"] == (len(picks) == 1)
+    one = Session(ds).run("select_by_ribbon", criterion="widest_ribbon", measure="area", top_n=2)
+    assert list(one["definitions"]) == ["area"] and len(one["groups"]) == 2
+    v = one["definitions"]["area"]["value_per_cluster"]
+    assert v[one["groups"][0]["clusters"][0]] >= v[one["groups"][1]["clusters"][0]]
+    a = Session(ds).run("select_by_ribbon", criterion="expanding_ribbon", subject="A")
+    assert a["subjects"] == ["A"]
+    assert all(a["per_cluster"][c]["A"]["width_trend"] == "expanding" for c in a["groups"][0]["clusters"])
+    assert "error" in Session(ds).run("select_by_ribbon", criterion="tightest_ribbon", measure="relative")
+
+
 def test_level3_ids(ds):
     s = Session(ds)
     r = s.run("filter_level3", column="KEGG_ID", values=["ko:K03196", "K99999"])

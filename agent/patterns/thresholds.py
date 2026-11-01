@@ -16,6 +16,7 @@ class Thresholds:
     constant_tol: float = 1e-9     # a feature whose values differ by less than this is "constant"
     # spread
     consistent_r: float = 0.7      # mean feature-to-mean correlation at or above this is "consistent"
+    width_flat: float = 0.1        # a ribbon whose width moves less than this is "steady" (data units)
     # fit
     fit_r2: float = 0.8            # a fitted function must explain this share of the variance to count
     # compare

@@ -109,7 +109,7 @@ class Session:
 
     OPS = (
         "filter_cols", "filter_level1", "filter_level2", "filter_level3",
-        "select_by_pattern", "select_by_comparison", "select_by_feature_number", "select_by_network",
+        "select_by_pattern", "select_by_ribbon", "select_by_comparison", "select_by_feature_number", "select_by_network",
         "select_by_feature_lookup", "select_given", "select_all",
         "describe_pattern", "describe_level2", "describe_level3", "describe_weight",
         "describe_feature_number",
@@ -278,20 +278,15 @@ class Session:
                       if any(s["shape"] != "even" and hit(s["peak"]) for s in curves[c].values())]
             groups = [{"label": f"peak at {timepoint or position or 'mid'}", "clusters": picked}]
             metric = "timepoint of the maximum of the cluster mean, per sample group"
-        elif criterion in ("tightest_ribbon", "widest_ribbon", "color_divergence"):
-            if criterion == "color_divergence":
-                lines = self.df.groupby(["cluster", self.cfg.color])[self.cols].mean()
-                width = (lines.groupby("cluster").max() - lines.groupby("cluster").min()).mean(axis=1)
-                metric = "mean gap between the highest and lowest colour mean line"
-            else:
-                g = self.df.groupby("cluster")[self.cols]
-                width = (g.max() - g.min()).mean(axis=1)
-                metric = "mean min-max ribbon width over the timepoints"
-            ranked = width.sort_values(ascending=(criterion == "tightest_ribbon"))
+        elif criterion == "color_divergence":
+            lines = self.df.groupby(["cluster", self.cfg.color])[self.cols].mean()
+            gap = (lines.groupby("cluster").max() - lines.groupby("cluster").min()).mean(axis=1)
+            ranked = gap.sort_values(ascending=False)
             groups = [{"label": f"{criterion} #{i + 1}", "clusters": [c]}
                       for i, c in enumerate(ranked.index[: top_n or DEFAULT_TOP])]
             self._set(groups)
-            return {"metric": metric, "groups": groups, "value_per_cluster": ranked.round(3).to_dict()}
+            return {"metric": "mean gap between the highest and lowest colour mean line",
+                    "groups": groups, "value_per_cluster": ranked.round(3).to_dict()}
         else:
             raise ValueError(f"unknown pattern criterion '{criterion}'")
 
@@ -300,6 +295,86 @@ class Session:
         self._set(groups)
         shapes = {c: {s: {"shape": v["shape"], "peak": v["peak"]} for s, v in curves[c].items()} for c in order}
         return {"metric": metric, "groups": groups, "shape_per_cluster": shapes}
+
+    def select_by_ribbon(self, criterion, measure=None, subject=None, top_n=None):
+        """Pick clusters by their ribbon in the pattern plot (agent/patterns/ribbon).
+
+        The ribbon of each cluster is read per sample group, since the groups share time values.
+
+        tightest_ribbon / widest_ribbon   rank by the ribbon width. measure: mean_width, max_width or
+            area; left empty or 'all' it is vague, and each definition in patterns.TIGHTNESS gives
+            its own answer. Definitions that pick the same cluster share one group.
+        expanding_ribbon / contracting_ribbon   clusters whose width grows (shrinks) steadily in every
+            sample group read, steepest first.
+        A cluster's width over sample groups is the mean of their mean / max width, and the sum of
+        their areas.
+        """
+        th = patterns.Thresholds()
+        subjects = {s: c for s, c in self._subjects(subject).items() if c}
+        rb = {}
+        for cl, g in self.df.groupby("cluster"):
+            rb[cl] = {s: patterns.ribbon(g[cols].values, patterns.TimeAxis.of(cols), th)
+                      for s, cols in subjects.items()}
+        order = [c for c in self.ds.clusters if c in rb]
+
+        def value(cl, m):
+            v = [patterns.ribbon_score(r, m) for r in rb[cl].values()]
+            v = [x for x in v if x is not None]
+            if not v:
+                return None
+            return float(np.sum(v)) if m == "area" else float(np.mean(v))
+
+        per_subject = {c: {s: {"mean_width": r["width"].get("mean"), "max_width": r["width"].get("max"),
+                               "area": r["width"].get("area"), "widest_at": r["width"].get("widest_at"),
+                               "width_trend": r["trend"]["direction"]}
+                           for s, r in rb[c].items()} for c in order}
+
+        if criterion in ("expanding_ribbon", "contracting_ribbon"):
+            way = criterion.split("_")[0]
+            hits = [c for c in order if all(r["trend"]["direction"] == way for r in rb[c].values())]
+            hits.sort(key=lambda c: -abs(value(c, "slope") or 0))
+            groups = [{"label": f"{way} ribbon", "clusters": hits[: top_n or len(hits)]}]
+            self._set(groups)
+            return {"criterion": criterion, "subjects": list(subjects),
+                    "metric": f"{patterns.RIBBON_METRIC['slope']}; {way} when the Spearman rho of the "
+                              f"width against time is {'>=' if way == 'expanding' else '<= -'}{th.trend_rho} "
+                              f"and the width moves by at least {th.width_flat}",
+                    "groups": groups, "per_cluster": per_subject}
+
+        if criterion not in ("tightest_ribbon", "widest_ribbon"):
+            raise ValueError(f"unknown ribbon criterion '{criterion}'")
+        vague = measure in (None, "", "all")
+        if not vague and measure not in patterns.TIGHTNESS:
+            raise ValueError(f"unknown ribbon measure '{measure}'; choose from {list(patterns.TIGHTNESS)}")
+        measures = patterns.TIGHTNESS if vague else (measure,)
+        keep = top_n or (1 if vague else DEFAULT_TOP)
+        word = criterion.split("_")[0]
+        definitions, picks = {}, {}
+        for m in measures:
+            vals = {c: value(c, m) for c in order}
+            ranked = sorted((c for c in order if vals[c] is not None), key=lambda c: vals[c],
+                            reverse=(criterion == "widest_ribbon"))
+            definitions[m] = {"metric": patterns.RIBBON_METRIC[m], "ranking": ranked[:keep],
+                              "value_per_cluster": {c: vals[c] for c in ranked}}
+            picks[m] = tuple(ranked[:keep])
+
+        if vague:
+            merged = {}           # same pick under several definitions -> one group
+            for m in measures:
+                merged.setdefault(picks[m], []).append(m.replace("_", " "))
+            groups = [{"label": f"{word} by " + (" and ".join(ms) if len(ms) < 3
+                                                 else ", ".join(ms[:-1]) + " and " + ms[-1]),
+                       "clusters": list(p)}
+                      for p, ms in merged.items() if p]
+        else:
+            groups = [{"label": f"{word} by {measure.replace('_', ' ')} #{i + 1}", "clusters": [c]}
+                      for i, c in enumerate(picks[measure])]
+        self._set(groups)
+        return {"criterion": criterion, "subjects": list(subjects),
+                "measure": "all" if vague else measure, "definitions": definitions,
+                "definitions_agree": len({picks[m] for m in measures}) == 1 if vague else None,
+                "groups": groups,
+                "per_cluster": per_subject}
 
     def _side(self, side, subject):
         """One side of a comparison: the timepoint columns of a sample group and the (start, end)
@@ -543,6 +618,9 @@ class Session:
                         "fit_r2": d["fit"]["r2"],
                         "mean": [round(v, 2) for v in d["mean"].values()],
                         "ribbon_width": d["spread"]["ribbon_width"]["mean"],
+                        "ribbon_max_width": (d["ribbon"] or {}).get("width", {}).get("max"),
+                        "ribbon_area": (d["ribbon"] or {}).get("width", {}).get("area"),
+                        "ribbon_trend": (d["ribbon"] or {}).get("trend", {}).get("direction"),
                         "fraction_constant_features": d["missingness"]["fraction_constant"],
                         "text": d["text"],
                     }

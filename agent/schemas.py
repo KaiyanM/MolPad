@@ -5,7 +5,9 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field
 
 PATTERN_CRITERIA = ("increase", "decrease", "increase_and_decrease", "peak_at", "compare",
-                    "tightest_ribbon", "widest_ribbon", "color_divergence")
+                    "color_divergence")
+RIBBON_CRITERIA = ("tightest_ribbon", "widest_ribbon", "expanding_ribbon", "contracting_ribbon")
+RIBBON_MEASURES = ("mean_width", "max_width", "area", "all")
 COMPARE_TOOLS = ("opposite", "similar", "shifted", "diverging", "converging")
 NETWORK_CRITERIA = ("most_edges", "strongest_edge", "isolated", "connected_pairs", "neighbours",
                     "connectivity", "components")
@@ -63,10 +65,13 @@ class CurveSlice(BaseModel):
 
 
 class SelectorStep(BaseModel):
-    kind: Literal["pattern", "feature_number", "network", "feature_lookup", "given", "all"]
-    criterion: Optional[Literal[PATTERN_CRITERIA + NETWORK_CRITERIA]] = Field(
-        None, description="required for pattern and network")
-    subject: Optional[str] = Field(None, description="pattern: sample group the shape is read in")
+    kind: Literal["pattern", "ribbon", "feature_number", "network", "feature_lookup", "given", "all"]
+    criterion: Optional[Literal[PATTERN_CRITERIA + RIBBON_CRITERIA + NETWORK_CRITERIA]] = Field(
+        None, description="required for pattern, ribbon and network")
+    measure: Optional[Literal[RIBBON_MEASURES]] = Field(
+        None, description="ribbon tightest / widest: the width measure the question names; "
+                          "empty or 'all' when it is vague")
+    subject: Optional[str] = Field(None, description="pattern / ribbon: sample group the shape is read in")
     timepoint: Optional[str] = Field(None, description="peak_at: exact timepoint column, e.g. 'C_5'")
     position: Optional[Literal["early", "mid", "late"]] = Field(
         None, description="peak_at: when no exact timepoint is named")

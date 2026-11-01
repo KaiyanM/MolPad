@@ -7,6 +7,7 @@ from .divergence import divergence
 from .fit import fit_curve
 from .missingness import missingness
 from .peaks import peaks
+from .ribbon import ribbon
 from .spread import spread
 from .thresholds import DEFAULT
 from .timeaxis import TimeAxis
@@ -30,7 +31,7 @@ def shape_of(tr, pk):
     return "mixed"
 
 
-def _text(shape, tr, pk, ch, ms, sp, dv):
+def _text(shape, tr, pk, ch, ms, sp, dv, rb=None):
     s = []
     if shape == "unknown":
         return "Too few timepoints to describe."
@@ -58,6 +59,10 @@ def _text(shape, tr, pk, ch, ms, sp, dv):
                  f"feature SD {sp['sd']['mean']:.2f}"
                  + (f"; features {'follow' if sp['consistent'] else 'do not closely follow'} "
                     f"the mean (r = {c:.2f})." if c is not None else "."))
+    if rb and rb["trend"]["direction"] in ("expanding", "contracting"):
+        w = list(rb["width"]["per_timepoint"].values())
+        s.append(f"The ribbon {'widens' if rb['trend']['direction'] == 'expanding' else 'narrows'} "
+                 f"over time: width {w[0]:.2f} -> {w[-1]:.2f}.")
     bits = []
     if ms["fraction_missing"] > 0:
         bits.append(f"{ms['fraction_missing']:.1%} of values missing, most at {ms['most_missing_timepoint']}")
@@ -87,8 +92,8 @@ def describe(matrix, labels, times=None, groups=None, missing_value=None, expect
                     (they are still counted under missingness)
 
     Returns a dict with keys shape, mean, trend, peaks, changes, missingness,
-    spread, fit (the fitted function, see fit.py), divergence (when groups are
-    given) and text.
+    spread, ribbon (width measures and width trend, see ribbon.py), fit (the
+    fitted function, see fit.py), divergence (when groups are given) and text.
     """
     axis = TimeAxis.of(labels, times)
     m = np.asarray(matrix, dtype=float)
@@ -112,15 +117,16 @@ def describe(matrix, labels, times=None, groups=None, missing_value=None, expect
     pk = peaks(mean, axis, th)
     ch = changes(mean, axis)
     sp = spread(work, axis, th)
+    rb = ribbon(work, axis, th) if len(work) else None
     dv = divergence(work, groups, axis) if groups is not None and len(work) else None
     shape = shape_of(tr, pk)
     ft = fit_curve(mean, axis, th)
     out = {"shape": shape, "mean": {axis.labels[i]: float(mean[i]) for i in range(len(axis))},
            "trend": tr, "peaks": pk, "changes": ch, "missingness": ms, "spread": sp,
-           "fit": {**ft.as_dict(), "function": ft}}
+           "ribbon": rb, "fit": {**ft.as_dict(), "function": ft}}
     if dv is not None:
         out["divergence"] = dv
-    out["text"] = _text(shape, tr, pk, ch, ms, sp, dv)
+    out["text"] = _text(shape, tr, pk, ch, ms, sp, dv, rb)
     if ft.shape not in ("unknown", "flat"):
         out["text"] += (f" Fitted overall shape: {ft.shape} (R2 = {ft.r2:.2f})." if ft.fits
                         else f" No simple function fits the curve (best R2 = {ft.r2:.2f}).")
