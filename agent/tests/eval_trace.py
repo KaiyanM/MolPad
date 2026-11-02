@@ -1,6 +1,7 @@
 """Compare the agent with the trace table of the decision tree (section 5).
 
     python -m agent.tests.eval_trace [--only Q15,Q22] [--workers 4] [--out results.json]
+                                     [--pipeline tree|frame]
 
 Needs an API key and makes about eight LLM calls per question. This is a
 report of where the node prompts disagree with the tree, not a pass/fail test.
@@ -11,6 +12,7 @@ is an upper bound.
 import argparse
 import csv
 import json
+import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -101,7 +103,10 @@ def main():
     p.add_argument("--only", help="comma-separated question ids")
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--out", help="write full outputs to this JSON file")
+    p.add_argument("--pipeline", choices=("tree", "frame"), help="sets AGENT_PIPELINE for this run")
     a = p.parse_args()
+    if a.pipeline:
+        os.environ["AGENT_PIPELINE"] = a.pipeline
 
     table = expected_rows()
     with open(QUESTIONS / "cheese_questions.csv", encoding="utf-8", errors="replace") as fh:
@@ -114,7 +119,7 @@ def main():
 
     nodes = ("N0", "N1", "N2", "N3", "N4", "N5", "leaf")
     hits = {n: [0, 0] for n in nodes}
-    full = {}
+    full, costs = {}, []
     for qid, out, err in results:
         exp = expected(table[qid])
         if err:
@@ -131,12 +136,23 @@ def main():
                 hits[n][0] += 1
             else:
                 wrong.append(f"{n}: expected {exp[n]}, got {act.get(n)}")
-        print(f"{qid}  {'ok' if not wrong else '; '.join(wrong)}")
+        c = out["trace"].get("cost") or {}
+        if c:
+            costs.append(c)
+        tag = f"[{c.get('calls', '?')} calls, {c.get('output_tokens', 0):.0f} out tok, {c.get('wall_seconds', 0):.0f}s]"
+        print(f"{qid}  {tag:34s} {'ok' if not wrong else '; '.join(wrong)}")
         full[qid] = {"question": questions[qid], "expected": exp, "actual": act, **out}
 
     print("\nAgreement with the trace table")
     for n in nodes:
         print(f"  {n:5s} {hits[n][0]:2d} / {hits[n][1]:2d}")
+    if costs:
+        n = len(costs)
+        mean = {k: sum(c.get(k, 0) for c in costs) / n
+                for k in ("calls", "input_tokens", "output_tokens", "reasoning_tokens", "wall_seconds")}
+        print(f"\nMean per question ({n}): {mean['calls']:.1f} LLM calls, {mean['input_tokens']:.0f} input / "
+              f"{mean['output_tokens']:.0f} output tokens ({mean['reasoning_tokens']:.0f} reasoning), "
+              f"{mean['wall_seconds']:.1f}s wall")
     if a.out:
         Path(a.out).write_text(json.dumps(full, indent=1), encoding="utf-8")
 

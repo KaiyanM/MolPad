@@ -155,3 +155,15 @@ def test_not_a_dashboard(tmp_path):
     page.write_text("<html></html>")
     with pytest.raises(ValueError, match="molpad-data"):
         payload.read_payload(page)
+
+
+def test_clean_state_reads_shared_filters():
+    ds = load_dataset()
+    s = serve.clean_state({"level1": ["Pseudomonadota", "Nope"], "level2": ["Bacilli"],
+                           "scope": "all", "colour_by": "level2"}, ds)
+    assert s["level1"] == ["Pseudomonadota"] and s["level2"] == ["Bacilli"]
+    assert s["pathway"] == "Pseudomonadota" and s["scope"] == "all" and s["colour_by"] == "level2"
+    old = serve.clean_state({"pathway": "Bacillota"}, ds)          # a page from before the filter bar
+    assert old["level1"] == ["Bacillota"]
+    default = serve.clean_state({}, ds)
+    assert default["level1"] == [] and default["scope"] == "filtered" and default["pathway"] == ""

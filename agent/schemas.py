@@ -115,3 +115,66 @@ class Display(BaseModel):
 
 class Messages(BaseModel):
     texts: list[str] = Field(description="one text per requested message, in the same order")
+
+
+# ---- frame pipeline (AGENT_PIPELINE=frame) ---------------------------------
+# One parse call fills the roles of a question; code then looks every mention up
+# in the data. The roles map onto the tree: K=N0, R=N1, H=N2, C+D=N3, A+E=N4,
+# B=N5, F=N6.
+
+SELECTOR_KINDS = ("pattern", "ribbon", "feature_number", "network", "feature_lookup", "example", "given", "all")
+MEASURES = ("pattern", "level2", "level3", "weight", "feature_number")
+
+
+class Mention(BaseModel):
+    """A term of the question that may name something in the data."""
+    text: str = Field(description="copied from the question as written")
+    role: Literal["condition", "compare", "measure", "target"] = Field(
+        description="condition: limits the data (C); compare: one side of a comparison (D); "
+                    "measure: is what gets read or counted (B); target: names the clusters (A)")
+
+
+class FrameCore(BaseModel):
+    """The roles of one data question."""
+    mentions: list[Mention] = Field(default_factory=list)
+    target: list[Literal[SELECTOR_KINDS]] = Field(
+        default_factory=list, description="A then E: the rule(s) that pick clusters, in order; empty = all")
+    measure: list[Literal[MEASURES]] = Field(
+        default_factory=list, description="B: what is read from the picked clusters")
+    compare: Literal["none", "level1", "level2", "with_and_without_level2", "curves"] = Field(
+        "none", description="D: what is set against what")
+    outside_concept: Optional[str] = Field(
+        None, description="a gene family or function named instead of ids, e.g. 'Type IV secretion'")
+    outside_ids: list[str] = Field(default_factory=list, description="ids you know for outside_concept")
+
+
+class Frame(FrameCore):
+    """parse: K, R and H of the question plus its roles."""
+    kind: Literal["out_of_scope", "design", "data"]
+    control: Optional[Literal["layout", "importance", "level1", "level2", "table"]] = Field(
+        None, description="design only: the dashboard control the question is about")
+    value: Optional[str] = Field(None, description="design only: the setting to showcase, e.g. 'circle'")
+    status: Literal["ask", "assume_default", "use_current_selection", "ok"] = "ok"
+    note: str = Field("", description="what to ask, or the assumption made; empty for ok")
+    shape: Literal["direct", "evidence_chain"] = "direct"
+    reason: str = Field(description="one short sentence")
+
+
+class SubFrame(FrameCore):
+    question: str = Field(description="the sub-question, answerable from the data alone")
+
+
+class SubFrames(BaseModel):
+    """breakdown: a hypothesis split into direct sub-questions with their roles filled."""
+    sub_frames: list[SubFrame] = Field(description="2 to 4, in the order of the argument")
+
+
+class PlanUnit(BaseModel):
+    steps: list[SelectorStep] = Field(description="N4: one step, or two when the second works on the first")
+    descriptor: Descriptor = Field(description="N5")
+
+
+class Plans(BaseModel):
+    """plan: N4 + N5 for each (sub-)question, and N6 for the whole answer."""
+    plans: list[PlanUnit] = Field(description="one per (sub-)question, in order")
+    display: Display

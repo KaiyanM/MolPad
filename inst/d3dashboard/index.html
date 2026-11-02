@@ -18,12 +18,24 @@
 
 <main id="tab-main" class="mp-grid">
 
-  <section id="box-network" class="mp-box mp-col-7">
+  <section id="box-filters" class="mp-box mp-col-12 mp-filterbar">
     <div class="mp-controls">
-      <label class="mp-field mp-grow">
-        <span>Select a Functional Annotation:</span>
-        <select id="s_ptw"></select>
-      </label>
+      <div class="mp-field">
+        <span>Functional Annotation:</span>
+        <div id="f_level1"></div>
+      </div>
+      <div class="mp-field">
+        <span>Taxonomic Scope:</span>
+        <div id="f_level2"></div>
+      </div>
+      <button id="btn_filters_reset" class="mp-btn" type="button" title="Set both filters back to All">Reset filters</button>
+      <p class="mp-hint mp-grow">The filters colour the network nodes. The views of the selected clusters follow them too, unless "All features" is chosen there.</p>
+    </div>
+  </section>
+
+  <div class="mp-analysis mp-col-12">
+  <section id="box-network" class="mp-box">
+    <div class="mp-controls">
       <label class="mp-field">
         <span>Graph Layout:</span>
         <select id="s_layout">
@@ -39,28 +51,42 @@
       <button id="btn_reset" class="mp-btn" type="button" title="Clear the brush and select every cluster">Select all</button>
       <button id="btn_clear" class="mp-btn" type="button" title="Unselect every cluster, then click nodes to add them one by one">Clear all</button>
     </div>
-    <h4 class="mp-plot-title">Pattern Network Among All Pathways</h4>
+    <h4 class="mp-plot-title" id="network_title">Pattern Network</h4>
     <div id="network" class="mp-plot"></div>
     <div id="network_legend" class="mp-legend"></div>
     <p class="mp-hint">Drag a rectangle to select clusters, click a node to add or remove it, drag nodes to move them. Click empty space or "Select all" for every cluster; "Clear all" starts from none.</p>
   </section>
 
-  <section id="box-right" class="mp-box mp-col-5">
-    <label class="mp-field">
-      <span>Select a Taxonomic Scope: <small>(none selected = all)</small></span>
-      <select id="s_tax" multiple size="4"></select>
-    </label>
+  <section id="box-right" class="mp-box mp-l-top">
+    <div class="mp-controls">
+      <div class="mp-field">
+        <span>Selected clusters show:</span>
+        <div id="s_scope" class="mp-seg" role="group">
+          <button type="button" class="mp-seg-btn" data-scope="filtered" title="Only the features that pass the filters">Filtered features</button>
+          <button type="button" class="mp-seg-btn" data-scope="all" title="Every feature of the selected clusters">All features</button>
+        </div>
+      </div>
+      <label class="mp-field">
+        <span>Colour lines by:</span>
+        <select id="s_colour"></select>
+      </label>
+    </div>
+    <h4 class="mp-plot-title" id="stackbar_title">Taxonomic Scope of Selected Groups</h4>
     <div id="stackbar" class="mp-plot"></div>
+  </section>
+
+  <section id="box-ribbon" class="mp-box mp-l-bottom">
     <h4 class="mp-plot-title">Pattern of Selected Groups</h4>
     <div id="ribbon" class="mp-plot"></div>
   </section>
+  </div>
 
   <section id="box-table" class="mp-box mp-col-12">
     <div class="mp-controls">
-      <label class="mp-field">
-        <span>Filter by Functional Annotation:</span>
-        <select id="s_p"></select>
-      </label>
+      <div class="mp-field">
+        <span>Rows:</span>
+        <span id="table_scope" class="mp-badge"></span>
+      </div>
       <label class="mp-field mp-grow">
         <span>Search:</span>
         <input id="table_search" type="search" placeholder="ID, cluster, annotation... (comma-separated for several)">
@@ -90,9 +116,9 @@
   <div class="mp-box mp-col-9">
     <h3>Network Navigation</h3>
     <ol class="mp-steps">
-      <li>Select a functional annotation on the top left. Nodes turn bright green when more of their features carry that annotation. Lower the importance score to show weaker connections.</li>
-      <li>Drag a rectangle on the network, or click nodes, to select clusters. The stacked bar, the pattern plot and the table update to the selection. Use the taxonomic scope box to focus on specific taxa.</li>
-      <li>Browse the annotated features of the selected clusters in the table. Database ids link to their online records. Filter by annotation, search (separate several terms with commas to match any of them), sort by clicking a header, or change the page size. The small button next to each column name opens a menu to sort that column and to filter it by searching and ticking its values.</li>
+      <li>Choose functional annotations and taxonomic scopes in the filter bar (several of each, or All). Options that cannot be combined with the other filter are greyed out. Nodes turn bright green when more of their features pass the filters. Lower the importance score to show weaker connections.</li>
+      <li>Drag a rectangle on the network, or click nodes, to select clusters. The stacked bar, the pattern plot and the table show the selected clusters. They follow the filters while "Filtered features" is chosen; choose "All features" to see everything in the clusters you found, while the node colours keep showing the filters. Colour the pattern lines by annotation, by taxonomic scope, or not at all.</li>
+      <li>Browse the features of the selected clusters in the table. Database ids link to their online records. Search (separate several terms with commas to match any of them), sort by clicking a header, or change the page size. The small button next to each column name opens a menu to sort that column and to filter it by searching and ticking its values.</li>
     </ol>
     <p>This page is a static file: every filter runs in your browser, so you can share the file as is.</p>
   </div>
@@ -107,7 +133,7 @@
   <div class="mp-chat-head">
     <span>Assistant</span>
     <button id="chat_status" class="mp-chat-status checking" type="button" title="Check the agent again">Agent: checking...</button>
-    <button id="chat_toggle" class="mp-chat-toggle" type="button" title="Hide or show the dialogue">&#8211;</button>
+    <button id="chat_toggle" class="mp-chat-toggle" type="button" title="Hide the dialogue">&#171;</button>
   </div>
   <div id="chat_body" class="mp-chat-body">
     <div id="chat_log" class="mp-chat-log"></div>

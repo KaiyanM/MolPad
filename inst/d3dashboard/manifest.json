@@ -10,6 +10,7 @@
     "js/palettes.js",
     "js/data.js",
     "js/state.js",
+    "js/multiselect.js",
     "js/controls.js",
     "js/network.js",
     "js/stackbar.js",

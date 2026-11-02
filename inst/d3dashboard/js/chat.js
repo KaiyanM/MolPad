@@ -151,7 +151,10 @@
     if (!el.chat) return;
     el.chat_form.addEventListener("submit", submit);
     el.chat_toggle.addEventListener("click", function () {
-      el.chat.classList.toggle("collapsed");
+      var collapsed = el.chat.classList.toggle("collapsed");
+      document.body.classList.toggle("mp-chat-collapsed", collapsed);
+      el.chat_toggle.innerHTML = collapsed ? "&#187;" : "&#171;";
+      el.chat_toggle.title = collapsed ? "Show the dialogue" : "Hide the dialogue";
     });
     if (el.chat_status) el.chat_status.addEventListener("click", connect);
     if (!MP.link) {

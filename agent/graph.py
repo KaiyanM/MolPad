@@ -1,4 +1,4 @@
-"""The decision tree as a LangGraph.
+"""The decision tree as a LangGraph (the 'tree' pipeline; the default 'frame' one is in frame.py).
 
     START -> keywords -> n0_kind -> leaf_L0 | leaf_L1 | n1_completeness
     n1_completeness -> leaf_L2 | n2_shape
@@ -7,6 +7,8 @@
     n6_display, leaf_L0, leaf_L1, leaf_L2 -> compose_messages -> END
 """
 
+import os
+import time
 from functools import lru_cache
 
 from langgraph.graph import END, START, StateGraph
@@ -37,6 +39,20 @@ def build_graph():
     return g.compile()
 
 
+def pipeline() -> str:
+    """'frame' (parse -> plan -> compose, agent/frame.py; the default) or 'tree' (one LLM call per
+    node, below). Env AGENT_PIPELINE. On the 43 cheese questions (2026-11-02) frame reached 30 leaves
+    with 2.9 calls and 10s per question; tree reached 25 with 8.3 calls and 19s."""
+    return os.getenv("AGENT_PIPELINE", "frame").strip().lower()
+
+
+def _graph():
+    if pipeline() == "frame":
+        from .frame import build_frame_graph
+        return build_frame_graph()
+    return build_graph()
+
+
 def _one(items):
     return items[0] if len(items) == 1 else items
 
@@ -46,11 +62,15 @@ def answer(question: str, dash_state: dict | None = None, debug: bool | None = N
 
     debug=True prints one "[debug]" line per LLM decision, route and data action to stderr.
     """
+    from .llm import start_usage, usage_summary
+
     if debug is not None:
         nodes.DEBUG = debug
     state = {**load_dataset().default_state(), **(dash_state or {})}
-    final = build_graph().invoke({"question": question, "dash_state": state},
-                                 {"recursion_limit": 60})
+    log = start_usage()
+    t0 = time.time()
+    final = _graph().invoke({"question": question, "dash_state": state}, {"recursion_limit": 60})
+    cost = {**usage_summary(log), "wall_seconds": round(time.time() - t0, 1), "pipeline": pipeline()}
     units = final.get("units") or []
     trace = {"keywords": final["keyword_map"], "N0": final["kind"]["kind"]}
     if "completeness" in final:
@@ -66,4 +86,10 @@ def answer(question: str, dash_state: dict | None = None, debug: bool | None = N
     if "display" in final:
         trace["N6"] = final["display"]
     trace["leaf"] = final["leaf"]
+    if final.get("skills") is not None:
+        trace["skills"] = final["skills"]
+    trace["cost"] = cost
+    nodes._debug("cost", f"{cost['calls']} LLM calls, {cost['input_tokens']:.0f} in / "
+                 f"{cost['output_tokens']:.0f} out ({cost['reasoning_tokens']:.0f} reasoning) tokens, "
+                 f"{cost['seconds']:.1f}s in LLM, {cost['wall_seconds']:.1f}s total")
     return {"question": question, "trace": trace, "steps": final["steps"]}

@@ -64,14 +64,17 @@ class _Playback:
         self.table_set = None
 
     def filters(self, run):
-        if run.get("level1") and run["level1"] != self.level1:
-            self.level1 = run["level1"]
-            self.steps.append(dash_step(f"click level1 drop-down-{self.level1}", "set filter1", self.level1))
-        level2 = run.get("level2") or []
+        """Set the shared filters to what the run shows; a contrast shows all its values at once."""
+        level1 = run.get("shown_level1", [run["level1"]] if run.get("level1") else [])
+        if level1 and level1 != self.level1:
+            self.level1 = list(level1)
+            self.steps.append(dash_step("click level1 drop-down-" + " and ".join(level1),
+                                        "set filter1", ", ".join(level1)))
+        level2 = run.get("shown_level2", run.get("level2") or [])
         if level2 != self.level2:
             self.level2 = list(level2)
             self.steps.append(dash_step("click level2 drop-down-" + (" and ".join(level2) or "all"),
-                                        "set filter2", ",".join(level2) or "all"))
+                                        "set filter2", ", ".join(level2) or "all"))
 
     def slider(self, run):
         if run.get("threshold_moved") and run["threshold"] != self.threshold:

@@ -73,6 +73,11 @@
     return Number(x).toFixed(digits === undefined ? 2 : digits);
   }
 
+  /* 59682 -> "59,682" */
+  function fmtInt(n) {
+    return Number(n || 0).toLocaleString("en-US");
+  }
+
   function clamp(x, lo, hi) {
     return Math.max(lo, Math.min(hi, x));
   }
@@ -92,6 +97,7 @@
     compareClusters: compareClusters,
     renderLinks: renderLinks,
     fmt: fmt,
+    fmtInt: fmtInt,
     clamp: clamp,
     setsEqual: setsEqual
   };

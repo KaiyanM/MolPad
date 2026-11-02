@@ -107,15 +107,29 @@ The page reads the data with
 
 ## What the page derives from this
 
-* **Node colour**: for the selected pathway, the number of features in each
-  cluster whose `Pathway` equals it (0 for none), on a grey to green gradient.
-* **Stacked bar**: number of features per selected cluster and taxonomic scope.
-* **Ribbon plot**: for each selected cluster, subject and type, the minimum,
-  mean and maximum of `values` at each time point (nulls ignored). The facets
-  of one cluster share the time axis and the value axis.
-* **Table**: the features of the selected clusters, filtered by taxonomic
-  scope and by the table's own pathway filter, searchable and sortable, with a
-  sort and filter menu on every column header.
+Two shared filters sit in the filter bar: **level 1** (`Pathway`) and **level 2**
+(`taxonomic.scope`). Each is a checkbox list that allows several values and has
+"All" (the default). Each option shows its feature count under the other filter;
+options with 0 are greyed out. A feature with no value at a level passes only
+while that level is on All.
+
+The rule: **the network shows where, the other views show what.**
+
+* **Node colour**: the number of features in each cluster that pass both
+  filters (every feature when both are on All), on a grey to green gradient.
+* **Views of the selected clusters** (stacked bar, ribbon plot, table) show the
+  features of the selected clusters that pass the filters, or every feature of
+  those clusters when "Selected clusters show: All features" is chosen. The node
+  colours keep following the filters either way.
+* **Stacked bar**: number of those features per selected cluster and taxonomic
+  scope.
+* **Ribbon plot**: for each selected cluster, subject and colour group, the
+  minimum, mean and maximum of `values` at each time point (nulls ignored). The
+  colour group is level 1, level 2, `type` (offered only when it differs from
+  level 1) or none (one ribbon per cluster). The facets of one cluster share the
+  time axis and the value axis.
+* **Table**: the same features, searchable and sortable, with a sort and filter
+  menu on every column header.
 
 ## Writing the JSON from R
 

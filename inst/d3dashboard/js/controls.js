@@ -4,64 +4,69 @@
 
   var el = {};
 
-  function fillSelect(select, values, labelFn) {
+  /* Restart the highlight animation on a control (see .mp-flash). */
+  function flash(node) {
+    if (!node) return;
+    node.classList.remove("mp-flash");
+    void node.offsetWidth;
+    node.classList.add("mp-flash");
+  }
+
+  function fillSelect(select, items) {
     select.innerHTML = "";
-    values.forEach(function (v) {
+    items.forEach(function (it) {
       var o = document.createElement("option");
-      o.value = v;
-      o.textContent = labelFn ? labelFn(v) : v;
+      o.value = it.value;
+      o.textContent = it.label;
       select.appendChild(o);
     });
   }
 
-  function selectedValues(select) {
-    return Array.from(select.selectedOptions).map(function (o) { return o.value; });
+  /* Ribbon colour choices; `type` only when it is not just level 1 again. */
+  function colourChoices() {
+    var out = [{ value: "level1", label: "Functional Annotation" },
+               { value: "level2", label: "Taxonomic Scope" }];
+    if (MP.D.hasDistinctType) out.push({ value: "type", label: "type" });
+    out.push({ value: "none", label: "None (one ribbon per cluster)" });
+    return out;
   }
 
-  /* Restart the highlight animation on a drop-down (see .mp-flash). */
-  function flash(select) {
-    if (!select) return;
-    select.classList.remove("mp-flash");
-    void select.offsetWidth;
-    select.classList.add("mp-flash");
-  }
-
-  /* Per-pathway counts among the currently selected clusters and taxa. */
-  function pathwayCounts() {
-    var counts = new Map();
-    MP.state.selectedFeatures().forEach(function (f) {
-      var p = f.Pathway;
-      if (p === null || p === undefined) return;
-      counts.set(String(p), (counts.get(String(p)) || 0) + 1);
+  function syncScope() {
+    var scope = MP.state.get().scope;
+    Array.prototype.forEach.call(el.s_scope.querySelectorAll("[data-scope]"), function (b) {
+      var on = b.getAttribute("data-scope") === scope;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
     });
-    return counts;
-  }
-
-  function refreshTablePathway() {
-    var D = MP.D, S = MP.state.get();
-    var counts = pathwayCounts();
-    var total = 0;
-    counts.forEach(function (n) { total += n; });
-    var values = [""].concat(D.pathways);
-    fillSelect(el.s_p, values, function (v) {
-      if (v === "") return "All annotations (" + total + ")";
-      return v + " (" + (counts.get(v) || 0) + ")";
-    });
-    el.s_p.value = D.pathways.indexOf(S.tablePathway) >= 0 ? S.tablePathway : "";
   }
 
   function init() {
     var D = MP.D, S = MP.state.get();
-    ["s_ptw", "s_layout", "obs", "obs_value", "s_tax", "s_p", "btn_reset", "btn_clear"].forEach(function (id) {
+    ["f_level1", "f_level2", "btn_filters_reset", "s_layout", "obs", "obs_value", "s_scope",
+     "s_colour", "btn_reset", "btn_clear"].forEach(function (id) {
       el[id] = document.getElementById(id);
     });
 
-    fillSelect(el.s_ptw, D.pathways);
-    el.s_ptw.value = S.pathway;
-    el.s_ptw.addEventListener("change", function () {
-      MP.state.set({ pathway: el.s_ptw.value, tablePathway: el.s_ptw.value }, "controls");
+    // ---- shared level filters ------------------------------------------------
+    MP.filters = {
+      level1: MP.multiselect.create({
+        mount: el.f_level1, id: "ms_level1", values: D.pathways,
+        selected: function () { return MP.state.get().level1; },
+        counts: function () { return MP.state.optionCounts(1); },
+        onChange: function (list) { MP.state.set({ level1: list }, "controls"); }
+      }),
+      level2: MP.multiselect.create({
+        mount: el.f_level2, id: "ms_level2", values: D.taxa,
+        selected: function () { return MP.state.get().level2; },
+        counts: function () { return MP.state.optionCounts(2); },
+        onChange: function (list) { MP.state.set({ level2: list }, "controls"); }
+      })
+    };
+    el.btn_filters_reset.addEventListener("click", function () {
+      MP.state.set({ level1: [], level2: [] }, "controls");
     });
 
+    // ---- network controls ------------------------------------------------------
     el.s_layout.value = S.layout;
     el.s_layout.addEventListener("change", function () {
       MP.state.set({ layout: el.s_layout.value }, "controls");
@@ -81,17 +86,6 @@
       pushWeight();
     });
 
-    fillSelect(el.s_tax, D.taxa);
-    el.s_tax.size = Math.min(6, Math.max(3, D.taxa.length));
-    el.s_tax.addEventListener("change", function () {
-      MP.state.set({ taxa: selectedValues(el.s_tax) }, "controls");
-    });
-
-    refreshTablePathway();
-    el.s_p.addEventListener("change", function () {
-      MP.state.set({ tablePathway: el.s_p.value }, "controls");
-    });
-
     el.btn_reset.addEventListener("click", function () {
       MP.network.clearBrush();
       MP.state.set({ selectedClusters: D.clusters.slice() }, "controls");
@@ -101,15 +95,28 @@
       MP.state.set({ selectedClusters: [] }, "controls");
     });
 
-    // Keep the DOM in sync when state changes from elsewhere (brush, clicks).
-    MP.state.subscribe(["selectedClusters", "taxa", "tablePathway", "pathway"], function (S2, keys) {
-      if (keys.indexOf("pathway") >= 0 && el.s_ptw.value !== S2.pathway) {
-        el.s_ptw.value = S2.pathway;
-        flash(el.s_ptw);
-      }
-      refreshTablePathway();
-      // The table filter follows the network annotation, so show that it moved.
-      if (keys.indexOf("tablePathway") >= 0) flash(el.s_p);
+    // ---- views of the selected clusters ---------------------------------------
+    el.s_scope.addEventListener("click", function (event) {
+      var b = event.target.closest("[data-scope]");
+      if (b) MP.state.set({ scope: b.getAttribute("data-scope") }, "controls");
+    });
+    syncScope();
+
+    fillSelect(el.s_colour, colourChoices());
+    el.s_colour.value = S.colourBy;
+    el.s_colour.addEventListener("change", function () {
+      MP.state.set({ colourBy: el.s_colour.value }, "controls");
+    });
+
+    // ---- keep the DOM in sync when state changes from elsewhere ----------------
+    MP.state.subscribe(["level1", "level2"], function (S2, keys) {
+      MP.filters.level1.refresh();
+      MP.filters.level2.refresh();
+      keys.forEach(function (k) { flash(MP.filters[k].button); });
+    });
+    MP.state.subscribe(["scope"], function () { syncScope(); flash(el.s_scope); });
+    MP.state.subscribe(["colourBy"], function (S2) {
+      if (el.s_colour.value !== S2.colourBy) { el.s_colour.value = S2.colourBy; flash(el.s_colour); }
     });
 
     // Every drop-down flashes when its value is chosen, by hand or by the virtual mouse.

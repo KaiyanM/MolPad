@@ -56,8 +56,16 @@ def clean_state(raw, ds):
     if isinstance(raw.get("selected_clusters"), list):
         picked = [c for c in raw["selected_clusters"] if c in ds.clusters]
         state["selected_clusters"] = picked or state["selected_clusters"]
-    if raw.get("pathway") in ds.level1_values:
-        state["pathway"] = raw["pathway"]
+    for key, valid in (("level1", ds.level1_values), ("level2", ds.level2_values)):
+        if isinstance(raw.get(key), list):
+            state[key] = [v for v in raw[key] if v in valid]
+    if not state["level1"] and raw.get("pathway") in ds.level1_values:   # an older page
+        state["level1"] = [raw["pathway"]]
+    state["pathway"] = state["level1"][0] if len(state["level1"]) == 1 else ""
+    if raw.get("scope") in ("filtered", "all"):
+        state["scope"] = raw["scope"]
+    if raw.get("colour_by") in ("level1", "level2", "type", "none"):
+        state["colour_by"] = raw["colour_by"]
     if isinstance(raw.get("layout"), str):
         state["layout"] = raw["layout"]
     return state

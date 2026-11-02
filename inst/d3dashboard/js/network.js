@@ -33,7 +33,7 @@
       .on("tick", ticked)
       .stop();
 
-    MP.state.subscribe(["pathway"], function () { colourNodes(); });
+    MP.state.subscribe(["level1", "level2"], function () { colourNodes(); });
     MP.state.subscribe(["minWeight"], function () { drawEdges(); });
     MP.state.subscribe(["layout"], function () { clearBrush(); applyLayout(); });
     MP.state.subscribe(["selectedClusters"], function () { highlight(); });
@@ -78,9 +78,9 @@
     highlight();
   }
 
+  /* Node colour: features of each cluster that pass the shared filters (every feature with All). */
   function currentCounts() {
-    var D = MP.D, S = MP.state.get();
-    var m = D.pathwayCounts.get(S.pathway) || new Map();
+    var m = MP.state.nodeCounts();
     var maxN = 0;
     nodes.forEach(function (n) {
       n.n = m.get(n.id) || 0;
@@ -93,13 +93,21 @@
     var maxN = currentCounts();
     var scale = d3.scaleLinear().domain([0, Math.max(1, maxN)])
       .range([MP.palettes.nodeLow, MP.palettes.nodeHigh]);
-    var S = MP.state.get();
+    var filtered = MP.state.isFiltered();
     gNodes.selectAll("g.mp-node").each(function (d) {
       var g = d3.select(this);
+      var total = MP.D.totalByCluster.get(d.id) || 0;
       g.select("rect").attr("fill", maxN === 0 ? MP.palettes.nodeLow : scale(d.n));
-      g.select("title").text(d.id + "\n" + d.n + " feature(s) in " + S.pathway +
-        "\n" + (MP.D.totalByCluster.get(d.id) || 0) + " feature(s) in total");
+      g.select("title").text(d.id + "\n" + (filtered
+        ? MP.utils.fmtInt(d.n) + " of " + MP.utils.fmtInt(total) + " feature(s) pass the filters"
+        : MP.utils.fmtInt(total) + " feature(s)"));
     });
+    var title = document.getElementById("network_title");
+    if (title) {
+      title.textContent = filtered
+        ? "Pattern Network: features of " + filterText()
+        : "Pattern Network: all features";
+    }
     renderLegend(maxN);
   }
 
@@ -330,6 +338,13 @@
 
   // ---- legend and resize -------------------------------------------------------------
 
+  function filterText() {
+    var S = MP.state.get(), parts = [];
+    if (S.level1.length) parts.push(MP.state.summary(1));
+    if (S.level2.length) parts.push(MP.state.summary(2));
+    return parts.join(" \u00b7 ");
+  }
+
   function renderLegend(maxN) {
     if (maxN === undefined) maxN = currentCounts();
     var legend = d3.select("#network_legend");
@@ -343,7 +358,8 @@
     grad.append("stop").attr("offset", "100%").attr("stop-color", MP.palettes.nodeHigh);
     s.append("rect").attr("width", w).attr("height", h).attr("fill", "url(#" + id + ")")
       .attr("stroke", "#999").attr("stroke-width", 0.5);
-    legend.append("span").text("0 to " + maxN);
+    legend.append("span").text("0 to " + MP.utils.fmtInt(maxN) +
+      (MP.state.isFiltered() ? " (features passing the filters)" : ""));
   }
 
   function resize() {

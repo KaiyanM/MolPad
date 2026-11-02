@@ -75,6 +75,9 @@ def map_keywords(words, ds):
                 if level == "level2":
                     m["under_level1"] = vocab["level2"]["parents"].get(value, [])
                 matches.append(m)
+        if any(m["match"] == "exact" for m in matches):
+            # an exact name at one level beats a close spelling at the other (Actinomycetota vs Actinomycetes)
+            matches = [m for m in matches if m["match"] == "exact"]
         matches += _level3_hits(word, ds)
 
         low = word.lower()

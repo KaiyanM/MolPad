@@ -324,4 +324,153 @@ Rules
   21% of its features are Flavobacteriia." Then answer for those clusters. At most 3 sentences.
 - Name a class for a cluster only when a finding states that cluster's class mix or example
   reason. Never infer a cluster's class from the question.
+- A filter keeps only the values it names. Never conclude from a filtered run that a cluster
+  "contains only" that class or "does not include" another one: give the counts from the
+  "evaluate level2" finding instead, and give class mix as counts, not percentages.
+- When a finding compares the clusters picked for each value ("compare clusters between ..."),
+  answer from it: which clusters are shared and which belong to one value only.
 - A slot with a "write" instruction: follow it."""
+
+
+# ---- frame pipeline (AGENT_PIPELINE=frame) ---------------------------------
+
+PARSE = """You read a question about an interactive dashboard and fill its roles. Code looks every
+mention up in the data afterwards, so copy mentions exactly as written. You decide the roles only;
+the data values are listed below so you can tell a data name from a generic word.
+
+K: kind
+- out_of_scope: tells the agent to do a hand gesture whose result depends on screen position
+  ("brush the top row", "drag nodes together"), or asks what a filter does to the display rather
+  than to the data ("how many features disappear from the plot when ...").
+- design: asks whether or how a dashboard control helps ("does switching to the circle layout make
+  it easier ...", "what is the grid layout for"). Fill `control` and `value`.
+- data: everything else. This is the normal case. "Select", "restricting to" or "given" with a rule
+  in the data (the strongest edge, a phylum, a class) is still data: the agent can do that.
+For out_of_scope and design, leave the other roles empty.
+
+R: status (data only)
+- ask: refers to a cluster without saying which, and no rule picks one ("for the same cluster ...").
+  `note` = what to ask (a specific cluster, or an overview?).
+- assume_default: needs a setting that is not given (whether clusters are "connected" without an
+  importance score). `note` = the assumed value, normally the current one.
+- use_current_selection: "the selected clusters", "these clusters".
+- ok: the normal case. Vague wording ("dominant", "most enriched", "similar shape", "tightest"),
+  a named gene family, "a specific contig", a hypothesis, or a rule such as "the largest cluster"
+  are ok. "Which clusters ..." searches all clusters and is ok.
+
+H: shape (data only)
+- evidence_chain: a claim that needs an argument: "is X associated with Y", "following an independent
+  succession", any "why" or causal wording.
+- direct: a lookup (which / how many / what / rank / does X change / do two things peak at different
+  weeks). The normal case: a yes-or-no question that one table of numbers settles is direct.
+
+mentions: the specific terms that may name something in the data, each with its role.
+- Pick names of categories at any level (a phylum, a class, "unknown" when it means the unknown
+  category), ids (contig ids, KEGG ids such as K03196, GO ids), annotation columns named without ids
+  ("KEGG annotations", "GO annotation"), sample groups ("cheese A" -> "A"), timepoint names ("C_5"),
+  clusters named by the user ("cluster 3").
+- Do not pick generic words (cluster, pattern, feature, phylum, class, network, edge, importance
+  score, layout, "others"), weeks, time spans or bare numbers.
+- role: condition = limits the data the question is asked about (C: "for X", "given X", "within",
+  "in cheese A", "contigs that carry K11901"); compare = one side of a comparison (D: "X versus Y",
+  "is it the same in cheese C"); measure = the thing read or counted on the clusters (B: "what
+  fraction are Gammaproteobacteria", "which have KEGG annotations"); target = names the clusters (A:
+  "cluster 3", "the cluster that peaks at C_5").
+  A taxon is not always a condition: in "what fraction of the largest cluster is Gammaproteobacteria"
+  it is measured; filtering on it would change which cluster is largest. "Rank the clusters by number
+  of X features" does limit the data to X: condition.
+
+target (A, then E): the rule(s) that pick clusters, in order. pattern (increase, decrease, peak,
+opposite shape, colour lines disagree) | ribbon (tight / wide ribbon, features follow the same
+trajectory) | feature_number (most features, most enriched, largest, dominant) | network (edges,
+connected, isolated, strongest edge, neighbours, similar shape to) | feature_lookup (where does this
+id / gene fall) | example (two or more classes compared without naming clusters) | given (cluster ids
+written by the user, or the selected clusters) | all (each cluster, rank, a count over the network).
+measure (B): what is read from the picked clusters: pattern | level2 (class mix) | level3 (ids,
+annotations) | weight (neighbours, edges per cluster, components) | feature_number (counts).
+compare (D): level1 / level2 (two values of that level, filter run once per value) |
+with_and_without_level2 ("does it change when restricting to Y") | curves (two curves: sample groups,
+time windows or clusters) | none.
+outside_concept + outside_ids: a gene family or function named instead of ids; write the ids you know.
+
+Examples (K/R/H; mentions as text:role; target; measure; compare)
+"Given Pseudomonadota, which cluster has the most features and what is its pattern?" -> data/ok/direct; Pseudomonadota:condition; feature_number; pattern
+"Given Pseudomonadota and restricting to Gammaproteobacteria, does the dominant cluster change?" -> data/ok/direct; Pseudomonadota:condition, Gammaproteobacteria:compare; feature_number; -; with_and_without_level2
+"Given Bacillota and class Bacilli versus Clostridia, do the two classes sit in the same clusters?" -> data/ok/direct; Bacillota:condition, Bacilli:compare, Clostridia:compare; feature_number; -; level2
+"Do Flavobacteriia and Bacilli peak at different weeks?" -> data/ok/direct; Flavobacteriia:condition, Bacilli:condition; example; pattern
+"What fraction of the features in the largest cluster are Gammaproteobacteria?" -> data/ok/direct; Gammaproteobacteria:measure; feature_number; level2
+"Which clusters increase steadily in cheese A, and which decrease?" -> data/ok/direct; A:condition; pattern
+"Are there clusters whose cheese A and cheese C halves have opposite shapes?" -> data/ok/direct; A:compare, C:compare; pattern; -; curves
+"At which week does each cluster reach its maximum in cheese A, and is it the same week in cheese C?" -> data/ok/direct; A:compare, C:compare; all; pattern
+"Which clusters have a similar shape to the cluster most enriched for Actinomycetota?" -> data/ok/direct; Actinomycetota:condition; feature_number, network; pattern
+"Given Pseudomonadota and Gammaproteobacteria, which contigs carry KEGG ID K11901?" -> data/ok/direct; Pseudomonadota:condition, Gammaproteobacteria:condition, K11901:condition; feature_lookup
+"Given Actinomycetota and Actinomycetes, how many contigs have a GO annotation at all?" -> data/ok/direct; Actinomycetota:condition, Actinomycetes:condition, GO annotation:condition; feature_number; level3
+"Which individual contigs in the most Actinomycetota-enriched cluster have KEGG annotations?" -> data/ok/direct; Actinomycetota:condition, KEGG annotations:measure; feature_number; level3
+"Where do the Type IV secretion genes (KEGG) fall?" -> data/ok/direct; feature_lookup; outside_concept=Type IV secretion, outside_ids=[K03196, K03197, ...]
+"Which GO terms recur among contigs in a cluster that peaks at C_5?" -> data/ok/direct; C_5:target; pattern; level3
+"Which cluster has the tightest ribbon?" -> data/ok/direct; ribbon
+"Which cluster pairs remain connected when the importance score is raised to its maximum?" -> data/ok/direct; network
+"How many connected components does the network have at the default score?" -> data/ok/direct; all; weight
+"For Actinomycetota, are its most enriched clusters connected to the rest of the network or isolated?" -> data/assume_default/direct; Actinomycetota:condition; feature_number, network
+"How many features in the selected clusters lack a GO annotation?" -> data/use_current_selection/direct; GO annotation:measure; given; level3
+"For the same cluster, how does the cheese C trajectory differ from the cheese A trajectory?" -> data/ask/direct
+"Is the rise of secretion-system genes at C_5 associated with the higher taxonomic diversity of that sample?" -> data/ok/evidence_chain
+"Does switching to the circle layout make it easier to see which clusters form a connected component?" -> design, control=layout, value=circle
+"Using the grid layout, brush the top row of nodes: what do those clusters have in common?" -> out_of_scope"""
+
+BREAKDOWN = """A hypothesis about the data cannot be answered in one lookup. Split it into 2 to 4 direct
+sub-questions that, together, argue for or against it. Each sub-question must be answerable from the
+dashboard data by itself: it names its own conditions (level 1 / level 2 / level 3 values, sample
+group), says how clusters are picked (by pattern, ribbon, feature number, network edges, looking up
+ids) and what is read from them. Do not refer to "the clusters above"; repeat the condition. Order
+them as steps of the argument, and prefer the angles the data can actually test.
+
+For each sub-question fill its roles the way they are described below: mentions (text copied from
+the sub-question, role condition / compare / measure / target), target, measure, compare,
+outside_concept and outside_ids. Use only data values listed below in mentions.
+
+Roles
+- target: pattern | ribbon | feature_number | network | feature_lookup | example | given | all
+- measure: pattern | level2 | level3 | weight | feature_number
+- compare: none | level1 | level2 | with_and_without_level2 | curves
+
+Example
+Hypothesis: "Are the Actinomycetota features that peak late in cheese A following an independent succession?"
+- "For Actinomycetota, which clusters peak late in cheese A?" -> Actinomycetota:condition, A:condition; pattern
+- "For Actinomycetota, which clusters hold most of its features and are they connected to other clusters?" -> Actinomycetota:condition; feature_number, network
+- "For Bacillota, which clusters hold most of its features and what is their pattern?" -> Bacillota:condition; feature_number; pattern"""
+
+
+def parse_context(ds):
+    """What parse needs: names of things, not settings. No importance score, no selection."""
+    cfg = ds.cfg
+    level3 = "; ".join(f"{c} ({n})" for c, n in zip(cfg.level3, cfg.level3_notes))
+    subjects = "; ".join(f"{s}: {', '.join(cols)}" for s, cols in ds.subjects.items())
+    return f"""BACKGROUND
+{cfg.background}
+
+DATA NAMES
+- Level 1 ({cfg.level1_name}): {', '.join(ds.level1_values)}
+- Level 2 ({cfg.level2_name}): {', '.join(ds.level2_values)}
+- Level 3, table columns: {level3}
+- Sample groups and timepoint columns, in time order: {subjects}
+- Clusters: {ds.clusters[0]} .. {ds.clusters[-1]}
+- Dashboard controls: layout (force, circle, grid), importance score slider, level-1 drop-down,
+  level-2 multi-select, feature table"""
+
+
+def plan_context(ds, dash_state, status="ok"):
+    """What plan needs: time axis and network settings. No background, no level value lists."""
+    subjects = "; ".join(f"{s}: {', '.join(cols)}" for s, cols in ds.subjects.items())
+    lines = [
+        "DASHBOARD",
+        f"- Clusters {ds.clusters[0]} .. {ds.clusters[-1]}, one network node each.",
+        f"- Sample groups and timepoint columns, in time order: {subjects}. Weeks map to the columns by "
+        "position (first = early, last = late).",
+        f"- Level 3 table columns: {', '.join(ds.cfg.level3)}",
+        f"- An edge is drawn when weight > Importance Score. Now {dash_state['min_weight']} "
+        f"(min {ds.slider_min}, max {ds.slider_max}).",
+    ]
+    if status == "use_current_selection":
+        lines.append(f"- Clusters selected now: {', '.join(dash_state['selected_clusters'])}.")
+    return "\n".join(lines)

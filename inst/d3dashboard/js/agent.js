@@ -1,7 +1,7 @@
 /* MolPad D3 dashboard: text commands that drive the virtual mouse.
    A command is "function:param", for example "brush node:Group_2".
-   "brush node", "select node", "search table" and "set filter2" take one value or several,
-   comma-separated; "set filter1" takes one. "select all" and "clear table"
+   "brush node", "select node", "search table", "set filter1" and "set filter2" take one
+   value or several, comma-separated ("all" for every value of a filter). "select all" and "clear table"
    take none. A JSON step list from the Python agent is played with play(). */
 (function (MP) {
   "use strict";
@@ -23,80 +23,92 @@
       .filter(function (v) { return v; });
   }
 
-  /* Level-1 filter: one value in the "Select a Functional Annotation" drop-down. */
-  function setFilter1(param) {
-    if (listOf(param).length > 1) {
-      throw new Error("Filter 1 takes one value. Choose one of: " + MP.D.pathways.join(", "));
-    }
-    var value = match(MP.D.pathways, param);
-    if (value === null) {
-      throw new Error('No annotation named "' + param + '". Choose one of: ' +
-        MP.D.pathways.join(", "));
-    }
-    var select = document.getElementById("s_ptw");
-    MP.app.showTab("main");
-    return MP.cursor.toElement(select).then(function () {
-      MP.cursor.press();
-      select.value = value;
-      // The listener in controls.js does the rest, as for a real choice.
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-      return MP.cursor.wait(180);
-    }).then(function () {
-      MP.cursor.release();
-      return "Filter 1 set to " + MP.state.get().pathway + ".";
-    });
-  }
-
-  /* Level-2 filter: one or several values in the "Select a Taxonomic Scope"
-     list. The first value is clicked (which drops the old choice), the others
-     are added to it. "all" clears the list, which means every scope. */
-  function setFilter2(param) {
+  /* Level filters: the checkbox drop-downs of the filter bar. "set filter1:A, B"
+     opens the level-1 list, clears it when it holds anything else, ticks A and B
+     and closes it; "all" ticks All. A value that cannot be combined with the other
+     filter (greyed out, 0 features) is refused with the reason. */
+  function setLevel(level, param) {
+    var D = MP.D;
+    var values = level === 1 ? D.pathways : D.taxa;
+    var noun = level === 1 ? "annotation" : "taxonomic scope";
+    var widget = MP.filters["level" + level];
     var parts = listOf(param);
     var clearAll = parts.length === 1 && parts[0].toLowerCase() === "all";
-    var values = [];
+    var want = [];
     if (!clearAll) {
       parts.forEach(function (part) {
-        var value = match(MP.D.taxa, part);
+        var value = match(values, part);
         if (value === null) {
-          throw new Error('No taxonomic scope named "' + part + '". Choose from: ' +
-            MP.D.taxa.join(", ") + ', or "all".');
+          throw new Error("No " + noun + ' named "' + part + '". Choose from: ' + values.join(", ") + ', or "all".');
         }
-        if (values.indexOf(value) < 0) values.push(value);
+        if (want.indexOf(value) < 0) want.push(value);
       });
+      var counts = MP.state.optionCounts(level);
+      var dead = want.filter(function (v) { return !counts.get(v); });
+      if (dead.length) {
+        var other = MP.state.summary(level === 1 ? 2 : 1);
+        throw new Error(dead.join(", ") + " has no features under the other filter (" + other +
+          "). Set that filter first, or to all.");
+      }
     }
-    var select = document.getElementById("s_tax");
-    var options = Array.prototype.slice.call(select.options);
+    var have = MP.state.get()["level" + level];
     MP.app.showTab("main");
 
-    function choose(target, change) {
-      return MP.cursor.toElement(target, 400).then(function () {
+    function click(node) {
+      return MP.cursor.toElement(node, 350).then(function () {
         MP.cursor.press();
-        change();
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-        return MP.cursor.wait(180);
+        node.click();
+        return MP.cursor.wait(160);
       }).then(function () { MP.cursor.release(); });
     }
 
-    var chain;
-    if (clearAll) {
-      chain = choose(select, function () {
-        options.forEach(function (o) { o.selected = false; });
-      });
-    } else {
-      chain = Promise.resolve();
-      values.forEach(function (value, i) {
-        var option = options.filter(function (o) { return o.value === value; })[0];
-        chain = chain.then(function () {
-          return choose(option, function () {
-            if (i === 0) options.forEach(function (o) { o.selected = false; });
-            option.selected = true;
-          });
-        });
+    var chain = click(widget.button).then(function () { if (!widget.isOpen()) widget.open(); });
+    var same = MP.utils.setsEqual(have, want);
+    if (!same && (clearAll || have.length)) {
+      chain = chain.then(function () { return click(widget.option("")); });   // All: clears the list
+    }
+    if (!same) {
+      want.forEach(function (v) {
+        chain = chain.then(function () { return click(widget.option(v)); });
       });
     }
     return chain.then(function () {
-      var taxa = MP.state.get().taxa;
-      return "Filter 2 set to " + (taxa.length ? taxa.join(", ") : "all") + ".";
+      return click(widget.button);
+    }).then(function () {
+      widget.close();
+      return "Filter " + level + " set to " + MP.state.summary(level) + ".";
+    });
+  }
+
+  function setFilter1(param) { return setLevel(1, param); }
+  function setFilter2(param) { return setLevel(2, param); }
+
+  /* What the views of the selected clusters show: "filtered" or "all" features. */
+  function setView(param) {
+    var key = String(param).trim().toLowerCase();
+    var scope = /^(all|whole|cluster|everything|all features)$/.test(key) ? "all"
+      : /^(filtered|filter|filtered features)$/.test(key) ? "filtered" : null;
+    if (!scope) throw new Error('Choose "filtered" or "all".');
+    var button = document.querySelector('#s_scope [data-scope="' + scope + '"]');
+    MP.app.showTab("main");
+    return clickButton(button).then(function () {
+      return "The selected clusters show " + (scope === "all" ? "all their features" : "the filtered features") + ".";
+    });
+  }
+
+  /* Ribbon line colour: level1, level2, type (when offered) or none. */
+  function setColour(param) {
+    var select = document.getElementById("s_colour");
+    var offered = Array.prototype.map.call(select.options, function (o) { return o.value; });
+    var key = String(param).trim().toLowerCase();
+    var alias = { "level 1": "level1", annotation: "level1", pathway: "level1",
+                  "level 2": "level2", scope: "level2", "taxonomic scope": "level2", taxa: "level2",
+                  off: "none", nothing: "none" };
+    var value = match(offered, alias[key] || key);
+    if (value === null) throw new Error('No colour grouping "' + param + '". Choose one of: ' + offered.join(", "));
+    MP.app.showTab("main");
+    return pick(select, value).then(function () {
+      return "Pattern lines coloured by " + select.options[select.selectedIndex].textContent + ".";
     });
   }
 
@@ -400,8 +412,11 @@
     "brush node": { usage: "brush node:Group_2, Group_3", run: brushNode },
     "select node": { usage: "select node:Group_2, Group_5", run: selectNode },
     "search table": { usage: "search table:K00004, K00008", run: searchTable },
-    "set filter1": { usage: "set filter1:<annotation>", run: setFilter1 },
-    "set filter2": { usage: "set filter2:<scope>, <scope>", run: setFilter2 },
+    "set filter1": { usage: "set filter1:<annotation>, <annotation> | all", run: setFilter1 },
+    "set filter2": { usage: "set filter2:<scope>, <scope> | all", run: setFilter2 },
+    "set view": { usage: "set view:filtered | all", run: setView },
+    "set colour": { usage: "set colour:level1 | level2 | none", run: setColour },
+    "set color": { usage: "set color:level1 | level2 | none", run: setColour },
     "set importance": { usage: "set importance:1.5", run: setImportance },
     "set layout": { usage: "set layout:circle", run: setLayout },
     "sort table": { usage: "sort table:GO_ID desc", run: sortTable },

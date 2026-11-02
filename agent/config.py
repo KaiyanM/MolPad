@@ -46,7 +46,7 @@ CONFIG = LevelConfig()
 
 # Commands the D3 dashboard can replay today (inst/d3dashboard/js/agent.js).
 SUPPORTED_COMMANDS = {
-    "set filter1", "set filter2", "set importance", "set layout",
+    "set filter1", "set filter2", "set importance", "set layout", "set view", "set colour",
     "brush node", "select node", "select all",
     "search table", "sort table", "clear table", "print message",
 }

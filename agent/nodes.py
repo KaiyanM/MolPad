@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sys
 import time
 from typing import TypedDict
@@ -20,7 +21,7 @@ MAX_SUB_CLAIMS = 4
 
 class AgentState(TypedDict, total=False):
     question: str
-    dash_state: dict        # pathway, min_weight, selected_clusters, layout
+    dash_state: dict        # level1, level2, scope, colour_by, min_weight, selected_clusters, layout
     keyword_map: dict       # keywords of the question and the level each belongs to
     kind: dict              # N0
     completeness: dict      # N1
@@ -54,17 +55,36 @@ def _route(node, target, why=""):
     return target
 
 
-def _judge(schema, card, state, user):
+# Words of a message that say something is missing from a cluster ("contains only Bacilli",
+# "no Clostridia", "does not include", "100% Bacilli"). A filtered run cannot show that.
+ABSENCE = re.compile(r"(?i:\bcontains? only\b|\bonly contains?\b|\bdoes(?: not|n't) (?:include|contain|have)\b"
+                     r"|\blacks?\b|\b100 ?%)|\b[Nn]o [A-Z][a-z]+")   # "no Clostridia", not "no cluster"
+
+
+def _compose_reasoning():
+    return os.getenv("AGENT_COMPOSE_TIER", "basic").strip().lower() == "reasoning"
+
+
+def _judge(schema, card, state, user, force_reasoning=False):
     from .llm import JUDGE_TIER, ask  # imported late: the rest of the module works without an API key
 
-    system = card + "\n\n" + prompts.dataset_block(load_dataset(), state["dash_state"])
+    ds = load_dataset()
+    if schema is Messages:
+        # the writer cites the findings only; the dataset block is just the background here
+        system = card + "\n\nBACKGROUND\n" + ds.cfg.background
+    else:
+        system = card + "\n\n" + prompts.dataset_block(ds, state["dash_state"])
     # N1 judges the wording of the question only; a keyword that is not in the data is reported
     # in the message instead of stopping the run with a clarifying question.
     if state.get("keyword_map") and schema not in (Messages, Completeness):
         system += "\n\n" + prompts.keyword_block(kw.as_text(state["keyword_map"]))
-    reasoning = JUDGE_TIER == "reasoning" and schema is not Messages
+    # the message writer uses the basic model unless AGENT_COMPOSE_TIER=reasoning
+    if schema is Messages:
+        reasoning = force_reasoning or _compose_reasoning()
+    else:
+        reasoning = JUDGE_TIER == "reasoning"
     t0 = time.time()
-    out = ask(schema, system, user, reasoning=reasoning).model_dump()
+    out = ask(schema, system, user, reasoning=reasoning, site=schema.__name__).model_dump()
     _debug("  llm", f"{schema.__name__} by the {'reasoning' if reasoning else 'basic'} model, "
            f"{time.time() - t0:.1f}s")
     return out
@@ -89,7 +109,8 @@ def keywords(state: AgentState):
            + ", ".join(vocab["level2"]["values"]))
     system = prompts.KEYWORDS + "\n\nBACKGROUND\n" + ds.cfg.background
     t0 = time.time()
-    words = ask(Keywords, system, state["question"], reasoning=JUDGE_TIER == "reasoning").keywords
+    words = ask(Keywords, system, state["question"], reasoning=JUDGE_TIER == "reasoning",
+                site="keywords").keywords
     _debug("  llm", f"Keywords, {time.time() - t0:.1f}s: {words}")
     kmap = kw.map_keywords(words, ds)
     for line in kw.as_text(kmap).splitlines():
@@ -131,7 +152,7 @@ def n2_shape(state: AgentState):
         from .llm import ask
 
         system = prompts.N2_SPLIT + "\n\n" + prompts.dataset_block(load_dataset(), state["dash_state"])
-        claims = ask(SubClaims, system, state["question"], reasoning=True).sub_claims
+        claims = ask(SubClaims, system, state["question"], reasoning=True, site="split").sub_claims
         subs = claims[:MAX_SUB_CLAIMS] or subs
     _debug("N2 shape", shape)
     if shape == "evidence_chain":
@@ -238,6 +259,8 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
     l3col = f.get("level3_column")
     l3vals = f.get("level3_values") or []
     runs = []
+    contrast_l1 = f.get("contrast") == "level1" and len(f["level1"]) > 1
+    contrast_l2 = f.get("contrast") == "level2" and len(f["level2"]) > 1
 
     for label, level1, level2 in _variants(f):
         s = Session(ds, dash_state)
@@ -313,9 +336,14 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
             do("evaluate feature number", "describe_feature_number")
         if d.get("pattern"):
             do("evaluate pattern", "describe_pattern")
-        # several classes in the filter: always read each shown cluster's class mix, so a
-        # message never names a class for a cluster without a finding behind it
-        if d.get("level2") or len(level2) > 1:
+        # The class mix is read as the bar shows it. In a level-2 contrast every compared class is
+        # counted, although this run keeps one, so the counts of the classes can be set side by side.
+        # With one class kept and no contrast the mix is that class alone, a filter artifact: skip it.
+        # With several classes kept, always read it, so a message never names a class for a cluster
+        # without a finding behind it.
+        if contrast_l2:
+            do("evaluate level2 (" + " and ".join(f["level2"]) + ")", "describe_level2", classes=f["level2"])
+        elif len(level2) > 1 or (d.get("level2") and len(level2) != 1):
             do("evaluate level2", "describe_level2")
         dcol = _match(d.get("level3_column") or "", ds.cfg.level3)
         if dcol:
@@ -335,7 +363,29 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
             "groups": [{**g, "joined": s.joined(g["clusters"])} for g in s.groups],
             "joined": s.joined(s.targets),
             "table": table, "steps": steps,
+            # what the dashboard filter shows: in a contrast every compared value at once, so the
+            # bar sets them side by side while each value's clusters are brushed in turn
+            "shown_level1": list(f["level1"]) if contrast_l1 else ([level1] if level1 else []),
+            "shown_level2": list(f["level2"]) if contrast_l2 else list(level2),
         })
+    if len(runs) > 1 and (contrast_l1 or contrast_l2):
+        variants = {r["label"]: list(r["targets"]) for r in runs}
+        common = set.intersection(*(set(v) for v in variants.values()))
+        # how many features of each compared value every picked cluster holds
+        col = ds.cfg.level2 if contrast_l2 else ds.cfg.level1
+        base = ds.features
+        if contrast_l2 and f["level1"] and len(f["level1"]) == 1:
+            base = base[base[ds.cfg.level1] == f["level1"][0]]
+        picked = sorted(set().union(*variants.values()), key=ds.cluster_number)
+        n = base[base["cluster"].isin(picked)].groupby(["cluster", col]).size()
+        values = f["level2"] if contrast_l2 else f["level1"]
+        counts = {c: {v: int(n.get((c, v), 0)) for v in values} for c in picked}
+        result = {"by": f["contrast"], "variants": variants, "counts": counts,
+                  "in_all": sorted(common, key=ds.cluster_number),
+                  "only": {k: [c for c in v if c not in common] for k, v in variants.items()}}
+        runs[-1]["steps"].append(leaves.data_step(
+            "compare clusters between " + " and ".join(variants), "compare_variants",
+            {"by": f["contrast"]}, result))
     return {"question": question, "filters": f, "selector": selector, "descriptor": descriptor,
             "dropped": dropped, "runs": runs}
 
@@ -343,6 +393,12 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
 def run_data(state: AgentState):
     unit = run_unit(_current(state), state["filters"], state["selector"], state["descriptor"],
                     state["dash_state"])
+    log_unit(unit)
+    return {"units": state["units"] + [unit], "idx": state["idx"] + 1}
+
+
+def log_unit(unit):
+    """Debug lines for one finished backend pass."""
     for d in unit["dropped"]:
         _debug("data", f"ignored, not in the data: {d}")
     for run in unit["runs"]:
@@ -356,7 +412,6 @@ def run_data(state: AgentState):
                            for g in run["groups"])
         _debug("data", f"target groups: {groups or '(none: answer covers all clusters)'}"
                + (f"   importance score moved to {run['threshold']}" if run["threshold_moved"] else ""))
-    return {"units": state["units"] + [unit], "idx": state["idx"] + 1}
 
 
 def route_loop(state: AgentState):
@@ -422,6 +477,14 @@ def compose_messages(state: AgentState):
     if len(texts) != len(slots):   # the writer sometimes merges slots; ask once more
         _debug("messages", f"got {len(texts)} text(s) for {len(slots)} slot(s), asking again")
         texts = _judge(Messages, prompts.COMPOSE, state, user)["texts"]
+    claim = next((m.group(0) for t in texts for m in [ABSENCE.search(t)] if m), None)
+    if claim and not _compose_reasoning():
+        # the basic writer turns "kept by the filter" into "the cluster has nothing else";
+        # the reasoning model reads the counts. Only this case pays for it.
+        _debug("messages", f'claims an absence ("{claim}"); rewritten by the reasoning model')
+        again = _judge(Messages, prompts.COMPOSE, state, user, force_reasoning=True)["texts"]
+        if len(again) == len(slots):
+            texts = again
     out, i = [], 0
     for s in steps:
         if s["kind"] == "message":

@@ -1,4 +1,6 @@
-/* MolPad D3 dashboard: stacked bar of taxonomic scope per selected cluster. */
+/* MolPad D3 dashboard: stacked bar of taxonomic scope per selected cluster.
+   Bar length = number of features the cluster views show (state.clusterFeatures):
+   the features passing the filters, or every feature with "All features". */
 (function (MP) {
   "use strict";
 
@@ -9,32 +11,37 @@
     container = d3.select(selector);
     legendDiv = container.append("div").attr("class", "mp-swatches");
     svg = container.append("svg");
-    MP.state.subscribe(["selectedClusters", "taxa"], render);
+    MP.state.subscribe(["selectedClusters", "level1", "level2", "scope"], render);
   }
 
   function counts() {
-    var D = MP.D, S = MP.state.get();
-    var taxa = MP.state.taxaSet();
-    var clusters = MP.state.sortedSelectedClusters();
-    var rows = clusters.map(function (c) {
+    var D = MP.D;
+    var byCluster = new Map(MP.state.sortedSelectedClusters().map(function (c) {
       var row = { cluster: c, total: 0 };
       D.taxa.forEach(function (t) { row[t] = 0; });
-      (D.byCluster.get(c) || []).forEach(function (f) {
-        var t = f["taxonomic.scope"];
-        if (t === null || t === undefined) return;
-        t = String(t);
-        if (!taxa.has(t)) return;
-        if (!(t in row)) row[t] = 0;
-        row[t] += 1;
-        row.total += 1;
-      });
-      return row;
+      return [c, row];
+    }));
+    MP.state.clusterFeatures().forEach(function (f) {
+      var t = MP.data.levelOf(f, 2);
+      var row = byCluster.get(f.cluster);
+      if (t === "" || !row) return;   // no taxonomic scope: no segment to draw
+      row[t] = (row[t] || 0) + 1;
+      row.total += 1;
     });
-    return { rows: rows, keys: D.taxa.filter(function (t) { return taxa.has(t); }) };
+    return { rows: Array.from(byCluster.values()), keys: D.taxa };
+  }
+
+  function updateTitle() {
+    var t = document.getElementById("stackbar_title");
+    if (!t) return;
+    var S = MP.state.get();
+    t.textContent = "Taxonomic Scope of Selected Groups" +
+      (S.scope === "all" || !MP.state.isFiltered() ? " (all features)" : " (filtered features)");
   }
 
   function render() {
     var D = MP.D;
+    updateTitle();
     var data = counts();
     var present = data.keys.filter(function (t) {
       return data.rows.some(function (r) { return r[t] > 0; });

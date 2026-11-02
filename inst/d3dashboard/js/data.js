@@ -104,13 +104,36 @@
     ws.value = MP.utils.clamp(Number.isFinite(ws.value) ? ws.value : ws.min, ws.min, ws.max);
     D.weightSlider = ws;
 
+    // Feature counts per (cluster, level 1, level 2), built once: node colours and the
+    // option counts of the filters add these up instead of rescanning every feature.
+    var combos = new Map();
+    raw.features.forEach(function (f) {
+      var key = f.cluster + "\u0000" + levelOf(f, 1) + "\u0000" + levelOf(f, 2);
+      var c = combos.get(key);
+      if (!c) combos.set(key, c = { cluster: f.cluster, l1: levelOf(f, 1), l2: levelOf(f, 2), n: 0 });
+      c.n += 1;
+    });
+    D.combos = Array.from(combos.values());
+
+    // The ribbon may colour by `type` too, but only when it says more than level 1 does.
+    D.hasDistinctType = raw.features.some(function (f) { return f.type !== levelOf(f, 1); });
+
     // Colour scales fixed for the whole session.
     D.typeColor = MP.palettes.ordinal(D.types, "darkwarm");
+    D.level1Color = D.hasDistinctType ? MP.palettes.ordinal(D.pathways, "darkwarm") : D.typeColor;
     D.taxaColor = MP.palettes.ordinal(D.taxa, "graytone");
 
     MP.D = D;
     return D;
   }
 
-  MP.data = { load: load };
+  /* Level 1 is the Pathway column, level 2 the taxonomic scope; "" when missing. */
+  var LEVEL_FIELD = { 1: "Pathway", 2: "taxonomic.scope" };
+
+  function levelOf(f, level) {
+    var v = f[LEVEL_FIELD[level]];
+    return v === null || v === undefined ? "" : String(v);
+  }
+
+  MP.data = { load: load, levelOf: levelOf, LEVEL_FIELD: LEVEL_FIELD };
 })(window.MolPad = window.MolPad || {});

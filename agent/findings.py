@@ -199,14 +199,45 @@ def _describe_pattern(args, r):
 
 
 def _describe_level2(args, r):
+    """Counts, as the stacked bar shows them; a share only of the whole cluster."""
     lines = []
     for cl in _order(r):
-        fr = r[cl]["fractions"]
-        top = sorted(fr, key=lambda k: -fr[k])[:2]
-        within = r[cl].get("within")
-        scope = f" kept by the filter ({', '.join(within)})" if within else ""
-        lines.append(f"{cl} ({_f(r[cl]['total'])} features{scope}): "
-                     + ", ".join(f"{k} {_pct(fr[k])}" for k in top))
+        v = r[cl]
+        counts = sorted(v["counts"].items(), key=lambda kv: -kv[1])
+        if v.get("classes"):
+            scope = f"counting {' and '.join(v['classes'])}"
+        elif v.get("kept"):
+            scope = f"of the features kept by the level-2 filter ({', '.join(v['kept'])})"
+        else:
+            scope = "of the features kept by the filters"
+        shown = counts if v.get("classes") else counts[:3]
+        lines.append(f"{cl}: " + ", ".join(f"{k} {_f(n)}" for k, n in shown)
+                     + f" ({scope}; the cluster has {_f(v.get('cluster_total'))} features in all)")
+    return lines
+
+
+def _compare_variants(args, r):
+    """Which clusters are main clusters of each compared value, with the counts of every value.
+
+    'Main cluster of X only' never means the cluster lacks the other value: the counts say so.
+    """
+    variants, counts = r["variants"], r.get("counts") or {}
+    names = list(variants)
+    lines = [f"main clusters of {label}: {_list(cl)}" for label, cl in variants.items()]
+
+    def nums(cl):
+        c = counts.get(cl)
+        return f" ({', '.join(f'{v} {_f(c[v])}' for v in c)})" if c else ""
+
+    for cl in _order(counts or set().union(*variants.values())):
+        of = [label for label in names if cl in variants[label]]
+        if len(of) == len(names):
+            lines.append(f"{cl}: a main cluster of all of {', '.join(names)}{nums(cl)}")
+        else:
+            rest = [label for label in names if label not in of]
+            lines.append(f"{cl}: a main cluster of {', '.join(of)}, not of {', '.join(rest)}{nums(cl)}")
+    both = r.get("in_all") or []
+    lines.append(f"shared main clusters: {_list(both)}" if both else "no shared main cluster")
     return lines
 
 
@@ -255,7 +286,7 @@ RULES = {
     "select_given": _select_given, "select_all": _select_all, "select_examples": _select_examples,
     "describe_pattern": _describe_pattern, "describe_level2": _describe_level2,
     "describe_level3": _describe_level3, "describe_weight": _describe_weight,
-    "describe_feature_number": _describe_feature_number,
+    "describe_feature_number": _describe_feature_number, "compare_variants": _compare_variants,
 }
 
 

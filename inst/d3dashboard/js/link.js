@@ -62,11 +62,15 @@
   function dashState() {
     var S = MP.state.get();
     return {
-      pathway: S.pathway,
+      level1: S.level1.slice(),          // [] = all
+      level2: S.level2.slice(),          // [] = all
+      scope: S.scope,                    // what the cluster views show: "filtered" | "all"
+      colour_by: S.colourBy,
+      pathway: S.level1.length === 1 ? S.level1[0] : "",   // older agents read this
+      taxa: S.level2.slice(),
       min_weight: S.minWeight,
       selected_clusters: S.selectedClusters.slice(),
-      layout: S.layout,
-      taxa: S.taxa.slice()
+      layout: S.layout
     };
   }
 

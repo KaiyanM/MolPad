@@ -7,30 +7,54 @@
   var margin = { top: 6, right: 10, bottom: 46, left: 40 };
   var gapX = 14, gapY = 12;
   var SIDE_W = 14, SUB_GAP = 12;
+  var MIN_PANEL_W = 180;
 
   function init(selector) {
     container = d3.select(selector);
     legendDiv = container.append("div").attr("class", "mp-swatches");
     svg = container.append("svg");
-    MP.state.subscribe(["selectedClusters", "taxa"], render);
+    MP.state.subscribe(["selectedClusters", "level1", "level2", "scope", "colourBy"], render);
   }
 
-  /* Per cluster, subject and type: min/mean/max at every time point. */
-  function summarise() {
+  var NONE = "all features", MISSING = "(none)";
+
+  /* The colour grouping of the lines: key of a feature, ordered domain, colour, legend title. */
+  function grouping() {
+    var D = MP.D, by = MP.state.get().colourBy;
+    if (by === "level2") {
+      return { key: function (f) { return MP.data.levelOf(f, 2) || MISSING; },
+               domain: D.taxa.concat([MISSING]), color: function (t) { return t === MISSING ? "#999" : D.taxaColor(t); },
+               title: "taxonomic.scope" };
+    }
+    if (by === "type") {
+      return { key: function (f) { return f.type; }, domain: D.types, color: D.typeColor, title: "type" };
+    }
+    if (by === "none") {
+      return { key: function () { return NONE; }, domain: [NONE],
+               color: function () { return MP.palettes.accent; }, title: "" };
+    }
+    return { key: function (f) { return MP.data.levelOf(f, 1) || MISSING; },
+             domain: D.pathways.concat([MISSING]), color: function (t) { return t === MISSING ? "#999" : D.level1Color(t); },
+             title: "Pathway" };
+  }
+
+  /* Per cluster, subject and colour group: min/mean/max at every time point. */
+  function summarise(G) {
     var D = MP.D;
     var byCluster = new Map();
-    MP.state.selectedFeatures().forEach(function (f) {
+    MP.state.clusterFeatures().forEach(function (f) {
       if (!byCluster.has(f.cluster)) byCluster.set(f.cluster, new Map());
       var byType = byCluster.get(f.cluster);
-      if (!byType.has(f.type)) byType.set(f.type, []);
-      byType.get(f.type).push(f);
+      var k = G.key(f);
+      if (!byType.has(k)) byType.set(k, []);
+      byType.get(k).push(f);
     });
 
     return MP.state.sortedSelectedClusters().map(function (c) {
       var byType = byCluster.get(c) || new Map();
       var subjects = D.subjects.map(function (sub) {
         var series = [];
-        D.types.forEach(function (t) {
+        G.domain.forEach(function (t) {
           var feats = byType.get(t);
           if (!feats || !feats.length) return;
           var points = sub.idx.map(function (i, j) {
@@ -49,18 +73,19 @@
 
   function render() {
     var D = MP.D;
-    var panels = summarise();
+    var G = grouping();
+    var panels = summarise(G);
     var width = Math.max(240, container.node().clientWidth || 400);
     var boxH = Math.max(200, container.node().clientHeight || 320);
 
-    var typesPresent = D.types.filter(function (t) {
+    var typesPresent = G.domain.filter(function (t) {
       return panels.some(function (p) { return p.series.some(function (s) { return s.type === t; }); });
     });
     legendDiv.selectAll("*").remove();
-    legendDiv.append("span").attr("class", "mp-swatch-title").text("type");
+    legendDiv.append("span").attr("class", "mp-swatch-title").text(G.title);
     typesPresent.forEach(function (t) {
       var s = legendDiv.append("span").attr("class", "mp-swatch");
-      s.append("i").style("background", D.typeColor(t));
+      s.append("i").style("background", G.color(t));
       s.append("span").text(t);
     });
 
@@ -74,11 +99,16 @@
     }
 
     var legendH = legendDiv.node().offsetHeight || 20;
-    var ncol = Math.ceil(Math.sqrt(k)), nrow = Math.ceil(k / ncol);
-    var panelW = (width - gapX * (ncol - 1)) / ncol;
+    // As square as the panel count allows; more columns when the rows would not fit the box
+    // height; never narrower than MIN_PANEL_W per panel.
     var nsub = D.subjects.length;
     var minPanelH = 150 + (nsub - 1) * 90;
     var available = boxH - legendH - 4;
+    var maxCols = Math.max(1, Math.floor((width + gapX) / (MIN_PANEL_W + gapX)));
+    var rowsFit = Math.max(1, Math.floor((available + gapY) / (minPanelH + gapY)));
+    var ncol = Math.max(1, Math.min(k, maxCols, Math.max(Math.ceil(Math.sqrt(k)), Math.ceil(k / rowsFit))));
+    var nrow = Math.ceil(k / ncol);
+    var panelW = (width - gapX * (ncol - 1)) / ncol;
     var panelH = Math.max(minPanelH, (available - gapY * (nrow - 1)) / nrow);
     var height = nrow * panelH + gapY * (nrow - 1);
     svg.attr("width", width).attr("height", height);
@@ -136,11 +166,11 @@
 
         sub.series.forEach(function (s) {
           plot.append("path").datum(s.points).attr("d", area)
-            .attr("fill", D.typeColor(s.type)).attr("fill-opacity", 0.2).attr("stroke", "none");
+            .attr("fill", G.color(s.type)).attr("fill-opacity", 0.2).attr("stroke", "none");
         });
         sub.series.forEach(function (s) {
           plot.append("path").datum(s.points).attr("d", line)
-            .attr("fill", "none").attr("stroke", D.typeColor(s.type))
+            .attr("fill", "none").attr("stroke", G.color(s.type))
             .attr("stroke-opacity", 0.8).attr("stroke-width", 1.5)
             .append("title").text(p.cluster + (sub.name ? " \u00b7 " + sub.name : "") +
               " \u00b7 " + s.type + " (mean, ribbon = min to max)");

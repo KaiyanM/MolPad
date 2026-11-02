@@ -44,8 +44,8 @@ def test_L4_contrast_two_steps():
              steps=[{"kind": "feature_number"}])
     leaf, steps = play([u], needs_focus=False)
     assert leaf == "L4"
-    assert commands(steps) == ["set filter1:Bacillota", "set filter2:Bacilli", "MESSAGE",
-                               "set filter2:Clostridia", "MESSAGE"]
+    # both classes stay in the filter, so the bar sets them side by side
+    assert commands(steps) == ["set filter1:Bacillota", "set filter2:Bacilli, Clostridia", "MESSAGE", "MESSAGE"]
     assert all(s["supported"] for s in steps if s["kind"] == "dashboard")
     check_order(steps)
 
@@ -181,7 +181,7 @@ def test_L7_examples_per_class_say_why():
              steps=[{"kind": "example", "example_by": "level2_composition"}], descriptor={"pattern": True})
     leaf, steps = play([u], grouping="one_by_one")
     assert leaf == "L7"
-    assert commands(steps) == ["set filter2:Flavobacteriia,Bacilli", "brush node:Group_3", "MESSAGE",
+    assert commands(steps) == ["set filter2:Flavobacteriia, Bacilli", "brush node:Group_3", "MESSAGE",
                                "brush node:Group_4", "MESSAGE", "MESSAGE"]
     assert "evaluate level2" in [s["action"] for s in steps if s["kind"] == "data"]
     msgs = [s["about"] for s in steps if s["kind"] == "message"]
@@ -194,3 +194,35 @@ def test_level2_contrast_with_two_level1_keeps_every_class():
                       "contrast": "level2"},
              steps=[{"kind": "example", "example_by": "level2_composition"}])
     assert [r["targets"] for r in u["runs"]] == [["Group_3"], ["Group_4"]]
+
+
+def test_level2_contrast_counts_both_classes_and_compares_clusters():
+    u = unit(filters={"level1": ["Bacillota"], "level2": ["Bacilli", "Clostridia"], "contrast": "level2"},
+             steps=[{"kind": "feature_number"}], descriptor={"level2": True})
+    for run in u["runs"]:
+        mix = next(st for st in run["steps"] if st["op"] == "describe_level2")
+        for cl, v in mix["result"].items():
+            assert set(v["counts"]) == {"Bacilli", "Clostridia"}       # not 100% of the kept class
+        assert not any("100%" in line for line in mix["findings"])
+    last = u["runs"][-1]["steps"][-1]
+    assert last["op"] == "compare_variants"
+    both = set(u["runs"][0]["targets"]) & set(u["runs"][1]["targets"])
+    assert last["result"]["in_all"] == sorted(both, key=load_dataset().cluster_number)
+    assert any(line.startswith("shared main clusters") or line.startswith("no shared main cluster")
+               for line in last["findings"])
+
+
+def test_one_kept_class_has_no_class_mix():
+    u = unit(filters={"level1": ["Bacillota"], "level2": ["Bacilli"]},
+             steps=[{"kind": "feature_number"}], descriptor={"level2": True})
+    assert "describe_level2" not in [st["op"] for st in u["runs"][0]["steps"]]
+
+
+def test_absence_claims_are_caught():
+    from agent.nodes import ABSENCE
+    assert ABSENCE.search("This cluster contains only Bacilli (2,126) and no Clostridia")
+    assert ABSENCE.search("Group_2 is 100% Betaproteobacteria")
+    assert ABSENCE.search("it does not include Bacilli")
+    for fine in ("It is a main Bacilli cluster but not a shared one", "no cluster is picked",
+                 "Group_2 has no neighbours", "Only Group_4 is shared"):
+        assert not ABSENCE.search(fine)

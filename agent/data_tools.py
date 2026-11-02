@@ -159,10 +159,13 @@ class Dataset:
         return self.times.get(col, _number(col))
 
     def default_state(self):
-        """Dashboard state at page load (inst/d3dashboard/js/state.js)."""
-        first = self.features[self.cfg.level1].dropna().unique()
+        """Dashboard state at page load (inst/d3dashboard/js/state.js): both filters on All."""
         return {
-            "pathway": first[0] if len(first) else "",
+            "level1": [],                 # [] = all
+            "level2": [],
+            "scope": "filtered",          # what the views of the selected clusters show
+            "colour_by": "level1",
+            "pathway": "",                # older name: the one level-1 value, "" for none / several
             "min_weight": self.default_threshold,
             "selected_clusters": list(self.clusters),
             "layout": "force",
@@ -748,14 +751,32 @@ class Session:
             out["filtered_features_only"] = part(self.df)
         return out
 
-    def describe_level2(self):
-        rows = self._target_rows(self.df)
+    def describe_level2(self, classes=None):
+        """Level-2 counts of each target cluster, as the stacked bar shows them.
+
+        `classes`: the level-2 values set against each other (a level-2 contrast). They are
+        counted together even while the filter keeps one of them, so a run that keeps only
+        Bacilli still reports how many Clostridia the cluster holds. Without `classes`, the
+        rows the filters kept are counted; `kept` names the level-2 filter when one is set.
+        """
+        if classes:
+            df = self.ds.features
+            if self.level1:
+                df = df[df[self.cfg.level1] == self.level1]
+            df = df[df[self.cfg.level2].isin(classes)]
+        else:
+            df = self.df
+        totals = self.ds.features.groupby("cluster").size()
         out = {}
-        for cl, g in rows.groupby("cluster"):
+        for cl, g in self._target_rows(df).groupby("cluster"):
             n = g[self.cfg.level2].value_counts()
-            out[cl] = {"total": len(g), "counts": n.to_dict(), "fractions": (n / len(g)).round(3).to_dict()}
-        if self.level2:   # shares are of the features the level-2 filter kept, not the whole cluster
-            out = {cl: {**v, "within": list(self.level2)} for cl, v in out.items()}
+            out[cl] = {"total": len(g), "counts": {k: int(v) for k, v in n.items()},
+                       "cluster_total": int(totals.get(cl, 0))}
+            if classes:
+                out[cl]["classes"] = list(classes)
+                out[cl]["counts"] = {c: out[cl]["counts"].get(c, 0) for c in classes}
+            elif self.level2:
+                out[cl]["kept"] = list(self.level2)
         return out
 
     def describe_level3(self, column, mode="frequency"):

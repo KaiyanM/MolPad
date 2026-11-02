@@ -46,7 +46,7 @@
 
     initMenu();
 
-    MP.state.subscribe(["selectedClusters", "taxa", "tablePathway"], function () {
+    MP.state.subscribe(["selectedClusters", "level1", "level2", "scope"], function () {
       local.page = 1;
       closeMenu();
       render();
@@ -54,20 +54,19 @@
   }
 
   function columns() {
-    var S = MP.state.get();
-    var ann = MP.D.annotationColumns.filter(function (c) {
-      return !(c === "Pathway" && S.tablePathway !== "");
-    });
-    return ["ID", "cluster", "type"].concat(ann);
+    return ["ID", "cluster", "type"].concat(MP.D.annotationColumns);
   }
 
+  /* The features of the selected clusters, as the bar and the ribbon show them. */
   function rows() {
-    var S = MP.state.get();
-    var out = MP.state.selectedFeatures();
-    if (S.tablePathway !== "") {
-      out = out.filter(function (f) { return String(f.Pathway) === S.tablePathway; });
+    var badge = document.getElementById("table_scope");
+    if (badge) {
+      var S = MP.state.get(), filtered = S.scope === "filtered" && MP.state.isFiltered();
+      badge.textContent = filtered ? "filtered features of the selected clusters"
+                                   : "all features of the selected clusters";
+      badge.classList.toggle("mp-badge-on", filtered);
     }
-    return out;
+    return MP.state.clusterFeatures();
   }
 
   function cellText(f, c) {

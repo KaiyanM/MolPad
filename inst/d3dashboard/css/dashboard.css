@@ -39,7 +39,11 @@ html, body {
   align-items: stretch;
   background: var(--mp-header);
   height: 50px;
+  position: sticky;
+  top: 0;
+  z-index: 1600;
 }
+html { scroll-padding-top: 60px; }
 
 .mp-logo {
   background: var(--mp-logo);
@@ -109,6 +113,50 @@ html, body {
 
 .mp-box h3 { margin: 4px 0 12px; font-weight: 500; }
 
+/* ---- analysis area: graph top-left, bar top-right, ribbon below ---------------
+   The bar and ribbon boxes touch and share their borders, so they read as one
+   mirrored-L panel (both follow the same "show" and "colour" controls); the graph
+   keeps its own box with page background around it. */
+:root { --mp-network-h: 275px; --mp-ribbon-h: 520px; --mp-gap: 16px; }
+
+.mp-analysis {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  grid-template-areas: "net bar" "rib rib";
+  column-gap: var(--mp-gap);
+  row-gap: 0;
+  min-width: 0;
+}
+#box-network { grid-area: net; margin-bottom: var(--mp-gap); }
+.mp-l-top {
+  grid-area: bar;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+}
+.mp-l-bottom {
+  grid-area: rib;
+  position: relative;
+  border-top: none;
+  border-radius: 0 0 3px 3px;
+}
+/* the inner edge of the L: a top border only under the graph, up to the bar box */
+.mp-l-bottom::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -4px;
+  /* graph column + gap + the bar box's left border, measured from the outer left edge */
+  width: calc((100% + 8px - var(--mp-gap)) * 7 / 12 + var(--mp-gap) + 4px);
+  height: 4px;
+  background: var(--mp-box-top);
+  border-top-left-radius: 3px;
+}
+
+@media (max-width: 1100px) {
+  .mp-analysis { grid-template-columns: 1fr; grid-template-areas: "net" "bar" "rib"; }
+  .mp-l-bottom::before { display: none; }
+}
+
 .mp-plot-title {
   margin: 10px 0 2px;
   font-size: 15px;
@@ -116,9 +164,9 @@ html, body {
 }
 
 .mp-plot { width: 100%; position: relative; }
-#network { height: 410px; }
+#network { height: var(--mp-network-h); }
 #stackbar { min-height: 120px; }
-#ribbon { height: 320px; overflow-y: auto; }
+#ribbon { height: var(--mp-ribbon-h); overflow-y: auto; }
 
 .mp-plot svg { display: block; }
 
@@ -193,6 +241,101 @@ input[type="range"] {
 
 .mp-btn:hover { background: var(--mp-accent-dark); }
 .mp-btn:disabled { opacity: .45; cursor: default; }
+
+/* ---- filter bar: checkbox drop-downs -------------------------------------- */
+
+.mp-filterbar { padding-top: 8px; padding-bottom: 8px; }
+.mp-filterbar .mp-hint { align-self: center; margin: 0; }
+
+.mp-ms { position: relative; min-width: 220px; }
+.mp-ms-btn {
+  font: inherit;
+  font-weight: 400;
+  width: 100%;
+  height: 32px;
+  padding: 5px 26px 5px 8px;
+  text-align: left;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+.mp-ms-btn::after {
+  content: "\25BE";
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--mp-muted);
+}
+.mp-ms-open .mp-ms-btn { border-color: var(--mp-accent); }
+.mp-ms-btn.mp-flash { animation: mp-flash .6s ease-out; }
+.mp-ms-btn:focus { outline: 2px solid var(--mp-accent); outline-offset: 1px; }
+
+.mp-ms-panel {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .15);
+  padding: 4px 0;
+}
+.mp-ms-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-weight: 400;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.mp-ms-opt:hover { background: #f1f5f3; }
+.mp-ms-all { border-bottom: 1px solid #eee; font-weight: 600; }
+.mp-ms-name { flex: 1 1 auto; }
+.mp-ms-count { color: var(--mp-muted); font-size: 12px; }
+.mp-ms-disabled { color: #b5b5b5; cursor: default; }
+.mp-ms-disabled:hover { background: none; }
+.mp-ms-opt input { accent-color: var(--mp-accent); margin: 0; }
+
+/* ---- segmented switch and badges ------------------------------------------ */
+
+.mp-seg { display: inline-flex; height: 32px; }
+.mp-seg-btn {
+  font: inherit;
+  font-weight: 400;
+  padding: 5px 12px;
+  border: 1px solid var(--mp-accent-dark);
+  background: #fff;
+  color: var(--mp-accent-dark);
+  cursor: pointer;
+}
+.mp-seg-btn + .mp-seg-btn { border-left: none; }
+.mp-seg-btn:first-child { border-radius: 3px 0 0 3px; }
+.mp-seg-btn:last-child { border-radius: 0 3px 3px 0; }
+.mp-seg-btn.active { background: var(--mp-accent); color: #fff; }
+.mp-seg.mp-flash { animation: mp-flash .6s ease-out; }
+
+.mp-badge {
+  display: inline-block;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 3px;
+  background: #eef0ef;
+  color: var(--mp-muted);
+  white-space: nowrap;
+}
+.mp-badge-on { background: var(--mp-flash); color: var(--mp-brush-stroke); }
 
 /* ---- network ------------------------------------------------------------- */
 
@@ -388,18 +531,50 @@ table.mp-table a { color: #1a5276; }
 
 /* ---- dialogue and virtual mouse ------------------------------------------- */
 
+/* The dialogue is a fixed sidebar on the left: it keeps its place while the page
+   scrolls, and its log scrolls on its own (overscroll does not move the page). */
+:root { --mp-chat-w: 340px; --mp-chat-w-collapsed: 34px; }
+body { padding-left: var(--mp-chat-w); }
+body.mp-chat-collapsed { padding-left: var(--mp-chat-w-collapsed); }
+body > .mp-header { margin-left: calc(-1 * var(--mp-chat-w)); }
+body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-collapsed)); }
+
 .mp-chat {
   position: fixed;
-  right: 16px;
-  bottom: 16px;
-  width: 320px;
-  max-width: calc(100vw - 32px);
+  left: 0;
+  top: 50px;                     /* below the header */
+  bottom: 0;
+  width: var(--mp-chat-w);
   z-index: 1500;
+  display: flex;
+  flex-direction: column;
   background: #fff;
-  border: 1px solid var(--mp-box-side);
-  border-top: 3px solid var(--mp-box-top);
-  border-radius: 4px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+  border-right: 4px solid var(--mp-box-side);
+  border-top: 4px solid var(--mp-box-top);
+}
+.mp-chat-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.mp-chat.collapsed { width: var(--mp-chat-w-collapsed); }
+.mp-chat.collapsed .mp-chat-head { flex-direction: column; padding: 8px 0; }
+.mp-chat.collapsed .mp-chat-head > span,
+.mp-chat.collapsed .mp-chat-status { display: none; }
+
+@media (max-width: 900px) {
+  /* narrow screens: back to a floating box, so the plots keep the full width */
+  body, body.mp-chat-collapsed { padding-left: 0; }
+  body > .mp-header, body.mp-chat-collapsed > .mp-header { margin-left: 0; }
+  .mp-chat, .mp-chat.collapsed {
+    top: auto; left: auto; right: 16px; bottom: 16px;
+    width: 320px; max-width: calc(100vw - 32px); max-height: 60vh;
+    border: 1px solid var(--mp-box-side); border-top: 3px solid var(--mp-box-top);
+    border-radius: 4px; box-shadow: 0 4px 14px rgba(0, 0, 0, .18);
+  }
+  .mp-chat.collapsed .mp-chat-head { flex-direction: row; padding: 6px 10px; }
+  .mp-chat.collapsed .mp-chat-head > span { display: inline; }
 }
 .mp-chat-head {
   display: flex;
@@ -418,8 +593,10 @@ table.mp-table a { color: #1a5276; }
 }
 .mp-chat.collapsed .mp-chat-body { display: none; }
 .mp-chat-log {
-  height: 180px;
+  flex: 1 1 auto;
+  min-height: 120px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px 10px;
   border-top: 1px solid var(--mp-box-side);
   border-bottom: 1px solid var(--mp-box-side);
