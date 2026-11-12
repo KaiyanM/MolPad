@@ -18,21 +18,6 @@
 
 <main id="tab-main" class="mp-grid">
 
-  <section id="box-filters" class="mp-box mp-col-12 mp-filterbar">
-    <div class="mp-controls">
-      <div class="mp-field">
-        <span>Functional Annotation:</span>
-        <div id="f_level1"></div>
-      </div>
-      <div class="mp-field">
-        <span>Taxonomic Scope:</span>
-        <div id="f_level2"></div>
-      </div>
-      <button id="btn_filters_reset" class="mp-btn" type="button" title="Set both filters back to All">Reset filters</button>
-      <p class="mp-hint mp-grow">The filters colour the network nodes. The views of the selected clusters follow them too, unless "All features" is chosen there.</p>
-    </div>
-  </section>
-
   <div class="mp-analysis mp-col-12">
   <section id="box-network" class="mp-box">
     <div class="mp-controls">
@@ -51,13 +36,23 @@
       <button id="btn_reset" class="mp-btn" type="button" title="Clear the brush and select every cluster">Select all</button>
       <button id="btn_clear" class="mp-btn" type="button" title="Unselect every cluster, then click nodes to add them one by one">Clear all</button>
     </div>
-    <h4 class="mp-plot-title" id="network_title">Pattern Network</h4>
+    <h4 class="mp-plot-title" id="network_title" title="Drag a rectangle to select clusters, click a node to add or remove it, drag nodes to move them. Click empty space or &quot;Select all&quot; for every cluster; &quot;Clear all&quot; starts from none.">Pattern Network</h4>
     <div id="network" class="mp-plot"></div>
     <div id="network_legend" class="mp-legend"></div>
-    <p class="mp-hint">Drag a rectangle to select clusters, click a node to add or remove it, drag nodes to move them. Click empty space or "Select all" for every cluster; "Clear all" starts from none.</p>
   </section>
 
   <section id="box-right" class="mp-box mp-l-top">
+    <div class="mp-controls mp-filters" title="The filters colour the network nodes. The views of the selected clusters follow them too, unless &quot;All features&quot; is chosen below.">
+      <div class="mp-field">
+        <span>Functional Annotation:</span>
+        <div id="f_level1"></div>
+      </div>
+      <div class="mp-field">
+        <span>Taxonomic Scope:</span>
+        <div id="f_level2"></div>
+      </div>
+      <button id="btn_filters_reset" class="mp-btn" type="button" title="Set both filters back to All">Reset filters</button>
+    </div>
     <div class="mp-controls">
       <div class="mp-field">
         <span>Selected clusters show:</span>
@@ -76,7 +71,10 @@
   </section>
 
   <section id="box-ribbon" class="mp-box mp-l-bottom">
-    <h4 class="mp-plot-title">Pattern of Selected Groups</h4>
+    <div class="mp-title-row">
+      <h4 class="mp-plot-title" id="ribbon_title">Pattern of All Groups (selected highlighted)</h4>
+      <button id="btn_ribbon_expand" class="mp-btn mp-btn-toggle" type="button" aria-pressed="false" title="Show only the selected clusters, in larger panels. Click again for every cluster, with the unselected ones faded.">Expand trajectories</button>
+    </div>
     <div id="ribbon" class="mp-plot"></div>
   </section>
   </div>

@@ -117,7 +117,15 @@ html { scroll-padding-top: 60px; }
    The bar and ribbon boxes touch and share their borders, so they read as one
    mirrored-L panel (both follow the same "show" and "colour" controls); the graph
    keeps its own box with page background around it. */
-:root { --mp-network-h: 275px; --mp-ribbon-h: 520px; --mp-gap: 16px; }
+:root {
+  /* The graph, the bar and the ribbon share one screen: what the window leaves after the
+     header, the box paddings, the controls and the titles (about 300px) is split between
+     the graph row and the ribbon row. */
+  --mp-plots-h: calc(100vh - 300px);
+  --mp-network-h: clamp(250px, calc(var(--mp-plots-h) * 0.56), 460px);
+  --mp-ribbon-h: clamp(190px, calc(var(--mp-plots-h) * 0.44), 340px);
+  --mp-gap: 16px;
+}
 
 .mp-analysis {
   display: grid;
@@ -163,10 +171,19 @@ html { scroll-padding-top: 60px; }
   font-weight: 500;
 }
 
+/* a plot title with a button on its right */
+.mp-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mp-title-row .mp-plot-title { margin-top: 4px; }
+.mp-btn-toggle { padding-top: 3px; padding-bottom: 3px; white-space: nowrap; }
+.mp-btn-toggle[aria-pressed="false"] { background: #fff; color: var(--mp-accent-dark); border: 1px solid var(--mp-accent-dark); }
+.mp-btn-toggle[aria-pressed="false"]:hover { background: #eef6f2; }
+
 .mp-plot { width: 100%; position: relative; }
 #network { height: var(--mp-network-h); }
-#stackbar { min-height: 120px; }
-#ribbon { height: var(--mp-ribbon-h); overflow-y: auto; }
+/* the bar grows with the number of selected clusters: it scrolls instead of stretching the row */
+#stackbar { min-height: 120px; max-height: calc(var(--mp-network-h) - 40px); overflow-y: auto; }
+/* one row of facets; they get narrower with more clusters and scroll sideways at the floor width */
+#ribbon { height: var(--mp-ribbon-h); overflow-x: auto; overflow-y: hidden; }
 
 .mp-plot svg { display: block; }
 
@@ -244,10 +261,20 @@ input[type="range"] {
 
 /* ---- filter bar: checkbox drop-downs -------------------------------------- */
 
-.mp-filterbar { padding-top: 8px; padding-bottom: 8px; }
-.mp-filterbar .mp-hint { align-self: center; margin: 0; }
+/* the two filters sit side by side above the controls of the bar and the ribbon */
+.mp-filters { flex-wrap: nowrap; }
+.mp-filters .mp-field { flex: 1 1 0; min-width: 0; }
+.mp-filters .mp-btn { flex: none; }
+/* the control rows of the two top boxes stay on one line in a narrow window */
+#box-network .mp-field { min-width: 90px; }
+#box-network .mp-grow { flex-basis: 110px; }
+#box-right .mp-controls { flex-wrap: nowrap; }
+#box-right .mp-field { min-width: 0; }
+#box-right .mp-field:has(#s_colour) { flex: 1 1 110px; }
+#s_colour { width: 100%; min-width: 0; }
+.mp-seg-btn { white-space: nowrap; }
 
-.mp-ms { position: relative; min-width: 220px; }
+.mp-ms { position: relative; min-width: 120px; }
 .mp-ms-btn {
   font: inherit;
   font-weight: 400;
@@ -606,6 +633,16 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
 .mp-chat-msg.user { text-align: right; color: var(--mp-accent-dark); }
 .mp-chat-msg.bot { color: var(--mp-text); }
 .mp-chat-msg.error { color: #a23b3b; }
+/* why the agent takes its next step: printed before the actions of that step */
+.mp-chat-msg.reason {
+  margin-top: 10px;
+  padding: 4px 8px;
+  border-left: 3px solid var(--mp-accent);
+  background: rgba(0, 0, 0, .04);
+  color: var(--mp-muted);
+  font-style: italic;
+}
+.mp-chat-msg.reason b { display: block; font-style: normal; font-size: 0.8em; letter-spacing: .04em; text-transform: uppercase; }
 .mp-chat-status {
   margin-left: auto; margin-right: 6px; border: 0; background: none; padding: 0;
   font-size: 0.8em; cursor: pointer; color: var(--mp-logo);

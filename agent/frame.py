@@ -199,11 +199,14 @@ def breakdown(state: FrameState):
             _debug("breakdown", f"dropped: {sub['question']}")
             continue
         frames.append({**sub, "filters": filters, "roles": roles})
-        maps.append(kmap)
+        # the words of a sub-question are the breakdown's, not the user's: a word of it that is
+        # not a data value is no assumption about the question, so it is not reported
+        maps.append({**kmap, "notes": [n for n in kmap["notes"] if " is not a " not in n]})
     if not frames:   # nothing testable: answer the question as one direct pass
         frames = state["frames"]
     for i, fr in enumerate(frames, 1):
-        _debug("breakdown", f"{i}/{len(frames)} {fr['question']}")
+        _debug("breakdown", f"{i}/{len(frames)} {fr['question']}"
+               + (f"   because: {fr['reason']}" if fr.get("reason") else ""))
         for line in fr["roles"]:
             _debug("  mention", line)
     kmap = _merge_kmaps(maps)
@@ -252,6 +255,8 @@ def run_frame(state: FrameState):
             _debug("sub-question", f"{i + 1}/{len(state['frames'])} {fr['question']}")
         unit = run_unit(fr["question"], fr["filters"], {"steps": p["steps"]}, p["descriptor"],
                         state["dash_state"])
+        if len(state["frames"]) > 1:
+            unit["reason"] = fr.get("reason") or ""
         log_unit(unit)
         units.append(unit)
     return {"units": units, "idx": len(units)}

@@ -477,7 +477,8 @@
 
   /* Play the step list written by the Python agent: an array of steps, or an
      object with a `steps` array (JSON text is parsed). Dashboard steps run as
-     commands, message steps are printed, data steps are not played: they hold
+     commands, message steps are printed, reasoning steps are printed before the
+     actions they explain, data steps are not played: they hold
      the evidence (findings and numbers) that a message lists by id. `say(text,
      kind, evidence)` receives each line; a failed step is reported and the rest
      go on. */
@@ -502,6 +503,11 @@
           done += 1;
           return pause(readingTime(step.text));
         }
+        if (step.kind === "reasoning") {
+          say(String(step.text), "reason");
+          return pause(readingTime(step.text));
+        }
+        if (step.kind !== "dashboard" && !step.command) return null;   // a kind this page does not know
         return pause(PAUSE_BEFORE_CMD).then(function () {
           say(String(step.command), "user");
           return run(step.command);

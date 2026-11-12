@@ -673,6 +673,10 @@ class Session:
             return out
         else:
             raise ValueError(f"unknown network criterion '{criterion}'")
+        if criterion in ("most_edges", "isolated", "neighbours", "connectivity"):
+            # found through the graph structure: the playback shows these one by one.
+            # An edge (strongest_edge, connected_pairs) keeps its two ends together.
+            groups = [{**g, "via": "network"} for g in groups]
         self._set(groups)
         out["groups"] = groups
         return out

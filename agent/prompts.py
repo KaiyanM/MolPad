@@ -299,7 +299,7 @@ COMPOSE = """You write the messages an analysis agent prints next to an interact
 You get the user's question, the findings of the backend data actions (short lines, each data
 action with an id such as [d2]), and a numbered list of message slots. Each slot says where in the
 playback it appears, which clusters are in focus at that moment, and which findings it rests on.
-Write one message per slot, in order.
+Write one message per slot and give each text the number of its slot. Never merge two slots.
 
 The user sees every number behind a message in an Evidence dropdown under it. So a message gives
 the conclusion, not the data.
@@ -316,7 +316,8 @@ Rules
 - Name the metric in a few words when the backend chose one for a vague criterion. When several
   definitions were tried (e.g. ribbon mean width, max width, area), name the definition this
   message is about and say whether the definitions agree.
-- State every assumption listed under ASSUMPTIONS in the first message.
+- State every assumption listed under ASSUMPTIONS in the message of slot 1, and only there. Notes
+  about words that are not data values are not assumptions: leave them out.
 - If a finding says "failed", or a filter left no features, say so plainly.
 - If ids came from model knowledge, say they were not looked up.
 - A slot with clusters in focus opens with exactly one sentence saying why they are shown, from
@@ -329,6 +330,15 @@ Rules
   "evaluate level2" finding instead, and give class mix as counts, not percentages.
 - When a finding compares the clusters picked for each value ("compare clusters between ..."),
   answer from it: which clusters are shared and which belong to one value only.
+- A slot with several clusters in focus: they were picked together for one reason. Give that
+  shared reason once, then say what the clusters have in common and where they differ. Do not
+  write one sentence per cluster.
+- A slot with "seen_before": an earlier message already introduced these clusters. Do not repeat
+  why they were picked or what was said about them; say only what this step adds.
+- A slot's "purpose" says what its step of the argument tests. Say what the result means for that
+  purpose, in a few words, without repeating the purpose itself.
+- A reason must agree with the findings. If "why" says a cluster was picked for something the
+  pattern finding does not show (picked as a late peak, but the pattern is flat), say so.
 - A slot with a "write" instruction: follow it."""
 
 
@@ -425,6 +435,11 @@ group), says how clusters are picked (by pattern, ribbon, feature number, networ
 ids) and what is read from them. Do not refer to "the clusters above"; repeat the condition. Order
 them as steps of the argument, and prefer the angles the data can actually test.
 
+Every sub-question must add a new angle. Do not ask twice for the same clusters picked the same
+way, and do not repeat an earlier sub-question with one more condition. Give each sub-question a
+`reason`: one sentence for the user that says why this step comes here in the argument and what
+result would support or weaken the hypothesis. The reason is shown in the chat before the step.
+
 For each sub-question fill its roles the way they are described below: mentions (text copied from
 the sub-question, role condition / compare / measure / target), target, measure, compare,
 outside_concept and outside_ids. Use only data values listed below in mentions.
@@ -437,8 +452,11 @@ Roles
 Example
 Hypothesis: "Are the Actinomycetota features that peak late in cheese A following an independent succession?"
 - "For Actinomycetota, which clusters peak late in cheese A?" -> Actinomycetota:condition, A:condition; pattern
-- "For Actinomycetota, which clusters hold most of its features and are they connected to other clusters?" -> Actinomycetota:condition; feature_number, network
-- "For Bacillota, which clusters hold most of its features and what is their pattern?" -> Bacillota:condition; feature_number; pattern"""
+  reason: First locate the late-peaking Actinomycetota features; without such clusters there is no succession to test.
+- "For Actinomycetota, which clusters hold most of its features?" -> Actinomycetota:condition; feature_number
+  reason: If most Actinomycetota features sit in the late-peaking clusters, the late peak describes the phylum and not a small subset.
+- "For Bacillota, which clusters hold most of its features and what is their pattern in cheese A?" -> Bacillota:condition, A:condition; feature_number; pattern
+  reason: A contrast phylum: if its main clusters are different or stay flat in cheese A, the Actinomycetota trajectory is its own."""
 
 
 def parse_context(ds):

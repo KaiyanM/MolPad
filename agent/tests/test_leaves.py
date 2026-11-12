@@ -23,7 +23,8 @@ def play(units, needs_focus=True, network_area=False, grouping="together"):
 
 
 def commands(steps):
-    return [s["command"] if s["kind"] == "dashboard" else "MESSAGE" for s in steps if s["kind"] != "data"]
+    return [s["command"] if s["kind"] == "dashboard" else "MESSAGE" for s in steps
+            if s["kind"] not in ("data", "reasoning")]
 
 
 def check_order(steps):
@@ -226,3 +227,94 @@ def test_absence_claims_are_caught():
     for fine in ("It is a main Bacilli cluster but not a shared one", "no cluster is picked",
                  "Group_2 has no neighbours", "Only Group_4 is shared"):
         assert not ABSENCE.search(fine)
+
+
+# ---- how groups are put in focus: together for one reason, one by one through the graph ----
+
+def chain(*units):
+    """An evidence chain: several sub-questions, each with the reason for its step."""
+    for i, u in enumerate(units, 1):
+        u["reason"] = f"reason {i}"
+    return play(list(units), grouping="one_by_one")   # the display judgement does not split a chain
+
+
+def test_chain_shows_clusters_picked_for_one_reason_together():
+    a = unit("late", filters={"cols": "A", "level1": ["Actinomycetota"]},
+             steps=[{"kind": "pattern", "criterion": "peak_at", "subject": "A", "position": "late"}])
+    b = unit("other", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    picked = a["runs"][0]["targets"]
+    assert len(picked) > 1
+    leaf, steps = chain(a, b)
+    assert leaf == "L7"
+    shown = [c for c in commands(steps) if c.startswith(("brush node:", "select node:"))]
+    assert shown[0].split(":")[1] == ",".join(picked)        # one action for the whole group
+    first = next(s["about"] for s in steps if s["kind"] == "message")
+    assert first["clusters"] == picked and first["purpose"] == "reason 1"
+
+
+def test_chain_shows_clusters_found_through_the_graph_one_by_one():
+    a = unit("neighbours", steps=[{"kind": "feature_number", "top_n": 1},
+                                  {"kind": "network", "criterion": "neighbours"}])
+    b = unit("other", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    group = a["runs"][0]["groups"][0]
+    assert group["via"] == "network" and len(group["clusters"]) > 1
+    _, steps = chain(a, b)
+    shown = [c for c in commands(steps) if c.startswith("brush node:")]
+    assert shown[:len(group["clusters"])] == [f"brush node:{c}" for c in group["clusters"]]
+
+
+def test_chain_does_not_brush_the_same_clusters_twice():
+    a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    b = unit("claim b", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}],
+             descriptor={"pattern": True})
+    _, steps = chain(a, b)
+    cmds = commands(steps)
+    assert sum(c.startswith("brush node:") for c in cmds) == 1
+    abouts = [s["about"] for s in steps if s["kind"] == "message"]
+    assert "seen_before" not in abouts[0] and abouts[1]["seen_before"] is True
+
+
+def test_chain_prints_the_reasoning_before_each_step():
+    a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    b = unit("claim b", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    _, steps = chain(a, b)
+    played = [s for s in steps if s["kind"] != "data"]
+    reasons = [s for s in played if s["kind"] == "reasoning"]
+    assert [r["text"] for r in reasons] == ["Step 1 of 2: claim a reason 1", "Step 2 of 2: claim b reason 2"]
+    assert played[0] is reasons[0]                            # before the first filter
+    assert played[played.index(reasons[1]) + 1]["command"] == "set filter1:Bacillota"
+    assert steps[-1]["about"]["role"] == "conclusion"
+
+
+def test_writer_never_drops_a_slot(monkeypatch):
+    """A reply that leaves slots out is asked again for those slots; what is still empty is filled."""
+    from agent import nodes
+    a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    b = unit("claim b", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    _, steps = chain(a, b)
+    asked = []
+
+    def judge(schema, card, state, user, force_reasoning=False):
+        asked.append(user.rsplit("\n\n", 1)[1])
+        return {"texts": [{"slot": 1, "text": "first"}]}       # slot 2 and the conclusion never come
+
+    monkeypatch.setattr(nodes, "_judge", judge)
+    out = nodes.compose_messages({"question": "q", "steps": steps, "units": [a, b]})["steps"]
+    texts = [s["text"] for s in out if s["kind"] == "message"]
+    assert asked == ["Write only slot(s) 1, 2.", "Write only slot(s) 2.", "Write only slot(s) 3."]
+    assert len(texts) == 3 and texts[0] == "first" and all(texts)
+    assert texts[2].startswith("No conclusion was written")
+    assert [s["kind"] for s in out if s["kind"] == "reasoning"] == ["reasoning"] * 2
+
+
+def test_contrast_shows_a_shared_group_once_and_each_side_speaks():
+    u = unit("contrast", filters={"level1": ["Actinomycetota", "Bacillota"], "contrast": "level1"},
+             steps=[{"kind": "given", "clusters": ["Group_1"]}])
+    other = unit("other", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    assert len(u["runs"]) == 2
+    _, steps = chain(u, other)
+    cmds = commands(steps)
+    assert cmds[:4] == ["set filter1:Actinomycetota, Bacillota", "brush node:Group_1", "MESSAGE", "MESSAGE"]
+    abouts = [s["about"] for s in steps if s["kind"] == "message"][:2]
+    assert [a["run"] for a in abouts] == [0, 1] and abouts[1]["seen_before"] is True
+

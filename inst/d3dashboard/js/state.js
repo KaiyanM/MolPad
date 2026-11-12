@@ -16,6 +16,8 @@
       level2: [],                     // [] means every level-2 value
       scope: "filtered",              // "filtered" | "all": what the cluster views show
       colourBy: "level1",             // ribbon lines: "level1" | "level2" | "type" | "none"
+      ribbonExpand: false,            // ribbon: false = every cluster, the unselected ones faded;
+                                      // true = the selected clusters only, enlarged
       layout: "force",
       minWeight: D.weightSlider.value,
       selectedClusters: D.clusters.slice()

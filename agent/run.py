@@ -45,6 +45,8 @@ def main():
                 print(f"               - {line}")
         elif s["kind"] == "dashboard":
             print(f"{i:2d}. dashboard  {s['command']}" + ("" if s["supported"] else "   [not supported yet]"))
+        elif s["kind"] == "reasoning":
+            print(f"{i:2d}. reasoning  {s['text']}")
         else:
             ev = s.get("evidence") or []
             print(f"{i:2d}. message    {s['text']}" + (f"   [evidence: {', '.join(ev)}]" if ev else ""))

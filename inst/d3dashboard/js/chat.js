@@ -38,6 +38,7 @@
 
   function say(text, kind, evidence) {
     var p = node("div", "mp-chat-msg " + kind);
+    if (kind === "reason") p.appendChild(node("b", null, "Reasoning"));
     p.appendChild(node("span", null, text));
     if (evidence && evidence.length) p.appendChild(evidenceBox(evidence));
     el.chat_log.appendChild(p);

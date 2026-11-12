@@ -43,7 +43,7 @@
   function init() {
     var D = MP.D, S = MP.state.get();
     ["f_level1", "f_level2", "btn_filters_reset", "s_layout", "obs", "obs_value", "s_scope",
-     "s_colour", "btn_reset", "btn_clear"].forEach(function (id) {
+     "s_colour", "btn_reset", "btn_clear", "btn_ribbon_expand", "ribbon_title"].forEach(function (id) {
       el[id] = document.getElementById(id);
     });
 
@@ -101,6 +101,19 @@
       if (b) MP.state.set({ scope: b.getAttribute("data-scope") }, "controls");
     });
     syncScope();
+
+    // ribbon: every cluster with the unselected ones faded, or the selected ones enlarged
+    function syncExpand() {
+      var on = MP.state.get().ribbonExpand;
+      el.btn_ribbon_expand.setAttribute("aria-pressed", on ? "true" : "false");
+      el.ribbon_title.textContent = on ? "Pattern of Selected Groups"
+        : "Pattern of All Groups (selected highlighted)";
+    }
+    el.btn_ribbon_expand.addEventListener("click", function () {
+      MP.state.set({ ribbonExpand: !MP.state.get().ribbonExpand }, "controls");
+    });
+    MP.state.subscribe(["ribbonExpand"], syncExpand);
+    syncExpand();
 
     fillSelect(el.s_colour, colourChoices());
     el.s_colour.value = S.colourBy;

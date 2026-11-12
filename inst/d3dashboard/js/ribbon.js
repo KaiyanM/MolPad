@@ -1,4 +1,7 @@
-/* MolPad D3 dashboard: min/mean/max ribbon plot per selected cluster. */
+/* MolPad D3 dashboard: min/mean/max ribbon plot per cluster.
+
+   Overview (default): every cluster has a panel, the unselected ones are faded.
+   Expanded ("Expand trajectories"): the selected clusters only, in larger panels. */
 (function (MP) {
   "use strict";
 
@@ -7,13 +10,17 @@
   var margin = { top: 6, right: 10, bottom: 46, left: 40 };
   var gapX = 14, gapY = 12;
   var SIDE_W = 14, SUB_GAP = 12;
-  var MIN_PANEL_W = 180;
+  var MIN_PANEL_W = 56;    // narrower than this and the row scrolls sideways
+  var NARROW_W = 110;      // below this a panel drops what does not fit
+  var SCROLLBAR_H = 14;
+  var FADED = 0.3;         // opacity of an unselected cluster in the overview
+  var MAX_SHARE = 1 / 3;   // expanded: a panel is at most this share of the box width
 
   function init(selector) {
     container = d3.select(selector);
     legendDiv = container.append("div").attr("class", "mp-swatches");
     svg = container.append("svg");
-    MP.state.subscribe(["selectedClusters", "level1", "level2", "scope", "colourBy"], render);
+    MP.state.subscribe(["selectedClusters", "level1", "level2", "scope", "colourBy", "ribbonExpand"], render);
   }
 
   var NONE = "all features", MISSING = "(none)";
@@ -40,18 +47,20 @@
 
   /* Per cluster, subject and colour group: min/mean/max at every time point. */
   function summarise(G) {
-    var D = MP.D;
-    var byCluster = new Map();
-    MP.state.clusterFeatures().forEach(function (f) {
-      if (!byCluster.has(f.cluster)) byCluster.set(f.cluster, new Map());
-      var byType = byCluster.get(f.cluster);
-      var k = G.key(f);
-      if (!byType.has(k)) byType.set(k, []);
-      byType.get(k).push(f);
-    });
+    var D = MP.D, S = MP.state.get();
+    var selected = new Set(S.selectedClusters);
+    var shown = S.ribbonExpand ? MP.state.sortedSelectedClusters() : D.clusters;
+    var all = S.scope === "all";
 
-    return MP.state.sortedSelectedClusters().map(function (c) {
-      var byType = byCluster.get(c) || new Map();
+    return shown.map(function (c) {
+      // the features of a cluster as the cluster views show them: filtered, or all of them
+      var byType = new Map();
+      (D.byCluster.get(c) || []).forEach(function (f) {
+        if (!all && !MP.state.matches(f)) return;
+        var k = G.key(f);
+        if (!byType.has(k)) byType.set(k, []);
+        byType.get(k).push(f);
+      });
       var subjects = D.subjects.map(function (sub) {
         var series = [];
         G.domain.forEach(function (t) {
@@ -67,7 +76,8 @@
         });
         return { name: sub.name, series: series };
       });
-      return { cluster: c, subjects: subjects, series: d3.merge(subjects.map(function (s) { return s.series; })) };
+      return { cluster: c, selected: selected.has(c), subjects: subjects,
+               series: d3.merge(subjects.map(function (s) { return s.series; })) };
     });
   }
 
@@ -75,6 +85,7 @@
     var D = MP.D;
     var G = grouping();
     var panels = summarise(G);
+    var expanded = MP.state.get().ribbonExpand;
     var width = Math.max(240, container.node().clientWidth || 400);
     var boxH = Math.max(200, container.node().clientHeight || 320);
 
@@ -94,42 +105,56 @@
     if (!k) {
       svg.attr("width", width).attr("height", 60);
       svg.append("text").attr("x", 8).attr("y", 30)
-        .style("fill", "#666").style("font-style", "italic").text("No clusters selected");
+        .style("fill", "#666").style("font-style", "italic")
+        .text("No clusters selected: select clusters in the network, or leave the expanded view");
       return;
     }
 
     var legendH = legendDiv.node().offsetHeight || 20;
-    // As square as the panel count allows; more columns when the rows would not fit the box
-    // height; never narrower than MIN_PANEL_W per panel.
+    // Always one row: every shown cluster gets an equal share of the width and the full
+    // height of the box. Expanded, a panel is at most MAX_SHARE of the width, so one or two
+    // clusters are not stretched flat, and the row sits in the middle. A narrow panel keeps its own y axis (each cluster has its
+    // own scale) but drops the inner x ticks, the repeated axis titles and the long name.
+    // At MIN_PANEL_W the row gets wider than the box and scrolls sideways.
     var nsub = D.subjects.length;
-    var minPanelH = 150 + (nsub - 1) * 90;
-    var available = boxH - legendH - 4;
-    var maxCols = Math.max(1, Math.floor((width + gapX) / (MIN_PANEL_W + gapX)));
-    var rowsFit = Math.max(1, Math.floor((available + gapY) / (minPanelH + gapY)));
-    var ncol = Math.max(1, Math.min(k, maxCols, Math.max(Math.ceil(Math.sqrt(k)), Math.ceil(k / rowsFit))));
-    var nrow = Math.ceil(k / ncol);
-    var panelW = (width - gapX * (ncol - 1)) / ncol;
-    var panelH = Math.max(minPanelH, (available - gapY * (nrow - 1)) / nrow);
-    var height = nrow * panelH + gapY * (nrow - 1);
-    svg.attr("width", width).attr("height", height);
+    var fitW = (width - gapX * (k - 1)) / k;
+    var narrow = fitW < NARROW_W;
+    var gap = narrow ? 6 : gapX;
+    var panelW = Math.max(MIN_PANEL_W, (width - gap * (k - 1)) / k);
+    if (expanded) panelW = Math.min(panelW, Math.max(MIN_PANEL_W, width * MAX_SHARE));
+    var total = k * panelW + gap * (k - 1);
+    var scrolls = total > width + 0.5;
+    var offset = scrolls ? 0 : (width - total) / 2;
+    var panelH = Math.max(110, boxH - legendH - 4 - (scrolls ? SCROLLBAR_H : 0));
+    svg.attr("width", scrolls ? total : width).attr("height", panelH);
 
-    var innerW = panelW - margin.left - margin.right;
+    var mLeft = narrow ? 26 : margin.left, mRight = narrow ? 3 : margin.right;
+    var subGap = narrow || panelH < 200 ? 6 : SUB_GAP;
+    var sideW = narrow ? 10 : SIDE_W;
+    var innerW = panelW - mLeft - mRight;
     var innerH = panelH - margin.top - margin.bottom - STRIP_H;
-    var plotW = innerW - (nsub > 1 ? SIDE_W : 0);
-    var subH = (innerH - SUB_GAP * (nsub - 1)) / nsub;
+    var plotW = innerW - (nsub > 1 ? sideW : 0);
+    var subH = (innerH - subGap * (nsub - 1)) / nsub;
     var x = d3.scalePoint().domain(D.timeLabels).range([0, plotW]).padding(0.3);
+    // x ticks: all of them while they fit (about 12px each, the labels are upright), else the ends
+    var xTicks = D.timeLabels.length * 12 <= plotW ? D.timeLabels
+      : [D.timeLabels[0], D.timeLabels[D.timeLabels.length - 1]];
+    var yTicks = subH < 60 ? 2 : (nsub > 1 ? 3 : 4);
 
     panels.forEach(function (p, idx) {
-      var col = idx % ncol, row = Math.floor(idx / ncol);
       var g = svg.append("g").attr("transform",
-        "translate(" + (col * (panelW + gapX) + margin.left) + "," +
-        (row * (panelH + gapY) + margin.top) + ")");
+        "translate(" + (offset + idx * (panelW + gap) + mLeft) + "," + margin.top + ")");
+      if (!expanded && !p.selected) g.attr("opacity", FADED).attr("class", "mp-ribbon-faded");
 
-      // facet strip
+      // facet strip; a name that does not fit is cut to its number ("Group_5" -> "5")
+      var name = p.cluster;
+      if (name.length * 6.5 > innerW) name = name.replace(/^.*[^0-9](?=[0-9]+$)/, "") || name;
       g.append("rect").attr("class", "mp-strip").attr("x", 0).attr("y", 0)
-        .attr("width", innerW).attr("height", STRIP_H);
+        .attr("width", innerW).attr("height", STRIP_H)
+        .append("title").text(p.cluster);
       g.append("text").attr("class", "mp-strip-text")
-        .attr("x", innerW / 2).attr("y", STRIP_H / 2 + 1).text(p.cluster);
+        .attr("x", innerW / 2).attr("y", STRIP_H / 2 + 1).text(name)
+        .append("title").text(p.cluster);
 
       // one y scale per cluster, shared by its subject facets
       var lo = d3.min(p.series, function (s) { return d3.min(s.points, function (d) { return d.min; }); });
@@ -150,18 +175,18 @@
       p.subjects.forEach(function (sub, si) {
         var last = si === nsub - 1;
         var plot = g.append("g").attr("transform",
-          "translate(0," + (STRIP_H + si * (subH + SUB_GAP)) + ")");
+          "translate(0," + (STRIP_H + si * (subH + subGap)) + ")");
         plot.append("rect").attr("class", "mp-panel-bg").attr("width", plotW).attr("height", subH);
 
         if (nsub > 1) {
           plot.append("rect").attr("class", "mp-strip").attr("x", plotW).attr("y", 0)
-            .attr("width", SIDE_W).attr("height", subH);
+            .attr("width", sideW).attr("height", subH);
           plot.append("text").attr("class", "mp-strip-text")
-            .attr("transform", "translate(" + (plotW + SIDE_W / 2) + "," + (subH / 2) + ") rotate(90)")
+            .attr("transform", "translate(" + (plotW + sideW / 2) + "," + (subH / 2) + ") rotate(90)")
             .text(sub.name);
         }
 
-        plot.append("g").selectAll("line").data(y.ticks(nsub > 1 ? 3 : 4)).join("line").attr("class", "mp-gridline")
+        plot.append("g").selectAll("line").data(y.ticks(yTicks)).join("line").attr("class", "mp-gridline")
           .attr("x1", 0).attr("x2", plotW).attr("y1", y).attr("y2", y);
 
         sub.series.forEach(function (s) {
@@ -176,22 +201,26 @@
               " \u00b7 " + s.type + " (mean, ribbon = min to max)");
         });
 
-        plot.append("g").attr("class", "mp-axis").call(d3.axisLeft(y).ticks(nsub > 1 ? 3 : 4));
+        plot.append("g").attr("class", "mp-axis").call(d3.axisLeft(y).ticks(yTicks));
         if (last) {
           plot.append("g").attr("class", "mp-axis").attr("transform", "translate(0," + subH + ")")
-            .call(d3.axisBottom(x))
+            .call(d3.axisBottom(x).tickValues(xTicks))
             .selectAll("text")
             .attr("transform", "rotate(-90)")
             .attr("dx", "-0.6em").attr("dy", "-0.4em")
             .style("text-anchor", "end");
-          plot.append("text").attr("class", "mp-axis-title")
-            .attr("x", plotW / 2).attr("y", subH + margin.bottom - 4).text("Time");
+          if (!narrow || idx === 0) {
+            plot.append("text").attr("class", "mp-axis-title")
+              .attr("x", plotW / 2).attr("y", subH + margin.bottom - 4).text("Time");
+          }
         }
       });
 
-      g.append("text").attr("class", "mp-axis-title")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -(STRIP_H + (innerH) / 2)).attr("y", -margin.left + 11).text("Value");
+      if (!narrow) {
+        g.append("text").attr("class", "mp-axis-title")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -(STRIP_H + (innerH) / 2)).attr("y", -margin.left + 11).text("Value");
+      }
     });
   }
 

@@ -457,10 +457,33 @@ def leaf_L2(state: AgentState):
     return {"leaf": "L2", "steps": leaves.leaf_L2(state["completeness"]["note"])}
 
 
+def _slot_texts(out, n):
+    """{slot index: text} of a Messages reply; slot numbers outside 1..n and empty texts are ignored."""
+    got = {}
+    for t in out["texts"]:
+        i = t["slot"] - 1
+        if 0 <= i < n and t["text"].strip() and i not in got:
+            got[i] = t["text"].strip()
+    return got
+
+
+def _fallback_text(slot, by_id):
+    """A plain text for a slot the writer left empty twice, so no step of the answer disappears."""
+    about = slot["about"]
+    if about.get("role") == "conclusion":
+        return "No conclusion was written for this answer; the steps above and their evidence stand as they are."
+    head = (", ".join(about["clusters"]) + ": " + about["why"]) if about.get("clusters") \
+        else (about.get("question") or "")
+    last = [by_id[i] for i in slot.get("evidence", []) if i in by_id][-1:]
+    return ". ".join(x.rstrip(".") for x in [head] + [l for d in last for l in d["findings"][:2]] if x) + "."
+
+
 def compose_messages(state: AgentState):
     """Write every message text from the data results, then drop the scaffolding."""
     steps = state["steps"]
     slots = [s for s in steps if s["kind"] == "message"]
+    n = len(slots)
+    by_id = {s["id"]: s for s in steps if s["kind"] == "data" and s.get("id")}
     # the writer reads the findings only; the full results stay in the steps as evidence
     data = "\n".join(f"[{s['id']}] {s['action']}\n" + "\n".join(f"  - {line}" for line in s["findings"])
                      for s in steps if s["kind"] == "data") or "(no data actions)"
@@ -472,32 +495,50 @@ def compose_messages(state: AgentState):
             f"FINDINGS OF THE DATA ACTIONS:\n{data}\n\n"
             "MESSAGE SLOTS:\n" + "\n".join(f"{i + 1}. {json.dumps(s['about'])}  findings: {', '.join(s['evidence']) or 'none'}"
                                          for i, s in enumerate(slots)))
-    user += f"\n\nWrite exactly {len(slots)} message(s), one per slot."
-    texts = _judge(Messages, prompts.COMPOSE, state, user)["texts"]
-    if len(texts) != len(slots):   # the writer sometimes merges slots; ask once more
-        _debug("messages", f"got {len(texts)} text(s) for {len(slots)} slot(s), asking again")
-        texts = _judge(Messages, prompts.COMPOSE, state, user)["texts"]
-    claim = next((m.group(0) for t in texts for m in [ABSENCE.search(t)] if m), None)
+
+    def write(wanted, extra="", force_reasoning=False):
+        tail = (f"Write exactly {n} message(s), one per slot." if len(wanted) == n else
+                "Write only slot(s) " + ", ".join(str(i + 1) for i in wanted) + ".")
+        out = _judge(Messages, prompts.COMPOSE, state, f"{user}{extra}\n\n{tail}", force_reasoning=force_reasoning)
+        return {i: t for i, t in _slot_texts(out, n).items() if i in wanted}
+
+    # The conclusion of an evidence chain is an argument over all the steps: the reasoning model
+    # writes it, after the step messages. One extra call, only for a hypothesis.
+    concl = [i for i, s in enumerate(slots) if s["about"].get("role") == "conclusion"]
+    apart = concl if n > 1 and not _compose_reasoning() else []
+    first = [i for i in range(n) if i not in apart]
+    texts = write(first) if first else {}
+    missing = [i for i in first if i not in texts]
+    if missing:   # the writer sometimes merges slots; ask once more for the ones it left out
+        _debug("messages", f"got {len(texts)} text(s) for {len(first)} slot(s), asking again for "
+               + ", ".join(str(i + 1) for i in missing))
+        texts.update(write(missing))
+    claim = next((m.group(0) for t in texts.values() for m in [ABSENCE.search(t)] if m), None)
     if claim and not _compose_reasoning():
         # the basic writer turns "kept by the filter" into "the cluster has nothing else";
         # the reasoning model reads the counts. Only this case pays for it.
         _debug("messages", f'claims an absence ("{claim}"); rewritten by the reasoning model')
-        again = _judge(Messages, prompts.COMPOSE, state, user, force_reasoning=True)["texts"]
-        if len(again) == len(slots):
+        again = write(first, force_reasoning=True)
+        if len(again) == len(first):
             texts = again
+    if apart:
+        written = "\n".join(f"{i + 1}. {texts[i]}" for i in sorted(texts))
+        texts.update(write(apart, "\n\nMESSAGES ALREADY WRITTEN FOR THE OTHER SLOTS (the assumptions are stated there; "
+                           "do not repeat them):\n" + written,
+                           force_reasoning=True))
     out, i = [], 0
     for s in steps:
         if s["kind"] == "message":
-            s = {"kind": "message", "text": texts[i] if i < len(texts) else "",
-                 "evidence": s.get("evidence", [])}
+            if i not in texts:   # never drop a step of the answer silently
+                _debug("messages", f"slot {i + 1} was left empty twice; filled from its findings")
+                texts[i] = _fallback_text(s, by_id)
+            s = {"kind": "message", "text": texts[i], "evidence": s.get("evidence", [])}
             i += 1
-            if not s["text"].strip():   # never play an empty message
-                continue
         out.append(s)
     _debug("messages", f"{len(slots)} slot(s), {len(texts)} text(s) written")
-    for n, s in enumerate(out, 1):
+    for k, s in enumerate(out, 1):
         if s["kind"] == "dashboard":
-            _debug("playback", f"{n:2d}. {s['command']}")
-        elif s["kind"] == "message":
-            _debug("playback", f"{n:2d}. message: {s['text'][:110]}")
+            _debug("playback", f"{k:2d}. {s['command']}")
+        elif s["kind"] in ("message", "reasoning"):
+            _debug("playback", f"{k:2d}. {s['kind']}: {s['text'][:110]}")
     return {"steps": out}

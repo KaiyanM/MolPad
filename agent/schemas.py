@@ -110,11 +110,17 @@ class Display(BaseModel):
     needs_focus: bool = Field(description="6a: the user must look at specific clusters to see the answer")
     network_area: bool = Field(description="6b: the slider must move, or the targets are defined by edges")
     grouping: Literal["together", "one_by_one"] = Field(description="6c, when there are several clusters")
-    reason: str = Field(description="one short sentence")
+    reason: str = Field(description="one short sentence for the user: what will be put in focus and why "
+                                    "that answers the question")
+
+
+class SlotText(BaseModel):
+    slot: int = Field(description="the number of the message slot this text is for")
+    text: str
 
 
 class Messages(BaseModel):
-    texts: list[str] = Field(description="one text per requested message, in the same order")
+    texts: list[SlotText] = Field(description="one text per requested message slot, each with its slot number")
 
 
 # ---- frame pipeline (AGENT_PIPELINE=frame) ---------------------------------
@@ -162,6 +168,8 @@ class Frame(FrameCore):
 
 class SubFrame(FrameCore):
     question: str = Field(description="the sub-question, answerable from the data alone")
+    reason: str = Field("", description="one sentence for the user: why this step comes here in the argument "
+                                        "and what result would support or weaken the hypothesis")
 
 
 class SubFrames(BaseModel):
