@@ -3214,54 +3214,121 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     return Math.min(READ_MAX, Math.max(READ_MIN, READ_BASE + READ_PER_WORD * words));
   }
 
-  /* Play the step list written by the Python agent: an array of steps, or an
-     object with a `steps` array (JSON text is parsed). Dashboard steps run as
-     commands, message steps are printed, reasoning steps are printed before the
-     actions they explain, data steps are not played: they hold
-     the evidence (findings and numbers) that a message lists by id. `say(text,
-     kind, evidence)` receives each line; a failed step is reported and the rest
-     go on. */
+  /* A player for the steps written by the Python agent. Steps can be handed over while it
+     plays, and the text of a message can come after the message itself:
+
+       var p = player(say, { writing: fn });
+       p.push(steps);          // any number of times; plays in the order given
+       p.text(slot, text);     // the text of the message step {kind: "message", slot: n}
+       p.end();                // nothing more will come
+       p.finished              // a promise: "Played n steps."
+
+     Dashboard steps run as commands, message steps are printed, reasoning steps are printed
+     before the actions they explain, data steps are not played: they hold the evidence
+     (findings and numbers) that a message lists by id. `say(text, kind, evidence)` receives
+     each line; a failed step is reported and the rest go on. When the next step is a message
+     whose text has not come yet, the player waits for that text only; `writing(true)` and
+     `writing(false)` are called around the wait, so the page can say so. */
+  function player(say, options) {
+    say = say || function () {};
+    var writing = (options && options.writing) || function () {};
+    var queue = [], byId = {}, texts = {};
+    var ended = false, running = false, done = 0, wake = null, finish;
+    var finished = new Promise(function (resolve) { finish = resolve; });
+
+    function textOf(step) {
+      if (step.text !== null && step.text !== undefined) return Promise.resolve(String(step.text));
+      return new Promise(function (resolve) {
+        var waited = false;
+        (function check() {
+          var ready = Object.prototype.hasOwnProperty.call(texts, step.slot);
+          if (!ready && !ended) {
+            if (!waited) { waited = true; writing(true); }
+            wake = check;
+            return;
+          }
+          if (waited) writing(false);
+          resolve(ready ? String(texts[step.slot]) : "");
+        })();
+      });
+    }
+
+    function one(step) {
+      if (step.kind === "message") {
+        return textOf(step).then(function (text) {
+          if (!text.trim()) return null;   // never print an empty message
+          var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
+            .filter(function (d) { return d; });
+          say(text, "bot", evidence);
+          done += 1;
+          return pause(readingTime(text));
+        });
+      }
+      if (step.kind === "reasoning") {
+        say(String(step.text), "reason");
+        return pause(readingTime(step.text));
+      }
+      if (step.kind !== "dashboard" && !step.command) return Promise.resolve();   // a kind this page does not know
+      return pause(PAUSE_BEFORE_CMD).then(function () {
+        say(String(step.command), "user");
+        return run(step.command);
+      }).then(function (report) {
+        say(report, "bot");
+        done += 1;
+      }, function (err) {
+        say(err && err.message ? err.message : String(err), "error");
+      }).then(function () { return pause(PAUSE_AFTER_CMD); });
+    }
+
+    function next() {
+      if (!queue.length) {
+        running = false;
+        if (ended) finish("Played " + done + " steps.");
+        return;
+      }
+      one(queue.shift()).then(next, next);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      next();
+    }
+
+    function nudge() {
+      var w = wake;
+      wake = null;
+      if (w) w();
+    }
+
+    return {
+      push: function (steps) {
+        (steps || []).forEach(function (step) {
+          if (!step) return;
+          if (step.kind === "data") { if (step.id) byId[step.id] = step; return; }
+          queue.push(step);
+        });
+        start();
+      },
+      text: function (slot, text) { texts[slot] = text; nudge(); },
+      end: function () { ended = true; nudge(); start(); },
+      finished: finished
+    };
+  }
+
+  /* Play a finished step list: an array of steps, or an object with a `steps` array (JSON
+     text is parsed). */
   function play(input, say) {
     var steps = typeof input === "string" ? JSON.parse(input) : input;
     if (steps && !Array.isArray(steps)) steps = steps.steps;
     if (!Array.isArray(steps)) throw new Error("Expected a list of steps, or an object with \"steps\".");
-    say = say || function () {};
-    var done = 0;
-    var chain = Promise.resolve();
-    var byId = {};
-    steps.forEach(function (step) {
-      if (step && step.kind === "data" && step.id) byId[step.id] = step;
-    });
-    steps.forEach(function (step) {
-      if (!step || step.kind === "data") return;
-      chain = chain.then(function () {
-        if (step.kind === "message") {
-          var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
-            .filter(function (d) { return d; });
-          say(String(step.text), "bot", evidence);
-          done += 1;
-          return pause(readingTime(step.text));
-        }
-        if (step.kind === "reasoning") {
-          say(String(step.text), "reason");
-          return pause(readingTime(step.text));
-        }
-        if (step.kind !== "dashboard" && !step.command) return null;   // a kind this page does not know
-        return pause(PAUSE_BEFORE_CMD).then(function () {
-          say(String(step.command), "user");
-          return run(step.command);
-        }).then(function (report) {
-          say(report, "bot");
-          done += 1;
-        }, function (err) {
-          say(err && err.message ? err.message : String(err), "error");
-        }).then(function () { return pause(PAUSE_AFTER_CMD); });
-      });
-    });
-    return chain.then(function () { return "Played " + done + " steps."; });
+    var p = player(say);
+    p.push(steps);
+    p.end();
+    return p.finished;
   }
 
-  MP.agent = { commands: commands, parse: parse, run: run, play: play, usage: usage };
+  MP.agent = { commands: commands, parse: parse, run: run, play: play, player: player, usage: usage };
 })(window.MolPad = window.MolPad || {});
 </script>
 <!-- molpad:js/link.js -->
@@ -3342,12 +3409,79 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     };
   }
 
-  function ask(question) {
-    return request("/ask", {
+  /* Send a question. The agent answers with one JSON event per line while it works; each is
+     passed to onEvent as it arrives:
+       {event: "status", text}   what the agent is doing now
+       {event: "plan", text}     the steps of the argument
+       {event: "steps", steps}   the playback; a message is {slot, text: null} until its text comes
+       {event: "text", slot, text}
+       {event: "done", trace}
+     Resolves with the trace when the answer is complete. An agent that does not stream answers
+     with the whole step list at once; it is passed on as one "steps" event. */
+  function ask(question, onEvent) {
+    onEvent = onEvent || function () {};
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ASK_TIMEOUT_MS) : null;
+    var trace = null;
+
+    function handle(ev) {
+      if (!ev || !ev.event) return;
+      if (ev.event === "error") throw new Error(ev.error || "The agent failed.");
+      if (ev.event === "done") trace = ev.trace || {};
+      onEvent(ev);
+    }
+
+    function readLines(res) {
+      var buffer = "";
+      function feed(chunk, last) {
+        buffer += chunk;
+        var lines = buffer.split("\n");
+        buffer = last ? "" : lines.pop();
+        lines.forEach(function (line) { if (line.trim()) handle(JSON.parse(line)); });
+      }
+      if (!res.body || !res.body.getReader || !window.TextDecoder) {
+        return res.text().then(function (all) { feed(all, true); });
+      }
+      var reader = res.body.getReader(), decoder = new TextDecoder("utf-8");
+      function pump() {
+        return reader.read().then(function (part) {
+          if (part.done) { feed(decoder.decode(), true); return null; }
+          feed(decoder.decode(part.value, { stream: true }), false);
+          return pump();
+        });
+      }
+      return pump();
+    }
+
+    var opts = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: question, state: dashState() })
-    }, ASK_TIMEOUT_MS);
+      body: JSON.stringify({ question: question, state: dashState(), stream: true })
+    };
+    if (ctrl) opts.signal = ctrl.signal;
+    return fetch(url() + "/ask", opts).then(function (res) {
+      var type = res.headers.get("Content-Type") || "";
+      if (!res.ok || type.indexOf("ndjson") < 0) {
+        return res.json().catch(function () { return {}; }).then(function (body) {
+          if (!res.ok) throw new Error(body.error || ("The agent answered " + res.status + "."));
+          onEvent({ event: "steps", steps: body.steps || [] });   // an agent that does not stream
+          trace = body.trace || {};
+        });
+      }
+      return readLines(res).then(function () {
+        if (trace === null) throw new Error("The agent stopped before the answer was complete.");
+      });
+    }, function (err) {
+      if (err && err.name === "AbortError") throw new Error("The agent did not answer in time.");
+      throw new Error("The agent is not reachable at " + url() + ".");
+    }).then(function () {
+      if (timer) clearTimeout(timer);
+      return trace;
+    }, function (err) {
+      if (timer) clearTimeout(timer);
+      if (err && err.name === "AbortError") throw new Error("The agent did not answer in time.");
+      throw err;
+    });
   }
 
   MP.link = {
@@ -3452,31 +3586,58 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     }
   }
 
-  /* A line that counts the seconds while the agent works; returns a function that removes it. */
-  function thinking() {
-    var p = node("div", "mp-chat-msg bot mp-chat-thinking", "Thinking...");
-    el.chat_log.appendChild(p);
-    el.chat_log.scrollTop = el.chat_log.scrollHeight;
+  /* A line that counts the seconds while the agent works. `label(text)` says what it is doing
+     now; `stop()` removes the line. It stays the last line of the log while it is shown. */
+  function thinking(text) {
+    var what = text || "Thinking";
+    var p = node("div", "mp-chat-msg bot mp-chat-thinking", what + "...");
     var t0 = Date.now();
-    var timer = setInterval(function () {
-      p.textContent = "Thinking... " + Math.round((Date.now() - t0) / 1000) + " s";
-    }, 1000);
-    return function () {
-      clearInterval(timer);
-      if (p.parentNode) p.parentNode.removeChild(p);
+    function place() {
+      el.chat_log.appendChild(p);   // moves it below what was printed meanwhile
+      el.chat_log.scrollTop = el.chat_log.scrollHeight;
+    }
+    function draw() {
+      var s = Math.round((Date.now() - t0) / 1000);
+      p.textContent = what + "..." + (s ? " " + s + " s" : "");
+    }
+    place();
+    var timer = setInterval(draw, 1000);
+    return {
+      label: function (next) { what = next; draw(); place(); },
+      stop: function () {
+        clearInterval(timer);
+        if (p.parentNode) p.parentNode.removeChild(p);
+      }
     };
   }
 
+  /* Ask the agent and play its answer while it is still being written: the status line
+     follows what the agent is doing, the dashboard actions start as soon as they are known,
+     and each message is printed when both its turn and its text have come. */
   function askAgent(question) {
-    var done = thinking();
-    return MP.link.ask(question).then(function (reply) {
-      done();
-      if (window.console && console.debug) console.debug("MolPad agent trace", reply.trace);
-      return MP.agent.play(reply.steps || [], say);
+    var status = thinking();
+    var writing = null;
+    var player = MP.agent.player(say, {
+      writing: function (on) {
+        if (writing) { writing.stop(); writing = null; }
+        if (on) writing = thinking("Writing");
+      }
+    });
+    return MP.link.ask(question, function (ev) {
+      if (ev.event === "status") status.label(ev.text);
+      else if (ev.event === "plan") { say(ev.text, "reason"); status.label("Planning what to look at"); }
+      else if (ev.event === "steps") { status.stop(); player.push(ev.steps); }
+      else if (ev.event === "text") player.text(ev.slot, ev.text);
+    }).then(function (trace) {
+      status.stop();
+      if (window.console && console.debug) console.debug("MolPad agent trace", trace);
+      player.end();
+      return player.finished;
     }, function (err) {
-      done();
+      status.stop();
+      player.end();
       if (!MP.link.connected()) connect();
-      throw err;
+      return player.finished.then(function () { throw err; });
     });
   }
 

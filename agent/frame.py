@@ -20,7 +20,7 @@ from langgraph.graph import END, START, StateGraph
 from . import keywords as kw
 from . import leaves, prompts, skills
 from .data_tools import load_dataset
-from .nodes import (MAX_SUB_CLAIMS, AgentState, _debug, _filled, _route, clean_filters,
+from .nodes import (MAX_SUB_CLAIMS, AgentState, _debug, _emit, _filled, _route, clean_filters,
                     compose_messages, leaf_L0, leaf_L1, leaf_L2, log_unit, run_unit)
 from .schemas import Frame, Plans, SubFrames
 
@@ -161,6 +161,9 @@ def parse(state: FrameState):
     _debug("parse roles", f"target={out['target']} measure={out['measure']} compare={out['compare']}"
            + (f" outside={out['outside_concept']} {out['outside_ids']}" if out["outside_concept"] else ""))
     frame = {**out, "question": state["question"], "filters": filters, "roles": roles}
+    if out["kind"] == "data" and out["status"] != "ask":
+        chain = out["shape"] == "evidence_chain"
+        _emit("status", text="Splitting the question into steps" if chain else "Planning what to look at")
     notes = [out["note"]] if out["status"] == "assume_default" and out["note"] else []
     return {
         "keyword_map": kmap,
@@ -209,6 +212,10 @@ def breakdown(state: FrameState):
                + (f"   because: {fr['reason']}" if fr.get("reason") else ""))
         for line in fr["roles"]:
             _debug("  mention", line)
+    if len(frames) > 1:
+        _emit("plan", text="This needs an argument in " + str(len(frames)) + " steps:\n"
+              + "\n".join(f"{i}. {fr['question']}" for i, fr in enumerate(frames, 1)))
+        _emit("status", text="Planning what to look at")
     kmap = _merge_kmaps(maps)
     kmap["notes"] += notes
     return {"frames": frames, "sub_questions": [fr["question"] for fr in frames], "keyword_map": kmap}
@@ -245,6 +252,7 @@ def plan(state: FrameState):
     d = out["display"]
     _debug("plan N6", f"needs_focus={d['needs_focus']}, network_area={d['network_area']}, "
            f"grouping={d['grouping']}: {d['reason']}")
+    _emit("status", text="Reading the data")
     return {"plans": plans, "display": d, "skills": names}
 
 

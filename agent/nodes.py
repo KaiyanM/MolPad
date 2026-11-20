@@ -1,5 +1,6 @@
 """Graph nodes: one per node of the decision tree, plus the backend pass and the message writer."""
 
+import contextvars
 import json
 import os
 import re
@@ -17,6 +18,11 @@ from .schemas import (Completeness, Descriptor, Display, Filters, Keywords, Kind
 DEBUG = os.getenv("AGENT_DEBUG", "").strip() not in ("", "0")
 
 MAX_SUB_CLAIMS = 4
+
+# Set by answer(): called with one dict per event while the answer is built, so a client can
+# show what is known before the whole answer is ready (agent/serve.py). One per run, so answers
+# that are built side by side (eval_trace) keep their own.
+EMIT = contextvars.ContextVar("agent_emit", default=None)
 
 
 class AgentState(TypedDict, total=False):
@@ -42,6 +48,13 @@ def _debug(node, text):
     """One readable line per decision, on stderr so the JSON on stdout stays clean."""
     if DEBUG:
         print(f"[debug] {node:<16} {text}", file=sys.stderr, flush=True)
+
+
+def _emit(event, **fields):
+    """Send one event to the client that is waiting for this answer, if there is one."""
+    emit = EMIT.get()
+    if emit is not None:
+        emit({"event": event, **fields})
 
 
 def _filled(d):
@@ -478,60 +491,124 @@ def _fallback_text(slot, by_id):
     return ". ".join(x.rstrip(".") for x in [head] + [l for d in last for l in d["findings"][:2]] if x) + "."
 
 
+def _findings_text(data_steps):
+    return "\n".join(f"[{s['id']}] {s['action']}\n" + "\n".join(f"  - {line}" for line in s["findings"])
+                     for s in data_steps) or "(no data actions)"
+
+
+def _slot_groups(slots, n_units):
+    """The slots each writer call covers: one call per sub-question, and the conclusion apart.
+
+    Returns (groups, conclusion): groups is [(unit or None, [slot index])]. A single question is
+    one group. In an evidence chain every step is written from its own findings only, so the
+    calls are small and run side by side; the conclusion is written last, over all of them.
+    """
+    concl = [i for i, s in enumerate(slots) if s["about"].get("role") == "conclusion"]
+    rest = [i for i in range(len(slots)) if i not in concl]
+    if n_units <= 1 or any("unit" not in slots[i]["about"] for i in rest):
+        return ([(None, rest)] if rest else []), concl
+    by_unit = {}
+    for i in rest:
+        by_unit.setdefault(slots[i]["about"]["unit"], []).append(i)
+    return sorted(by_unit.items()), concl
+
+
 def compose_messages(state: AgentState):
-    """Write every message text from the data results, then drop the scaffolding."""
+    """Write every message text from the data results, then drop the scaffolding.
+
+    The playback (data steps, dashboard actions, reasoning lines and the empty message slots) is
+    sent to the client first; each text follows as soon as it is written.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
     steps = state["steps"]
     slots = [s for s in steps if s["kind"] == "message"]
     n = len(slots)
     by_id = {s["id"]: s for s in steps if s["kind"] == "data" and s.get("id")}
-    # the writer reads the findings only; the full results stay in the steps as evidence
-    data = "\n".join(f"[{s['id']}] {s['action']}\n" + "\n".join(f"  - {line}" for line in s["findings"])
-                     for s in steps if s["kind"] == "data") or "(no data actions)"
+    data_steps = [s for s in steps if s["kind"] == "data"]
+    numbered, i = [], 0
+    for s in steps:   # what the client plays: a message is a numbered slot without its text yet
+        if s["kind"] == "message":
+            numbered.append({"kind": "message", "slot": i, "text": None, "evidence": s.get("evidence", [])})
+            i += 1
+        else:
+            numbered.append(s)
+    _emit("steps", steps=numbered)
+
     notes = list(state.get("assumptions") or []) + list((state.get("keyword_map") or {}).get("notes", []))
     for u in state.get("units") or []:
         notes += [f"ignored, not in the data: {d}" for d in u["dropped"]]
-    user = (f"QUESTION: {state['question']}\n\n"
-            f"ASSUMPTIONS: {json.dumps(notes)}\n\n"
-            f"FINDINGS OF THE DATA ACTIONS:\n{data}\n\n"
-            "MESSAGE SLOTS:\n" + "\n".join(f"{i + 1}. {json.dumps(s['about'])}  findings: {', '.join(s['evidence']) or 'none'}"
-                                         for i, s in enumerate(slots)))
+    groups, concl = _slot_groups(slots, len(state.get("units") or []))
+    if concl and _compose_reasoning() and n > 1 and len(groups) == 1:
+        groups, concl = [(None, groups[0][1] + concl)], []   # one reasoning call writes everything
+    texts = {}
 
-    def write(wanted, extra="", force_reasoning=False):
+    def slot_lines(wanted):
+        return "\n".join(f"{i + 1}. {json.dumps(slots[i]['about'])}  findings: "
+                         f"{', '.join(slots[i]['evidence']) or 'none'}" for i in wanted)
+
+    def write(user, wanted, force_reasoning=False):
         tail = (f"Write exactly {n} message(s), one per slot." if len(wanted) == n else
                 "Write only slot(s) " + ", ".join(str(i + 1) for i in wanted) + ".")
-        out = _judge(Messages, prompts.COMPOSE, state, f"{user}{extra}\n\n{tail}", force_reasoning=force_reasoning)
+        out = _judge(Messages, prompts.COMPOSE, state, f"{user}\n\n{tail}", force_reasoning=force_reasoning)
         return {i: t for i, t in _slot_texts(out, n).items() if i in wanted}
 
-    # The conclusion of an evidence chain is an argument over all the steps: the reasoning model
-    # writes it, after the step messages. One extra call, only for a hypothesis.
-    concl = [i for i, s in enumerate(slots) if s["about"].get("role") == "conclusion"]
-    apart = concl if n > 1 and not _compose_reasoning() else []
-    first = [i for i in range(n) if i not in apart]
-    texts = write(first) if first else {}
-    missing = [i for i in first if i not in texts]
-    if missing:   # the writer sometimes merges slots; ask once more for the ones it left out
-        _debug("messages", f"got {len(texts)} text(s) for {len(first)} slot(s), asking again for "
-               + ", ".join(str(i + 1) for i in missing))
-        texts.update(write(missing))
-    claim = next((m.group(0) for t in texts.values() for m in [ABSENCE.search(t)] if m), None)
-    if claim and not _compose_reasoning():
-        # the basic writer turns "kept by the filter" into "the cluster has nothing else";
-        # the reasoning model reads the counts. Only this case pays for it.
-        _debug("messages", f'claims an absence ("{claim}"); rewritten by the reasoning model')
-        again = write(first, force_reasoning=True)
-        if len(again) == len(first):
-            texts = again
-    if apart:
+    def write_group(unit, wanted):
+        """The texts of one sub-question (or of the whole single question), sent as they are ready."""
+        own = [d for d in data_steps if unit is None or d.get("unit") == unit]
+        head = (f"QUESTION: {state['question']}\n\n"
+                f"ASSUMPTIONS: {json.dumps(notes if 0 in wanted else [])}\n\n"
+                f"FINDINGS OF THE DATA ACTIONS:\n{_findings_text(own)}\n\nMESSAGE SLOTS:\n")
+        got = write(head + slot_lines(wanted), wanted)
+        missing = [i for i in wanted if i not in got]
+        if missing:   # the writer sometimes merges slots; ask once more for the ones it left out
+            _debug("messages", f"got {len(got)} text(s) for {len(wanted)} slot(s), asking again for "
+                   + ", ".join(str(i + 1) for i in missing))
+            got.update(write(head + slot_lines(missing), missing))
+        # The basic writer turns "kept by the filter" into "the cluster has nothing else"; the
+        # reasoning model reads the counts. Only the slots that make such a claim are rewritten.
+        absent = [] if _compose_reasoning() else [i for i in got if ABSENCE.search(got[i])]
+        if absent:
+            _debug("messages", "slot(s) " + ", ".join(str(i + 1) for i in absent)
+                   + " claim an absence; rewritten by the reasoning model")
+            got.update(write(head + slot_lines(absent), absent, force_reasoning=True))
+        for i in wanted:
+            if i not in got:   # never drop a step of the answer silently
+                _debug("messages", f"slot {i + 1} was left empty twice; filled from its findings")
+                got[i] = _fallback_text(slots[i], by_id)
+            _emit("text", slot=i, text=got[i])
+        return got
+
+    if len(groups) > 1:
+        # one writer per step, side by side; each thread keeps this run's usage log
+        with ThreadPoolExecutor(max_workers=len(groups)) as pool:
+            jobs = [pool.submit(contextvars.copy_context().run, write_group, u, w) for u, w in groups]
+            for job in jobs:
+                texts.update(job.result())
+    else:
+        for u, w in groups:
+            texts.update(write_group(u, w))
+
+    if concl:
+        # The conclusion of an evidence chain is an argument over all the steps: the reasoning
+        # model writes it from every finding and the step messages. One extra call per hypothesis.
         written = "\n".join(f"{i + 1}. {texts[i]}" for i in sorted(texts))
-        texts.update(write(apart, "\n\nMESSAGES ALREADY WRITTEN FOR THE OTHER SLOTS (the assumptions are stated there; "
-                           "do not repeat them):\n" + written,
-                           force_reasoning=True))
+        user = (f"QUESTION: {state['question']}\n\nASSUMPTIONS: []\n\n"
+                f"FINDINGS OF THE DATA ACTIONS:\n{_findings_text(data_steps)}\n\n"
+                f"MESSAGE SLOTS:\n{slot_lines(concl)}\n\n"
+                "MESSAGES ALREADY WRITTEN FOR THE OTHER SLOTS (the assumptions are stated there; "
+                f"do not repeat them):\n{written}")
+        got = write(user, concl, force_reasoning=True)
+        for i in concl:
+            if i not in got:
+                _debug("messages", f"slot {i + 1} was left empty; filled with the fallback")
+                got[i] = _fallback_text(slots[i], by_id)
+            _emit("text", slot=i, text=got[i])
+        texts.update(got)
+
     out, i = [], 0
     for s in steps:
         if s["kind"] == "message":
-            if i not in texts:   # never drop a step of the answer silently
-                _debug("messages", f"slot {i + 1} was left empty twice; filled from its findings")
-                texts[i] = _fallback_text(s, by_id)
             s = {"kind": "message", "text": texts[i], "evidence": s.get("evidence", [])}
             i += 1
         out.append(s)

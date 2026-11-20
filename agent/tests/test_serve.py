@@ -16,14 +16,21 @@ from agent.data_tools import Dataset, Session, load_dataset
 def server(monkeypatch):
     calls = []
 
-    def fake_answer(question, state=None, debug=None):
+    def fake_answer(question, state=None, debug=None, on_event=None):
         calls.append((question, state))
         if question == "slow":
             time.sleep(0.5)
+        if on_event:
+            on_event({"event": "status", "text": "Planning what to look at"})
+            on_event({"event": "steps", "steps": [{"kind": "message", "slot": 0, "text": None, "evidence": []}]})
         if question == "boom":
             raise RuntimeError("bad luck")
-        return {"question": question, "trace": {"leaf": "L3"},
-                "steps": [{"kind": "message", "text": "hi", "evidence": []}]}
+        out = {"question": question, "trace": {"leaf": "L3", "cost": {"first_steps_seconds": 0.1}},
+               "steps": [{"kind": "message", "text": "hi", "evidence": []}]}
+        if on_event:
+            on_event({"event": "text", "slot": 0, "text": "hi"})
+            on_event({"event": "done", "trace": out["trace"]})
+        return out
 
     monkeypatch.setattr(graph, "answer", fake_answer)
     srv = serve.make_server(0)
@@ -167,3 +174,29 @@ def test_clean_state_reads_shared_filters():
     assert old["level1"] == ["Bacillota"]
     default = serve.clean_state({}, ds)
     assert default["level1"] == [] and default["scope"] == "filtered" and default["pathway"] == ""
+
+
+def stream(url, question):
+    req = urllib.request.Request(url + "/ask", data=json.dumps({"question": question, "stream": True}).encode())
+    req.add_header("Origin", "null")
+    req.add_header("Content-Type", "application/json")
+    with urllib.request.urlopen(req, timeout=10) as r:
+        return r.status, dict(r.headers), [json.loads(line) for line in r.read().splitlines() if line.strip()]
+
+
+def test_ask_streams_one_event_per_line(server):
+    url, _ = server
+    code, headers, events = stream(url, "hello")
+    assert code == 200 and headers["Content-Type"].startswith("application/x-ndjson")
+    assert headers["Access-Control-Allow-Origin"] == "null"
+    assert [e["event"] for e in events] == ["status", "steps", "text", "done"]
+    assert events[1]["steps"][0]["text"] is None and events[2] == {"event": "text", "slot": 0, "text": "hi"}
+
+
+def test_stream_reports_a_failure_as_its_last_event_and_frees_the_agent(server):
+    url, _ = server
+    code, _, events = stream(url, "boom")
+    assert code == 200 and events[-1]["event"] == "error" and "bad luck" in events[-1]["error"]
+    code, _, body = call(url, "/ask", {"question": "again"})
+    assert code == 200 and body["steps"][0]["text"] == "hi"
+

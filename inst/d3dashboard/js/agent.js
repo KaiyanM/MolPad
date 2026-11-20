@@ -475,52 +475,119 @@
     return Math.min(READ_MAX, Math.max(READ_MIN, READ_BASE + READ_PER_WORD * words));
   }
 
-  /* Play the step list written by the Python agent: an array of steps, or an
-     object with a `steps` array (JSON text is parsed). Dashboard steps run as
-     commands, message steps are printed, reasoning steps are printed before the
-     actions they explain, data steps are not played: they hold
-     the evidence (findings and numbers) that a message lists by id. `say(text,
-     kind, evidence)` receives each line; a failed step is reported and the rest
-     go on. */
+  /* A player for the steps written by the Python agent. Steps can be handed over while it
+     plays, and the text of a message can come after the message itself:
+
+       var p = player(say, { writing: fn });
+       p.push(steps);          // any number of times; plays in the order given
+       p.text(slot, text);     // the text of the message step {kind: "message", slot: n}
+       p.end();                // nothing more will come
+       p.finished              // a promise: "Played n steps."
+
+     Dashboard steps run as commands, message steps are printed, reasoning steps are printed
+     before the actions they explain, data steps are not played: they hold the evidence
+     (findings and numbers) that a message lists by id. `say(text, kind, evidence)` receives
+     each line; a failed step is reported and the rest go on. When the next step is a message
+     whose text has not come yet, the player waits for that text only; `writing(true)` and
+     `writing(false)` are called around the wait, so the page can say so. */
+  function player(say, options) {
+    say = say || function () {};
+    var writing = (options && options.writing) || function () {};
+    var queue = [], byId = {}, texts = {};
+    var ended = false, running = false, done = 0, wake = null, finish;
+    var finished = new Promise(function (resolve) { finish = resolve; });
+
+    function textOf(step) {
+      if (step.text !== null && step.text !== undefined) return Promise.resolve(String(step.text));
+      return new Promise(function (resolve) {
+        var waited = false;
+        (function check() {
+          var ready = Object.prototype.hasOwnProperty.call(texts, step.slot);
+          if (!ready && !ended) {
+            if (!waited) { waited = true; writing(true); }
+            wake = check;
+            return;
+          }
+          if (waited) writing(false);
+          resolve(ready ? String(texts[step.slot]) : "");
+        })();
+      });
+    }
+
+    function one(step) {
+      if (step.kind === "message") {
+        return textOf(step).then(function (text) {
+          if (!text.trim()) return null;   // never print an empty message
+          var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
+            .filter(function (d) { return d; });
+          say(text, "bot", evidence);
+          done += 1;
+          return pause(readingTime(text));
+        });
+      }
+      if (step.kind === "reasoning") {
+        say(String(step.text), "reason");
+        return pause(readingTime(step.text));
+      }
+      if (step.kind !== "dashboard" && !step.command) return Promise.resolve();   // a kind this page does not know
+      return pause(PAUSE_BEFORE_CMD).then(function () {
+        say(String(step.command), "user");
+        return run(step.command);
+      }).then(function (report) {
+        say(report, "bot");
+        done += 1;
+      }, function (err) {
+        say(err && err.message ? err.message : String(err), "error");
+      }).then(function () { return pause(PAUSE_AFTER_CMD); });
+    }
+
+    function next() {
+      if (!queue.length) {
+        running = false;
+        if (ended) finish("Played " + done + " steps.");
+        return;
+      }
+      one(queue.shift()).then(next, next);
+    }
+
+    function start() {
+      if (running) return;
+      running = true;
+      next();
+    }
+
+    function nudge() {
+      var w = wake;
+      wake = null;
+      if (w) w();
+    }
+
+    return {
+      push: function (steps) {
+        (steps || []).forEach(function (step) {
+          if (!step) return;
+          if (step.kind === "data") { if (step.id) byId[step.id] = step; return; }
+          queue.push(step);
+        });
+        start();
+      },
+      text: function (slot, text) { texts[slot] = text; nudge(); },
+      end: function () { ended = true; nudge(); start(); },
+      finished: finished
+    };
+  }
+
+  /* Play a finished step list: an array of steps, or an object with a `steps` array (JSON
+     text is parsed). */
   function play(input, say) {
     var steps = typeof input === "string" ? JSON.parse(input) : input;
     if (steps && !Array.isArray(steps)) steps = steps.steps;
     if (!Array.isArray(steps)) throw new Error("Expected a list of steps, or an object with \"steps\".");
-    say = say || function () {};
-    var done = 0;
-    var chain = Promise.resolve();
-    var byId = {};
-    steps.forEach(function (step) {
-      if (step && step.kind === "data" && step.id) byId[step.id] = step;
-    });
-    steps.forEach(function (step) {
-      if (!step || step.kind === "data") return;
-      chain = chain.then(function () {
-        if (step.kind === "message") {
-          var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
-            .filter(function (d) { return d; });
-          say(String(step.text), "bot", evidence);
-          done += 1;
-          return pause(readingTime(step.text));
-        }
-        if (step.kind === "reasoning") {
-          say(String(step.text), "reason");
-          return pause(readingTime(step.text));
-        }
-        if (step.kind !== "dashboard" && !step.command) return null;   // a kind this page does not know
-        return pause(PAUSE_BEFORE_CMD).then(function () {
-          say(String(step.command), "user");
-          return run(step.command);
-        }).then(function (report) {
-          say(report, "bot");
-          done += 1;
-        }, function (err) {
-          say(err && err.message ? err.message : String(err), "error");
-        }).then(function () { return pause(PAUSE_AFTER_CMD); });
-      });
-    });
-    return chain.then(function () { return "Played " + done + " steps."; });
+    var p = player(say);
+    p.push(steps);
+    p.end();
+    return p.finished;
   }
 
-  MP.agent = { commands: commands, parse: parse, run: run, play: play, usage: usage };
+  MP.agent = { commands: commands, parse: parse, run: run, play: play, player: player, usage: usage };
 })(window.MolPad = window.MolPad || {});

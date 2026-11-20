@@ -301,9 +301,43 @@ def test_writer_never_drops_a_slot(monkeypatch):
     monkeypatch.setattr(nodes, "_judge", judge)
     out = nodes.compose_messages({"question": "q", "steps": steps, "units": [a, b]})["steps"]
     texts = [s["text"] for s in out if s["kind"] == "message"]
-    assert asked == ["Write only slot(s) 1, 2.", "Write only slot(s) 2.", "Write only slot(s) 3."]
+    # one writer per step (side by side), the missing one asked again, the conclusion last
+    assert sorted(asked[:3]) == ["Write only slot(s) 1.", "Write only slot(s) 2.", "Write only slot(s) 2."]
+    assert asked[3] == "Write only slot(s) 3."
     assert len(texts) == 3 and texts[0] == "first" and all(texts)
     assert texts[2].startswith("No conclusion was written")
+
+
+def test_writer_sends_the_playback_first_and_every_text_once(monkeypatch):
+    from agent import nodes
+    a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    b = unit("claim b", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    _, steps = chain(a, b)
+    seen_findings = []
+
+    def judge(schema, card, state, user, force_reasoning=False):
+        seen_findings.append(user.split("FINDINGS OF THE DATA ACTIONS:")[1].split("MESSAGE SLOTS:")[0])
+        wanted = [int(x) for x in user.rsplit("slot(s) ", 1)[1].rstrip(".").split(", ")]
+        return {"texts": [{"slot": i, "text": f"text {i}"} for i in wanted]}
+
+    events = []
+    monkeypatch.setattr(nodes, "_judge", judge)
+    token = nodes.EMIT.set(events.append)
+    try:
+        out = nodes.compose_messages({"question": "q", "steps": steps, "units": [a, b]})["steps"]
+    finally:
+        nodes.EMIT.reset(token)
+    assert events[0]["event"] == "steps"
+    played = events[0]["steps"]
+    assert [s["slot"] for s in played if s["kind"] == "message"] == [0, 1, 2]
+    assert all(s["text"] is None for s in played if s["kind"] == "message")
+    assert [s["kind"] for s in played] == [s["kind"] for s in steps]      # same playback, same order
+    sent = [(e["slot"], e["text"]) for e in events[1:]]
+    assert sorted(sent) == [(0, "text 1"), (1, "text 2"), (2, "text 3")] and sent[-1][0] == 2
+    assert [s["text"] for s in out if s["kind"] == "message"] == ["text 1", "text 2", "text 3"]
+    # a step is written from its own findings; the conclusion reads all of them
+    step_a = next(f for f in seen_findings[:2] if "Actinomycetota" in f)
+    assert "Bacillota" not in step_a and "Bacillota" in seen_findings[2] and "Actinomycetota" in seen_findings[2]
     assert [s["kind"] for s in out if s["kind"] == "reasoning"] == ["reasoning"] * 2
 
 

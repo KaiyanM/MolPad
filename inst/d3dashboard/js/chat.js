@@ -88,31 +88,58 @@
     }
   }
 
-  /* A line that counts the seconds while the agent works; returns a function that removes it. */
-  function thinking() {
-    var p = node("div", "mp-chat-msg bot mp-chat-thinking", "Thinking...");
-    el.chat_log.appendChild(p);
-    el.chat_log.scrollTop = el.chat_log.scrollHeight;
+  /* A line that counts the seconds while the agent works. `label(text)` says what it is doing
+     now; `stop()` removes the line. It stays the last line of the log while it is shown. */
+  function thinking(text) {
+    var what = text || "Thinking";
+    var p = node("div", "mp-chat-msg bot mp-chat-thinking", what + "...");
     var t0 = Date.now();
-    var timer = setInterval(function () {
-      p.textContent = "Thinking... " + Math.round((Date.now() - t0) / 1000) + " s";
-    }, 1000);
-    return function () {
-      clearInterval(timer);
-      if (p.parentNode) p.parentNode.removeChild(p);
+    function place() {
+      el.chat_log.appendChild(p);   // moves it below what was printed meanwhile
+      el.chat_log.scrollTop = el.chat_log.scrollHeight;
+    }
+    function draw() {
+      var s = Math.round((Date.now() - t0) / 1000);
+      p.textContent = what + "..." + (s ? " " + s + " s" : "");
+    }
+    place();
+    var timer = setInterval(draw, 1000);
+    return {
+      label: function (next) { what = next; draw(); place(); },
+      stop: function () {
+        clearInterval(timer);
+        if (p.parentNode) p.parentNode.removeChild(p);
+      }
     };
   }
 
+  /* Ask the agent and play its answer while it is still being written: the status line
+     follows what the agent is doing, the dashboard actions start as soon as they are known,
+     and each message is printed when both its turn and its text have come. */
   function askAgent(question) {
-    var done = thinking();
-    return MP.link.ask(question).then(function (reply) {
-      done();
-      if (window.console && console.debug) console.debug("MolPad agent trace", reply.trace);
-      return MP.agent.play(reply.steps || [], say);
+    var status = thinking();
+    var writing = null;
+    var player = MP.agent.player(say, {
+      writing: function (on) {
+        if (writing) { writing.stop(); writing = null; }
+        if (on) writing = thinking("Writing");
+      }
+    });
+    return MP.link.ask(question, function (ev) {
+      if (ev.event === "status") status.label(ev.text);
+      else if (ev.event === "plan") { say(ev.text, "reason"); status.label("Planning what to look at"); }
+      else if (ev.event === "steps") { status.stop(); player.push(ev.steps); }
+      else if (ev.event === "text") player.text(ev.slot, ev.text);
+    }).then(function (trace) {
+      status.stop();
+      if (window.console && console.debug) console.debug("MolPad agent trace", trace);
+      player.end();
+      return player.finished;
     }, function (err) {
-      done();
+      status.stop();
+      player.end();
       if (!MP.link.connected()) connect();
-      throw err;
+      return player.finished.then(function () { throw err; });
     });
   }
 

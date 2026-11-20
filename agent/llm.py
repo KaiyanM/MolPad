@@ -40,7 +40,9 @@ JUDGE_TIER = os.getenv("AGENT_JUDGE_TIER", "reasoning").strip().lower()
 
 
 # Reasoning effort per call site; "" leaves the provider default. Override with AGENT_EFFORT_<SITE>.
-_EFFORT_DEFAULTS = {"parse": "low", "plan": "low", "breakdown": "medium"}
+# breakdown: "low" writes the same kind of steps as "medium" in about a third of the time
+# (Q42, Q43 on 2026-11-13: 7-11s against 20-29s), and nothing can be shown before it ends.
+_EFFORT_DEFAULTS = {"parse": "low", "plan": "low", "breakdown": "low"}
 _GEMINI_BUDGET = {"minimal": 0, "low": 1024, "medium": 4096, "high": 16384}
 
 # One list per answer(): every LLM call appends {site, model, seconds, tokens...} to it.

@@ -8,6 +8,9 @@ dashboard state, to this server and plays back the steps it gets.
 
     GET  /health   {"ok", "model", "judge_tier", "title", "clusters", "timepoints"}
     POST /ask      {"question": str, "state": {...}} -> {"question", "trace", "steps"}
+    POST /ask      {..., "stream": true} -> one JSON event per line, sent while the agent works:
+                   status, plan, steps (the playback with empty message slots), text (one per
+                   slot), done (the trace) or error. See graph.answer for the fields.
 
 The agent reads the data from the same dashboard page (agent/payload.py), so both
 sides see the same data. Without --dashboard it reads the CSVs of config.py.
@@ -96,6 +99,42 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _stream(self, question, state, origin):
+        """Answer with one JSON event per line, each sent as soon as the agent has it.
+
+        The body has no length: it ends when the connection closes. A page that went away does
+        not stop the run; its events are dropped. Returns the answer, or None after an error
+        (which is sent as the last event).
+        """
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "close")
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        self.end_headers()
+        self.close_connection = True
+        gone = []
+        write_lock = threading.Lock()   # the writers of an evidence chain send from several threads
+
+        def send(event):
+            if gone:
+                return
+            try:
+                with write_lock:
+                    self.wfile.write(json.dumps(event).encode("utf-8") + b"\n")
+                    self.wfile.flush()
+            except OSError:
+                gone.append(True)
+
+        try:
+            return graph.answer(question, state, on_event=send)
+        except Exception as exc:
+            traceback.print_exc()
+            send({"event": "error", "error": f"the agent failed: {type(exc).__name__}: {exc}"})
+            return None
+
     def do_OPTIONS(self):
         origin = self._origin()
         if not origin:
@@ -137,18 +176,47 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(409, {"error": "the agent is still answering the previous question"}, origin)
         t0 = time.time()
         try:
-            out = graph.answer(question, clean_state(body.get("state"), load_dataset()))
+            state = clean_state(body.get("state"), load_dataset())
+            if body.get("stream") is True:
+                out = self._stream(question, state, origin)
+                if out is None:
+                    return None
+            else:
+                out = graph.answer(question, state)
         except Exception as exc:   # report it in the chat; the traceback stays in the server log
             traceback.print_exc()
             return self._send(500, {"error": f"the agent failed: {type(exc).__name__}: {exc}"}, origin)
         finally:
             _lock.release()
+        if body.get("stream") is True:
+            print(f"[serve] {time.time() - t0:5.1f}s  leaf {out['trace'].get('leaf')}  {question}"
+                  f"   (playback ready after {out['trace']['cost'].get('first_steps_seconds')}s)",
+                  file=sys.stderr, flush=True)
+            return None
         print(f"[serve] {time.time() - t0:5.1f}s  leaf {out['trace'].get('leaf')}  {question}",
               file=sys.stderr, flush=True)
         return self._send(200, out, origin)
 
     def log_message(self, fmt, *args):   # one line per question is printed above instead
         pass
+
+
+def warm_up():
+    """Build the graph and the LLM clients before the first question, which else waits for them.
+
+    No API call is made. A missing key is reported by the first question, as before.
+    """
+    t0 = time.time()
+    try:
+        from .llm import _EFFORT_DEFAULTS, effort_for, get_llm
+
+        graph._graph()
+        get_llm(False, "")
+        for effort in {""} | {effort_for(site) for site in _EFFORT_DEFAULTS}:
+            get_llm(True, effort)
+        print(f"[serve] ready for the first question ({time.time() - t0:.1f}s warm-up)", file=sys.stderr, flush=True)
+    except Exception as exc:
+        print(f"[serve] warm-up skipped: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
 
 
 def make_server(port=DEFAULT_PORT):
@@ -176,6 +244,7 @@ def main():
     print(f"[serve] data: {a.dashboard or 'CSV files of agent/config.py'}; {len(ds.features):,} features, "
           f"{len(ds.clusters)} clusters, sample groups {', '.join(ds.subjects)}", file=sys.stderr)
     server = make_server(a.port)
+    threading.Thread(target=warm_up, daemon=True).start()
     print(f"[serve] agent listening on http://127.0.0.1:{a.port}  (Ctrl+C to stop)", file=sys.stderr,
           flush=True)
     try:
