@@ -125,7 +125,8 @@
     MP.state.subscribe(["level1", "level2"], function (S2, keys) {
       MP.filters.level1.refresh();
       MP.filters.level2.refresh();
-      keys.forEach(function (k) { flash(MP.filters[k].button); });
+      // `keys` holds every field of the change, not only the filters (a restored snapshot)
+      keys.forEach(function (k) { if (MP.filters[k]) flash(MP.filters[k].button); });
     });
     MP.state.subscribe(["scope"], function () { syncScope(); flash(el.s_scope); });
     MP.state.subscribe(["colourBy"], function (S2) {

@@ -36,18 +36,110 @@
     return box;
   }
 
+  /* The body of the unit block that is open now: lines are printed there. null = the log itself. */
+  var into = null;
+
   function say(text, kind, evidence) {
     var p = node("div", "mp-chat-msg " + kind);
     if (kind === "reason") p.appendChild(node("b", null, "Reasoning"));
+    if (kind === "answer") p.appendChild(node("b", null, "Answer"));
     p.appendChild(node("span", null, text));
     if (evidence && evidence.length) p.appendChild(evidenceBox(evidence));
-    el.chat_log.appendChild(p);
+    (into || el.chat_log).appendChild(p);
     el.chat_log.scrollTop = el.chat_log.scrollHeight;
+    return p;
   }
 
-  function busy(on) {
+  /* One unit of the answer: a (sub-)question, why it is asked, what was assumed, and the
+     actions in the order they will be played. The actions and messages of the unit are then
+     printed inside the block. openUnit(null) closes the block: later lines go to the log.
+     Returns the heading elements it made (none when there is nothing to head). */
+  function openUnit(step) {
+    into = null;
+    if (!step) return [];
+    var several = step.of > 1;
+    var assumed = step.assumed || [];
+    if (!several && !step.reason && !assumed.length && !step.overview) return [];   // nothing to head
+    var box = node("section", "mp-chat-unit");
+    var made = [];
+    if (several) {
+      var head = node("div", "mp-unit-head");
+      head.appendChild(node("b", null, "Step " + (step.unit + 1) + " of " + step.of));
+      head.appendChild(node("span", "mp-unit-q", step.question));
+      box.appendChild(head);
+      made.push(head);
+    }
+    function line(cls, label, text) {
+      var d = node("div", "mp-unit-line " + cls);
+      d.appendChild(node("b", null, label));
+      d.appendChild(node("span", null, text));
+      box.appendChild(d);
+      made.push(d);
+    }
+    if (step.reason) line("why", "Why", step.reason);
+    assumed.forEach(function (a) { line("assumed", "Assumed", a); });
+    if (step.overview) line("overview", "Actions", step.overview);
+    into = node("div", "mp-unit-body");
+    box.appendChild(into);
+    el.chat_log.appendChild(box);
+    el.chat_log.scrollTop = el.chat_log.scrollHeight;
+    return made;
+  }
+
+  /* While a round is played or replayed nothing else may start: the input and every Replay
+     button are disabled, except `keep` (the button of the replay that runs, which stops it). */
+  function busy(on, keep) {
     el.chat_input.disabled = on;
+    Array.prototype.forEach.call(el.chat_log.querySelectorAll(".mp-chat-replay"), function (b) {
+      b.disabled = on && b !== keep;
+    });
     if (!on) el.chat_input.focus();
+  }
+
+  /* A round of agent actions that can be played again: the dashboard as it was before the
+     round, and one entry per played step with the chat lines it printed. */
+  function newRound() {
+    return { start: MP.agent.snapshot(), entries: [] };
+  }
+
+  /* Put a Replay button on the closing line of a round. A click puts the dashboard back to
+     the start of the round and runs its actions again; the lines already in the chat are
+     marked one after another, and nothing new is printed. While it runs the button stops it. */
+  function addReplay(line, round) {
+    if (!round.entries.some(function (e) { return e.kind === "dashboard"; })) return;
+    var button = node("button", "mp-chat-replay", "Replay");
+    button.type = "button";
+    button.title = "Reset the dashboard to the start of this answer and play its actions again";
+    var note = node("span", "mp-chat-replay-note");
+    var running = null;
+    button.addEventListener("click", function () {
+      if (running) { running.stop(); button.disabled = true; return; }
+      busy(true, button);
+      into = null;
+      note.textContent = "";
+      button.textContent = "Stop";
+      MP.agent.restore(round.start);
+      running = MP.agent.replay(round.entries, {
+        on: function (nodes) {
+          nodes.forEach(function (n) { n.classList.add("mp-replaying"); });
+          if (nodes[0]) nodes[0].scrollIntoView({ block: "nearest" });
+        },
+        off: function (nodes) {
+          nodes.forEach(function (n) { n.classList.remove("mp-replaying"); });
+        },
+        error: function (err) {
+          note.textContent = "A step failed: " + (err && err.message ? err.message : String(err));
+        }
+      });
+      running.finished.then(function () {
+        running = null;
+        button.textContent = "Replay";
+        busy(false);
+        line.scrollIntoView({ block: "nearest" });
+      });
+    });
+    line.appendChild(button);
+    line.appendChild(note);
   }
 
   function setStatus(text, kind) {
@@ -116,10 +208,12 @@
   /* Ask the agent and play its answer while it is still being written: the status line
      follows what the agent is doing, the dashboard actions start as soon as they are known,
      and each message is printed when both its turn and its text have come. */
-  function askAgent(question) {
+  function askAgent(question, round) {
     var status = thinking();
     var writing = null;
     var player = MP.agent.player(say, {
+      unit: openUnit,
+      record: function (entry) { round.entries.push(entry); },
       writing: function (on) {
         if (writing) { writing.stop(); writing = null; }
         if (on) writing = thinking("Writing");
@@ -149,11 +243,17 @@
     if (!text) return;
     el.chat_input.value = "";
     var list = text.charAt(0) === "{" || text.charAt(0) === "[";
+    into = null;
     say(list ? "(step list)" : text, "user");
     busy(true);
-    var job;
+    var job, round = null;
     if (list) {
-      job = new Promise(function (resolve) { resolve(MP.agent.play(text, say)); });
+      round = newRound();
+      job = new Promise(function (resolve) {
+        resolve(MP.agent.play(text, say, {
+          unit: openUnit, record: function (entry) { round.entries.push(entry); }
+        }));
+      });
     } else if (isCommand(text) || !MP.link.connected()) {
       // Without the agent, an unknown text gets the command help, as before.
       job = MP.agent.run(text).catch(function (err) {
@@ -163,10 +263,13 @@
         throw err;
       });
     } else {
-      job = askAgent(text);
+      round = newRound();
+      job = askAgent(text, round);
     }
     job.then(function (report) {
-      say(report, "bot");
+      into = null;
+      var line = say(report, "bot");
+      if (round) addReplay(line, round);
     }, function (err) {
       say(err && err.message ? err.message : String(err), "error");
     }).then(function () { busy(false); });

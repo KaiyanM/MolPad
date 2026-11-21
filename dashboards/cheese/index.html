@@ -651,6 +651,40 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
   font-style: italic;
 }
 .mp-chat-msg.reason b { display: block; font-style: normal; font-size: 0.8em; letter-spacing: .04em; text-transform: uppercase; }
+/* one unit of the answer: a sub-question, why, what was assumed, its actions; then the lines */
+.mp-chat-unit {
+  margin: 10px 0 8px;
+  padding: 4px 0 2px 8px;
+  border-left: 3px solid var(--mp-accent);
+  background: rgba(0, 0, 0, .03);
+}
+.mp-unit-head b, .mp-unit-line b, .mp-chat-msg.answer b {
+  font-size: 0.8em; letter-spacing: .04em; text-transform: uppercase; color: var(--mp-muted);
+}
+.mp-unit-head b { display: block; }
+.mp-unit-q { font-weight: 600; overflow-wrap: anywhere; }
+.mp-unit-line { margin-top: 3px; color: var(--mp-muted); font-size: 0.92em; overflow-wrap: anywhere; }
+.mp-unit-line b { margin-right: 6px; }
+.mp-unit-line.why { font-style: italic; }
+.mp-unit-line.why b { font-style: normal; }
+.mp-unit-line.assumed { color: #8a5a1c; }
+.mp-unit-body { margin-top: 6px; padding-right: 4px; }
+.mp-chat-msg.answer {
+  margin-top: 10px;
+  padding: 4px 8px;
+  border-left: 3px solid var(--mp-accent-dark);
+  background: rgba(0, 0, 0, .04);
+}
+.mp-chat-msg.answer b { display: block; }
+/* one Replay button per round, on its closing line; the lines of the step being replayed */
+.mp-chat-replay {
+  margin-left: 8px; padding: 1px 8px; border: 1px solid var(--mp-accent); border-radius: 3px;
+  background: none; color: var(--mp-accent-dark); font: inherit; font-size: 0.9em; cursor: pointer;
+}
+.mp-chat-replay:hover:not(:disabled) { background: rgba(0, 0, 0, .06); }
+.mp-chat-replay:disabled { opacity: .45; cursor: default; }
+.mp-chat-replay-note { margin-left: 8px; font-size: 0.85em; color: #a23b3b; }
+.mp-replaying { outline: 2px solid var(--mp-accent); outline-offset: 1px; background: rgba(0, 0, 0, .07); }
 .mp-chat-status {
   margin-left: auto; margin-right: 6px; border: 0; background: none; padding: 0;
   font-size: 0.8em; cursor: pointer; color: var(--mp-logo);
@@ -692,6 +726,21 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
 }
 .mp-cursor path { fill: var(--mp-brush-stroke); stroke: #fff; stroke-width: 1.2; }
 .mp-cursor.down { transform: scale(.78); }
+/* three jumping balls beside the pointer while the playback pauses or waits */
+.mp-cursor-wait { position: absolute; left: 20px; top: 12px; display: none; white-space: nowrap; }
+.mp-cursor.waiting .mp-cursor-wait { display: block; }
+.mp-cursor-wait i {
+  display: inline-block; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%;
+  background: var(--mp-brush-stroke); box-shadow: 0 0 0 1px #fff;
+  animation: mp-jump .9s ease-in-out infinite;
+}
+.mp-cursor-wait i:nth-child(2) { animation-delay: .15s; }
+.mp-cursor-wait i:nth-child(3) { animation-delay: .3s; }
+@keyframes mp-jump {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-7px); }
+}
+@media (prefers-reduced-motion: reduce) { .mp-cursor-wait i { animation: none; } }
 .mp-cursor.down path { fill: var(--mp-accent-dark); }
 </style>
 </head>
@@ -1527,7 +1576,8 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     MP.state.subscribe(["level1", "level2"], function (S2, keys) {
       MP.filters.level1.refresh();
       MP.filters.level2.refresh();
-      keys.forEach(function (k) { flash(MP.filters[k].button); });
+      // `keys` holds every field of the change, not only the filters (a restored snapshot)
+      keys.forEach(function (k) { if (MP.filters[k]) flash(MP.filters[k].button); });
     });
     MP.state.subscribe(["scope"], function () { syncScope(); flash(el.s_scope); });
     MP.state.subscribe(["colourBy"], function (S2) {
@@ -2645,7 +2695,30 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     });
   }
 
-  MP.table = { init: init, render: render };
+  /* The table's own settings (search, sort, column filters, page size), so a replay of the
+     agent's actions can start from the table as it was. */
+  function getState() {
+    var filters = {};
+    Object.keys(local.filters).forEach(function (c) { filters[c] = Array.from(local.filters[c]); });
+    return { search: el.table_search.value, terms: local.terms.slice(), sortKey: local.sortKey,
+             sortDir: local.sortDir, pageSize: local.pageSize, filters: filters };
+  }
+
+  function setState(s) {
+    el.table_search.value = s.search || "";
+    local.terms = (s.terms || []).slice();
+    local.sortKey = s.sortKey || null;
+    local.sortDir = s.sortDir || 1;
+    local.pageSize = s.pageSize || local.pageSize;
+    el.table_pagesize.value = String(local.pageSize);
+    local.filters = {};
+    Object.keys(s.filters || {}).forEach(function (c) { local.filters[c] = new Set(s.filters[c]); });
+    local.page = 1;
+    closeMenu();
+    render();
+  }
+
+  MP.table = { init: init, render: render, getState: getState, setState: setState };
 })(window.MolPad = window.MolPad || {});
 </script>
 <!-- molpad:js/cursor.js -->
@@ -2670,7 +2743,8 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     el = document.createElement("div");
     el.className = "mp-cursor";
     el.innerHTML = '<svg viewBox="0 0 22 22" width="22" height="22">' +
-      '<path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.3 L10 13 L16 13 Z"/></svg>';
+      '<path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.3 L10 13 L16 13 Z"/></svg>' +
+      '<span class="mp-cursor-wait"><i></i><i></i><i></i></span>';
     document.body.appendChild(el);
     place(window.innerWidth - 60, window.innerHeight - 60);
   }
@@ -2729,9 +2803,18 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
 
+  /* Three small balls jump next to the pointer while the playback pauses on purpose (time to
+     read a message or to look at the dashboard) or waits for a text: it is still running.
+     waiting(true) and waiting(false) come in pairs; the balls stay while any pair is open. */
+  var open = 0;
+  function waiting(on) {
+    open = Math.max(0, open + (on ? 1 : -1));
+    if (el) el.classList.toggle("waiting", open > 0);
+  }
+
   MP.cursor = {
     init: init, moveTo: moveTo, toElement: toElement,
-    press: press, release: release, wait: wait
+    press: press, release: release, wait: wait, waiting: waiting
   };
 })(window.MolPad = window.MolPad || {});
 </script>
@@ -3195,6 +3278,7 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
      ?pace=0.5 in the page address plays twice as fast, ?pace=0 without pauses. */
   var PAUSE_BEFORE_CMD = 800;     // ms before the pointer moves to the next control
   var PAUSE_AFTER_CMD = 1200;     // ms to look at the dashboard after a command
+  var WAIT_SIGN_MIN = 400;        // ms: shorter pauses do not show the waiting balls
   var READ_BASE = 1200, READ_PER_WORD = 250, READ_MIN = 2500, READ_MAX = 9000;
 
   function pace() {
@@ -3205,7 +3289,10 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
 
   function pause(ms) {
     var t = Math.round(ms * pace());
-    return t > 0 ? MP.cursor.wait(t) : Promise.resolve();
+    if (t <= 0) return Promise.resolve();
+    if (t < WAIT_SIGN_MIN) return MP.cursor.wait(t);
+    MP.cursor.waiting(true);   // the balls next to the pointer: paused on purpose, still running
+    return MP.cursor.wait(t).then(function () { MP.cursor.waiting(false); });
   }
 
   /* Time to read a message: grows with its length, within READ_MIN..READ_MAX. */
@@ -3226,12 +3313,20 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
      Dashboard steps run as commands, message steps are printed, reasoning steps are printed
      before the actions they explain, data steps are not played: they hold the evidence
      (findings and numbers) that a message lists by id. `say(text, kind, evidence)` receives
-     each line; a failed step is reported and the rest go on. When the next step is a message
+     each line; a failed step is reported and the rest go on. A unit step opens one unit of
+     the answer (a sub-question with its reason and an overview of its actions): `unit(step)`
+     is called with it, and `unit(null)` when the lines that follow belong to no unit (the
+     conclusion, kind "answer", and the end). `say` and `unit` may return the page elements
+     they made; `record(entry)` is then called once per played step with
+     {kind, nodes, command | text}, so the round can be replayed later (see replay). When the
+     next step is a message
      whose text has not come yet, the player waits for that text only; `writing(true)` and
      `writing(false)` are called around the wait, so the page can say so. */
   function player(say, options) {
     say = say || function () {};
     var writing = (options && options.writing) || function () {};
+    var unit = (options && options.unit) || function () {};
+    var record = (options && options.record) || function () {};
     var queue = [], byId = {}, texts = {};
     var ended = false, running = false, done = 0, wake = null, finish;
     var finished = new Promise(function (resolve) { finish = resolve; });
@@ -3243,11 +3338,11 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
         (function check() {
           var ready = Object.prototype.hasOwnProperty.call(texts, step.slot);
           if (!ready && !ended) {
-            if (!waited) { waited = true; writing(true); }
+            if (!waited) { waited = true; writing(true); MP.cursor.waiting(true); }
             wake = check;
             return;
           }
-          if (waited) writing(false);
+          if (waited) { writing(false); MP.cursor.waiting(false); }
           resolve(ready ? String(texts[step.slot]) : "");
         })();
       });
@@ -3259,31 +3354,44 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
           if (!text.trim()) return null;   // never print an empty message
           var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
             .filter(function (d) { return d; });
-          say(text, "bot", evidence);
+          var concluding = step.role === "conclusion";
+          if (concluding) unit(null);
+          record({ kind: "message", text: text, nodes: [say(text, concluding ? "answer" : "bot", evidence)] });
           done += 1;
           return pause(readingTime(text));
         });
       }
       if (step.kind === "reasoning") {
-        say(String(step.text), "reason");
+        record({ kind: "message", text: String(step.text), nodes: [say(String(step.text), "reason")] });
         return pause(readingTime(step.text));
       }
+      if (step.kind === "unit") {
+        var heading = [step.of > 1 ? step.question : "", step.reason || "",
+          (step.assumed || []).join(" "), step.overview || ""].join(" ");
+        var shown = unit(step) || [];
+        if (shown.length) record({ kind: "unit", text: heading, nodes: shown });
+        return pause(readingTime(heading));
+      }
       if (step.kind !== "dashboard" && !step.command) return Promise.resolve();   // a kind this page does not know
+      var entry = { kind: "dashboard", command: String(step.command), nodes: [] };
       return pause(PAUSE_BEFORE_CMD).then(function () {
-        say(String(step.command), "user");
+        entry.nodes.push(say(entry.command, "user"));
         return run(step.command);
       }).then(function (report) {
-        say(report, "bot");
+        entry.nodes.push(say(report, "bot"));
         done += 1;
       }, function (err) {
-        say(err && err.message ? err.message : String(err), "error");
-      }).then(function () { return pause(PAUSE_AFTER_CMD); });
+        entry.nodes.push(say(err && err.message ? err.message : String(err), "error"));
+      }).then(function () {
+        record(entry);   // a failed command is kept too: the replay runs the same list
+        return pause(PAUSE_AFTER_CMD);
+      });
     }
 
     function next() {
       if (!queue.length) {
         running = false;
-        if (ended) finish("Played " + done + " steps.");
+        if (ended) { unit(null); finish("Played " + done + " steps."); }
         return;
       }
       one(queue.shift()).then(next, next);
@@ -3318,17 +3426,72 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
 
   /* Play a finished step list: an array of steps, or an object with a `steps` array (JSON
      text is parsed). */
-  function play(input, say) {
+  function play(input, say, options) {
     var steps = typeof input === "string" ? JSON.parse(input) : input;
     if (steps && !Array.isArray(steps)) steps = steps.steps;
     if (!Array.isArray(steps)) throw new Error("Expected a list of steps, or an object with \"steps\".");
-    var p = player(say);
+    var p = player(say, options);
     p.push(steps);
     p.end();
     return p.finished;
   }
 
-  MP.agent = { commands: commands, parse: parse, run: run, play: play, player: player, usage: usage };
+  /* The dashboard as it is now: the shared state plus the table's own settings. */
+  function snapshot() {
+    var S = MP.state.get();
+    return {
+      state: { level1: S.level1.slice(), level2: S.level2.slice(), scope: S.scope, colourBy: S.colourBy,
+               ribbonExpand: S.ribbonExpand, layout: S.layout, minWeight: S.minWeight,
+               selectedClusters: S.selectedClusters.slice() },
+      table: MP.table && MP.table.getState ? MP.table.getState() : null
+    };
+  }
+
+  /* Put the dashboard back to a snapshot, at once and without the pointer. The layout list and
+     the importance slider do not follow a state change by themselves, so they are set here. */
+  function restore(snap) {
+    MP.app.showTab("main");
+    MP.network.clearBrush();
+    MP.state.set(snap.state, "agent");
+    var layout = document.getElementById("s_layout");
+    if (layout) layout.value = snap.state.layout;
+    var slider = document.getElementById("obs"), label = document.getElementById("obs_value");
+    if (slider) slider.value = snap.state.minWeight;
+    if (label) label.textContent = MP.utils.fmt(snap.state.minWeight, 1);
+    if (snap.table && MP.table && MP.table.setState) MP.table.setState(snap.table);
+  }
+
+  /* Run the recorded entries of a round again, in order, without printing anything:
+
+       var r = replay(entries, { on: fn, off: fn, error: fn });
+       r.stop();        // stops after the step that is running
+       r.finished       // a promise: "done" or "stopped"
+
+     `on(nodes, entry)` and `off(nodes, entry)` are called around each step, so the page can
+     mark the lines it belongs to; `error(err, entry)` when a command fails (the rest go on).
+     The caller restores the dashboard to the start of the round first (see restore). */
+  function replay(entries, hooks) {
+    hooks = hooks || {};
+    var stopped = false, i = 0;
+    var finished = new Promise(function (resolve) {
+      (function step() {
+        if (stopped || i >= entries.length) { resolve(stopped ? "stopped" : "done"); return; }
+        var e = entries[i++], nodes = (e.nodes || []).filter(function (n) { return n; });
+        if (hooks.on) hooks.on(nodes, e);
+        var job = e.kind === "dashboard"
+          ? pause(PAUSE_BEFORE_CMD).then(function () { return run(e.command); })
+              .then(null, function (err) { if (hooks.error) hooks.error(err, e); })
+              .then(function () { return pause(PAUSE_AFTER_CMD); })
+          : pause(readingTime(e.text || ""));
+        function after() { if (hooks.off) hooks.off(nodes, e); step(); }
+        job.then(after, after);
+      })();
+    });
+    return { finished: finished, stop: function () { stopped = true; } };
+  }
+
+  MP.agent = { commands: commands, parse: parse, run: run, play: play, player: player, usage: usage,
+               snapshot: snapshot, restore: restore, replay: replay };
 })(window.MolPad = window.MolPad || {});
 </script>
 <!-- molpad:js/link.js -->
@@ -3534,18 +3697,110 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     return box;
   }
 
+  /* The body of the unit block that is open now: lines are printed there. null = the log itself. */
+  var into = null;
+
   function say(text, kind, evidence) {
     var p = node("div", "mp-chat-msg " + kind);
     if (kind === "reason") p.appendChild(node("b", null, "Reasoning"));
+    if (kind === "answer") p.appendChild(node("b", null, "Answer"));
     p.appendChild(node("span", null, text));
     if (evidence && evidence.length) p.appendChild(evidenceBox(evidence));
-    el.chat_log.appendChild(p);
+    (into || el.chat_log).appendChild(p);
     el.chat_log.scrollTop = el.chat_log.scrollHeight;
+    return p;
   }
 
-  function busy(on) {
+  /* One unit of the answer: a (sub-)question, why it is asked, what was assumed, and the
+     actions in the order they will be played. The actions and messages of the unit are then
+     printed inside the block. openUnit(null) closes the block: later lines go to the log.
+     Returns the heading elements it made (none when there is nothing to head). */
+  function openUnit(step) {
+    into = null;
+    if (!step) return [];
+    var several = step.of > 1;
+    var assumed = step.assumed || [];
+    if (!several && !step.reason && !assumed.length && !step.overview) return [];   // nothing to head
+    var box = node("section", "mp-chat-unit");
+    var made = [];
+    if (several) {
+      var head = node("div", "mp-unit-head");
+      head.appendChild(node("b", null, "Step " + (step.unit + 1) + " of " + step.of));
+      head.appendChild(node("span", "mp-unit-q", step.question));
+      box.appendChild(head);
+      made.push(head);
+    }
+    function line(cls, label, text) {
+      var d = node("div", "mp-unit-line " + cls);
+      d.appendChild(node("b", null, label));
+      d.appendChild(node("span", null, text));
+      box.appendChild(d);
+      made.push(d);
+    }
+    if (step.reason) line("why", "Why", step.reason);
+    assumed.forEach(function (a) { line("assumed", "Assumed", a); });
+    if (step.overview) line("overview", "Actions", step.overview);
+    into = node("div", "mp-unit-body");
+    box.appendChild(into);
+    el.chat_log.appendChild(box);
+    el.chat_log.scrollTop = el.chat_log.scrollHeight;
+    return made;
+  }
+
+  /* While a round is played or replayed nothing else may start: the input and every Replay
+     button are disabled, except `keep` (the button of the replay that runs, which stops it). */
+  function busy(on, keep) {
     el.chat_input.disabled = on;
+    Array.prototype.forEach.call(el.chat_log.querySelectorAll(".mp-chat-replay"), function (b) {
+      b.disabled = on && b !== keep;
+    });
     if (!on) el.chat_input.focus();
+  }
+
+  /* A round of agent actions that can be played again: the dashboard as it was before the
+     round, and one entry per played step with the chat lines it printed. */
+  function newRound() {
+    return { start: MP.agent.snapshot(), entries: [] };
+  }
+
+  /* Put a Replay button on the closing line of a round. A click puts the dashboard back to
+     the start of the round and runs its actions again; the lines already in the chat are
+     marked one after another, and nothing new is printed. While it runs the button stops it. */
+  function addReplay(line, round) {
+    if (!round.entries.some(function (e) { return e.kind === "dashboard"; })) return;
+    var button = node("button", "mp-chat-replay", "Replay");
+    button.type = "button";
+    button.title = "Reset the dashboard to the start of this answer and play its actions again";
+    var note = node("span", "mp-chat-replay-note");
+    var running = null;
+    button.addEventListener("click", function () {
+      if (running) { running.stop(); button.disabled = true; return; }
+      busy(true, button);
+      into = null;
+      note.textContent = "";
+      button.textContent = "Stop";
+      MP.agent.restore(round.start);
+      running = MP.agent.replay(round.entries, {
+        on: function (nodes) {
+          nodes.forEach(function (n) { n.classList.add("mp-replaying"); });
+          if (nodes[0]) nodes[0].scrollIntoView({ block: "nearest" });
+        },
+        off: function (nodes) {
+          nodes.forEach(function (n) { n.classList.remove("mp-replaying"); });
+        },
+        error: function (err) {
+          note.textContent = "A step failed: " + (err && err.message ? err.message : String(err));
+        }
+      });
+      running.finished.then(function () {
+        running = null;
+        button.textContent = "Replay";
+        busy(false);
+        line.scrollIntoView({ block: "nearest" });
+      });
+    });
+    line.appendChild(button);
+    line.appendChild(note);
   }
 
   function setStatus(text, kind) {
@@ -3614,10 +3869,12 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
   /* Ask the agent and play its answer while it is still being written: the status line
      follows what the agent is doing, the dashboard actions start as soon as they are known,
      and each message is printed when both its turn and its text have come. */
-  function askAgent(question) {
+  function askAgent(question, round) {
     var status = thinking();
     var writing = null;
     var player = MP.agent.player(say, {
+      unit: openUnit,
+      record: function (entry) { round.entries.push(entry); },
       writing: function (on) {
         if (writing) { writing.stop(); writing = null; }
         if (on) writing = thinking("Writing");
@@ -3647,11 +3904,17 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
     if (!text) return;
     el.chat_input.value = "";
     var list = text.charAt(0) === "{" || text.charAt(0) === "[";
+    into = null;
     say(list ? "(step list)" : text, "user");
     busy(true);
-    var job;
+    var job, round = null;
     if (list) {
-      job = new Promise(function (resolve) { resolve(MP.agent.play(text, say)); });
+      round = newRound();
+      job = new Promise(function (resolve) {
+        resolve(MP.agent.play(text, say, {
+          unit: openUnit, record: function (entry) { round.entries.push(entry); }
+        }));
+      });
     } else if (isCommand(text) || !MP.link.connected()) {
       // Without the agent, an unknown text gets the command help, as before.
       job = MP.agent.run(text).catch(function (err) {
@@ -3661,10 +3924,13 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
         throw err;
       });
     } else {
-      job = askAgent(text);
+      round = newRound();
+      job = askAgent(text, round);
     }
     job.then(function (report) {
-      say(report, "bot");
+      into = null;
+      var line = say(report, "bot");
+      if (round) addReplay(line, round);
     }, function (err) {
       say(err && err.message ? err.message : String(err), "error");
     }).then(function () { busy(false); });

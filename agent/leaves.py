@@ -5,11 +5,15 @@ Pure Python, no LLM. A step is one of
     {"kind": "data",      "id", "action", "op", "args", "findings", "result"}
     {"kind": "dashboard", "action", "command", "supported"}
     {"kind": "message",   "text", "about", "evidence"}
+    {"kind": "unit",      "unit", "of", "question", "reason", "assumed", "overview"}
     {"kind": "reasoning", "text", "unit"}
 
-A reasoning step is printed in the chat before the actions of a step of the argument:
-it says which sub-question comes next and why. Its text is fixed here, not written
-by the message writer, so it cannot get lost.
+The answer is a list of units, one per (sub-)question. A unit step opens each one: it
+carries the sub-question, why it is asked, what had to be assumed, and an overview that
+names the dashboard actions of the unit in the order they are played. Every dashboard
+and message step that follows carries the same `unit` number, so the chat can show the
+logic first and the actions under it. The texts of a unit step are fixed here, not
+written by the message writer, so they cannot get lost.
 
 Data steps come first because they decide what is shown. Dashboard steps and
 messages then follow in playback order. Message texts are left empty here and
@@ -43,6 +47,38 @@ def reasoning_step(text, unit=None):
     return {"kind": "reasoning", "text": text, "unit": unit}
 
 
+def unit_step(unit, of, question, reason="", assumed=()):
+    return {"kind": "unit", "unit": unit, "of": of, "question": question, "reason": reason or "",
+            "assumed": list(assumed), "overview": ""}
+
+
+def _overview(steps):
+    """One sentence that names the dashboard actions of a unit in the order they are played."""
+    parts = []
+    for s in steps:
+        if s["kind"] != "dashboard":
+            continue
+        fn, _, param = s["command"].partition(":")
+        if fn in ("set filter1", "set filter2"):
+            parts.append(f"clear filter {fn[-1]}" if param == "all" else f"set filter {fn[-1]} to {param}")
+        elif fn == "set importance":
+            parts.append(f"move the importance score to {param}")
+        elif fn == "search table":
+            parts.append(f"search the table for {param}")
+        elif fn == "sort table":
+            parts.append(f"sort the table by {param}")
+        elif fn in ("brush node", "select node"):
+            parts.append(f"{fn.split()[0]} {', '.join(param.split(','))}"
+                         + (f" ({s['why']})" if s.get("why") else ""))
+        else:
+            parts.append(s["command"])
+    if not parts:
+        return ""
+    if len(parts) == 1:
+        return parts[0][0].upper() + parts[0][1:] + "."
+    return "First " + parts[0] + "".join(f", then {p}" for p in parts[1:]) + "."
+
+
 def attach_evidence(steps):
     """Give each message the ids of the data steps it rests on.
 
@@ -73,33 +109,43 @@ class _Playback:
         self.table_set = None
         self.focus = None     # the clusters in focus now
         self.seen = set()     # clusters an earlier message has already covered
+        self.unit = None      # the unit the next steps belong to
+
+    def _add(self, step):
+        step["unit"] = self.unit
+        self.steps.append(step)
+        return step
 
     def filters(self, run):
-        """Set the shared filters to what the run shows; a contrast shows all its values at once."""
+        """Set the shared filters to what the run shows; a contrast shows all its values at once.
+
+        A filter 1 that an earlier unit set is cleared when this run reads every level-1 value,
+        so the dashboard shows the data the run was computed on.
+        """
         level1 = run.get("shown_level1", [run["level1"]] if run.get("level1") else [])
-        if level1 and level1 != self.level1:
+        if level1 != (self.level1 or []):
             self.level1 = list(level1)
-            self.steps.append(dash_step("click level1 drop-down-" + " and ".join(level1),
-                                        "set filter1", ", ".join(level1)))
+            self._add(dash_step("click level1 drop-down-" + (" and ".join(level1) or "all"),
+                                "set filter1", ", ".join(level1) or "all"))
         level2 = run.get("shown_level2", run.get("level2") or [])
         if level2 != self.level2:
             self.level2 = list(level2)
-            self.steps.append(dash_step("click level2 drop-down-" + (" and ".join(level2) or "all"),
-                                        "set filter2", ", ".join(level2) or "all"))
+            self._add(dash_step("click level2 drop-down-" + (" and ".join(level2) or "all"),
+                                "set filter2", ", ".join(level2) or "all"))
 
     def slider(self, run):
         if run.get("threshold_moved") and run["threshold"] != self.threshold:
             self.threshold = run["threshold"]
             self.focus = None   # the network is redrawn, so the next group is brushed again
-            self.steps.append(dash_step("drag importance score", "set importance", self.threshold))
+            self._add(dash_step("drag importance score", "set importance", self.threshold))
 
     def table(self, run):
         t = run.get("table")
         if t and (t["fn"], t["param"]) != self.table_set:   # the table keeps its search between steps
             self.table_set = (t["fn"], t["param"])
-            self.steps.append(dash_step(t["action"], t["fn"], t["param"]))
+            self._add(dash_step(t["action"], t["fn"], t["param"]))
 
-    def show(self, clusters, joined=False, brush=False):
+    def show(self, clusters, joined=False, brush=False, why=None):
         """Put the clusters in focus: one rectangle when they sit together, else clicks.
 
         "brush node" draws one rectangle when one exists that holds only these
@@ -107,7 +153,8 @@ class _Playback:
         is clear all, then a click on each node in turn.
 
         Clusters that are in focus already are not brushed a second time. Returns True
-        when an earlier message has covered every one of them.
+        when an earlier message has covered every one of them. `why` is the short reason
+        the unit's overview gives for this action.
         """
         seen_before = set(clusters) <= self.seen
         self.seen |= set(clusters)
@@ -116,18 +163,16 @@ class _Playback:
         self.focus = list(clusters)
         if len(clusters) == 1 or joined or brush:
             action = "brush selected cluster" + ("s" if len(clusters) > 1 else "")
-            self.steps.append(dash_step(action, "brush node", ",".join(clusters)))
+            step = dash_step(action, "brush node", ",".join(clusters))
         else:
-            self.steps.append(dash_step("click clear all; click selected clusters", "select node",
-                                        ",".join(clusters)))
+            step = dash_step("click clear all; click selected clusters", "select node", ",".join(clusters))
+        if why:
+            step["why"] = why
+        self._add(step)
         return seen_before
 
-    def reason(self, text, unit=None):
-        if text:
-            self.steps.append(reasoning_step(text, unit))
-
     def say(self, **about):
-        self.steps.append(message_step(about))
+        self._add(message_step(about))
 
 
 WHY_FIRST = ("first sentence: why these clusters are in focus, from `why` and the class mix in the "
@@ -142,6 +187,16 @@ def _why(run, group):
                  and st["findings"] and st["findings"][0].startswith(("metric:", "rule:"))), None)
     label = group.get("label")
     return "; ".join(x for x in (f"picked as {label}" if label else "picked by the selector", rule) if x)
+
+
+def _brief(run, group, limit=90):
+    """A few words on why a group is shown, for the overview of its unit."""
+    text = group.get("label")
+    if not text:
+        rule = next((st["findings"][0] for st in run.get("steps", []) if st["op"].startswith("select_")
+                     and st["findings"] and st["findings"][0].startswith(("metric:", "rule:"))), "")
+        text = rule.split(":", 1)[1].strip() if rule else ""
+    return text if len(text) <= limit else text[:limit - 3].rsplit(" ", 1)[0] + "..."
 
 
 SEEN_BEFORE = ("an earlier message already introduced these clusters: do not repeat why they were "
@@ -241,8 +296,23 @@ def leaf_L2(note):
     return [message_step({"leaf": "L2", "write": "ask for a specific cluster, or an overview", "missing": note})]
 
 
-def assemble(leaf, units, display):
-    """Steps for L3-L8. `units` is one entry per (sub-)question, each with its runs."""
+CONCLUDE = {
+    "evidence_chain": "conclusion: answer the original question, argued yes/no over the steps above: "
+                      "say which step supports it and which weakens it, and do not claim more than "
+                      "the findings show; say that the dashboard gives evidence and does not prove cause",
+    "multi_step": "conclusion: answer the original question in one to three sentences from the steps "
+                  "above, naming the clusters and the measure each step found; state what a step "
+                  "assumed (`assumed`), and do not claim more than the findings show",
+}
+
+
+def assemble(leaf, units, display, shape="evidence_chain"):
+    """Steps for L3-L8. `units` is one entry per (sub-)question, each with its runs.
+
+    `shape` is the reasoning shape of the question: it decides how the conclusion over
+    several units is written (an argument for a hypothesis, a plain answer for a question
+    that only needed several steps).
+    """
     steps = [{**s, "id": None, "unit": ui, "run": ri}
              for ui, u in enumerate(units) for ri, r in enumerate(u["runs"]) for s in r["steps"]]
     for i, s in enumerate(steps, 1):
@@ -252,13 +322,16 @@ def assemble(leaf, units, display):
     # display judgement "one_by_one" splits a group only for a single question.
     one_by_one = len(units) == 1 and display["grouping"] == "one_by_one"
     shown = 0   # groups put in focus one after another
-    if len(units) == 1 and leaf in ("L5", "L6", "L7", "L8"):
-        play.reason(display.get("reason"))
 
     for ui, unit in enumerate(units):
+        play.unit = ui
         if len(units) > 1:
             why = (unit.get("reason") or "").strip()
-            play.reason(f"Step {ui + 1} of {len(units)}: {unit['question']}" + (f" {why}" if why else ""), ui)
+        else:
+            why = (display.get("reason") or "") if leaf in ("L5", "L6", "L7", "L8") else ""
+        head = play._add(unit_step(ui, len(units), unit["question"], why,
+                                   [a["text"] for a in unit.get("assumed") or []]))
+        start = len(play.steps)
         wheres = []   # L7: the message fields of each run, filled before its groups are shown
         for ri, run in enumerate(unit["runs"]):
             d = unit.get("descriptor") or {}
@@ -280,7 +353,7 @@ def assemble(leaf, units, display):
                 group = {"clusters": run["targets"], "joined": run.get("joined", False),
                          "label": one.get("label"), "why": one.get("why")}
                 play.filters(run)
-                play.show(group["clusters"], group["joined"])
+                play.show(group["clusters"], group["joined"], why=_brief(run, group))
                 play.table(run)
                 play.say(**where, **_focus(run, group))
             elif leaf == "L7":
@@ -295,7 +368,7 @@ def assemble(leaf, units, display):
                 for rj, g in pairs:
                     other = unit["runs"][rj]
                     play.filters(other)
-                    seen = play.show(g["clusters"], g.get("joined", False))
+                    seen = play.show(g["clusters"], g.get("joined", False), why=_brief(other, g))
                     play.table(other)
                     play.say(**wheres[rj], **_focus(other, g, seen))
                 shown += len(pairs)
@@ -304,17 +377,19 @@ def assemble(leaf, units, display):
                 play.slider(run)
                 groups = _groups(run, one_by_one)
                 for g in groups:
-                    seen = play.show(g["clusters"], brush=True)
+                    seen = play.show(g["clusters"], brush=True, why=_brief(run, g))
                     play.say(**where, **_focus(run, g, seen))
                 shown += len(groups)
             else:
                 raise ValueError(f"unknown leaf {leaf}")
+        head["overview"] = _overview(play.steps[start:])
 
     if len(units) > 1:
+        play.unit = None    # the conclusion stands after the units, not inside the last one
+        assumed = [a["text"] for u in units for a in u.get("assumed") or []]
         play.say(leaf=leaf, role="conclusion", steps=[u["question"] for u in units],
-                 write="conclusion: answer the original question, argued yes/no over the steps above: "
-                       "say which step supports it and which weakens it, and do not claim more than "
-                       "the findings show; say that the dashboard gives evidence and does not prove cause")
+                 write=CONCLUDE.get(shape, CONCLUDE["evidence_chain"]),
+                 **({"assumed": assumed} if assumed else {}))
     elif shown > 1:
         play.say(leaf=leaf, question=units[0]["question"],
                  write="compare the groups shown above and answer the question in one or two sentences. "

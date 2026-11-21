@@ -76,7 +76,8 @@ def actual(trace):
             n3.add("external")
         if f.get("contrast", "none") != "none":
             n3.add("contrast")
-    if many and len({tuple(f.get("level1") or []) for f in f3}) > 1:
+    # a step that reads every level-1 value (it starts from clusters an earlier step found) is no contrast
+    if many and len({tuple(f["level1"]) for f in f3 if f.get("level1")}) > 1:
         n3.add("contrast")
     act["N3"] = sorted(n3)
     act["N4"] = sorted({s["kind"] for steps in f4 for s in steps

@@ -8,9 +8,16 @@ def test_every_card_exists():
         assert card(name)
 
 
-def test_q04_feature_number_then_network():
-    assert pick_skills([{"target": ["feature_number", "network"], "measure": ["pattern"]}]) == \
-        ["feature_number", "network"]
+def test_q04_similar_shape_reads_curves_not_the_network():
+    # step 1 finds the cluster, step 2 starts from it and compares curves
+    frames = [{"target": ["feature_number"], "measure": ["pattern"]},
+              {"target": ["given", "pattern"], "measure": ["pattern"], "compare": "curves", "uses": 1}]
+    assert pick_skills(frames) == ["pattern", "compare", "feature_number", "given"]
+
+
+def test_breakdown_card_has_the_templates():
+    text = card("breakdown")
+    assert all(t in text for t in ("find, then relate", "find, then check", "hypothesis"))
 
 
 def test_q05_curves_load_pattern_and_compare():

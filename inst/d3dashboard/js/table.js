@@ -371,5 +371,28 @@
     });
   }
 
-  MP.table = { init: init, render: render };
+  /* The table's own settings (search, sort, column filters, page size), so a replay of the
+     agent's actions can start from the table as it was. */
+  function getState() {
+    var filters = {};
+    Object.keys(local.filters).forEach(function (c) { filters[c] = Array.from(local.filters[c]); });
+    return { search: el.table_search.value, terms: local.terms.slice(), sortKey: local.sortKey,
+             sortDir: local.sortDir, pageSize: local.pageSize, filters: filters };
+  }
+
+  function setState(s) {
+    el.table_search.value = s.search || "";
+    local.terms = (s.terms || []).slice();
+    local.sortKey = s.sortKey || null;
+    local.sortDir = s.sortDir || 1;
+    local.pageSize = s.pageSize || local.pageSize;
+    el.table_pagesize.value = String(local.pageSize);
+    local.filters = {};
+    Object.keys(s.filters || {}).forEach(function (c) { local.filters[c] = new Set(s.filters[c]); });
+    local.page = 1;
+    closeMenu();
+    render();
+  }
+
+  MP.table = { init: init, render: render, getState: getState, setState: setState };
 })(window.MolPad = window.MolPad || {});

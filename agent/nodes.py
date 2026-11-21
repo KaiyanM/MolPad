@@ -11,6 +11,7 @@ from typing import TypedDict
 from . import keywords as kw
 from . import leaves, prompts
 from .data_tools import Session, load_dataset
+from .ribbon import MissingInput
 from .schemas import (Completeness, Descriptor, Display, Filters, Keywords, Kind, Messages,
                       Selector, Shape, SubClaims)
 
@@ -272,6 +273,7 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
     l3col = f.get("level3_column")
     l3vals = f.get("level3_values") or []
     runs = []
+    assumed = []   # inputs a data action needed and the question did not give: the default used
     contrast_l1 = f.get("contrast") == "level1" and len(f["level1"]) > 1
     contrast_l2 = f.get("contrast") == "level2" and len(f["level2"]) > 1
 
@@ -281,7 +283,14 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
 
         def do(action, op, **args):
             args = {k: v for k, v in args.items() if v not in (None, [], False)}
-            result = s.run(op, **args)
+            try:
+                result = s.run(op, **args)
+            except MissingInput as m:      # assume the default and say so in the answer
+                args[m.field] = m.default
+                note = {"field": m.field, "used": m.default, "options": m.options, "text": m.say}
+                if note not in assumed:
+                    assumed.append(note)
+                result = s.run(op, **args)
             steps.append(leaves.data_step(action, op, args, result))
             return result
 
@@ -301,11 +310,21 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
         # a pattern / network step without a criterion is a descriptor the LLM put in the wrong slot
         chosen = [st for st in selector.get("steps") or []
                   if st.get("criterion") or st["kind"] not in ("pattern", "ribbon", "network")]
+        # a comparison that does not say which relation it looks for is not a rule: guessing one
+        # (it used to be "opposite") picks clusters nobody asked for
+        chosen = [st for st in chosen if st.get("criterion") != "compare" or st.get("tool")]
         for st in chosen or [{"kind": "all"}]:
             kind = st["kind"]
-            if kind == "pattern" and st.get("criterion") == "compare":
+            a = _slice(st.get("a"), ds) or {}
+            if (kind == "pattern" and st.get("criterion") == "compare" and st.get("tool") == "similar"
+                    and st.get("between") == "clusters" and 0 < len(s.targets) < len(ds.clusters)):
+                # "similar to the cluster picked before": read on the ribbons (agent/ribbon.py)
+                do("compare ribbons and select similar cluster", "select_by_similarity",
+                   subjects=[a["subject"]] if a.get("subject") in ds.subjects else None,
+                   match=st.get("match"), top_n=st.get("top_n"))
+            elif kind == "pattern" and st.get("criterion") == "compare":
                 do("compare patterns and select cluster", "select_by_comparison",
-                   tool=st.get("tool") or "opposite", between=st.get("between") or "subjects",
+                   tool=st["tool"], between=st.get("between") or "subjects",
                    a=_slice(st.get("a"), ds), b=_slice(st.get("b"), ds), top_n=st.get("top_n"))
             elif kind == "pattern":
                 tp = st.get("timepoint") if st.get("timepoint") in ds.timepoints else None
@@ -400,7 +419,7 @@ def run_unit(question, filters, selector, descriptor, dash_state, ds=None):
             "compare clusters between " + " and ".join(variants), "compare_variants",
             {"by": f["contrast"]}, result))
     return {"question": question, "filters": f, "selector": selector, "descriptor": descriptor,
-            "dropped": dropped, "runs": runs}
+            "dropped": dropped, "runs": runs, "assumed": assumed}
 
 
 def run_data(state: AgentState):
@@ -496,6 +515,14 @@ def _findings_text(data_steps):
                      for s in data_steps) or "(no data actions)"
 
 
+def _sent(step):
+    """A message step as the client gets it: its unit and role stay, the writer's scaffolding goes."""
+    out = {"kind": "message", "unit": step.get("unit"), "evidence": step.get("evidence", [])}
+    if (step.get("about") or {}).get("role"):
+        out["role"] = step["about"]["role"]
+    return out
+
+
 def _slot_groups(slots, n_units):
     """The slots each writer call covers: one call per sub-question, and the conclusion apart.
 
@@ -529,7 +556,7 @@ def compose_messages(state: AgentState):
     numbered, i = [], 0
     for s in steps:   # what the client plays: a message is a numbered slot without its text yet
         if s["kind"] == "message":
-            numbered.append({"kind": "message", "slot": i, "text": None, "evidence": s.get("evidence", [])})
+            numbered.append({**_sent(s), "slot": i, "text": None})
             i += 1
         else:
             numbered.append(s)
@@ -556,8 +583,11 @@ def compose_messages(state: AgentState):
     def write_group(unit, wanted):
         """The texts of one sub-question (or of the whole single question), sent as they are ready."""
         own = [d for d in data_steps if unit is None or d.get("unit") == unit]
+        # what a data action of this step had to assume is said in the step itself
+        took = [a["text"] for k, u in enumerate(state.get("units") or []) if unit in (None, k)
+                for a in u.get("assumed") or []]
         head = (f"QUESTION: {state['question']}\n\n"
-                f"ASSUMPTIONS: {json.dumps(notes if 0 in wanted else [])}\n\n"
+                f"ASSUMPTIONS: {json.dumps((notes if 0 in wanted else []) + took)}\n\n"
                 f"FINDINGS OF THE DATA ACTIONS:\n{_findings_text(own)}\n\nMESSAGE SLOTS:\n")
         got = write(head + slot_lines(wanted), wanted)
         missing = [i for i in wanted if i not in got]
@@ -609,7 +639,7 @@ def compose_messages(state: AgentState):
     out, i = [], 0
     for s in steps:
         if s["kind"] == "message":
-            s = {"kind": "message", "text": texts[i], "evidence": s.get("evidence", [])}
+            s = {**_sent(s), "text": texts[i]}
             i += 1
         out.append(s)
     _debug("messages", f"{len(slots)} slot(s), {len(texts)} text(s) written")
@@ -618,4 +648,8 @@ def compose_messages(state: AgentState):
             _debug("playback", f"{k:2d}. {s['command']}")
         elif s["kind"] in ("message", "reasoning"):
             _debug("playback", f"{k:2d}. {s['kind']}: {s['text'][:110]}")
+        elif s["kind"] == "unit":
+            _debug("playback", f"{k:2d}. unit {s['unit'] + 1} of {s['of']}: {s['question']}")
+            for line in s["assumed"] + [s["overview"]]:
+                _debug("playback", f"      {line[:140]}")
     return {"steps": out}

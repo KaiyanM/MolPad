@@ -185,7 +185,7 @@ kind
   clusters that hold most of its features".
 - network: edge, connected, isolated, importance score, strongest, neighbours. criterion:
     most_edges | strongest_edge | isolated | connected_pairs (pairs still joined by an edge)
-    neighbours (the clusters picked so far plus the clusters linked to them; also "similar shape to")
+    neighbours (the clusters picked so far plus the clusters linked to them)
     connectivity (for the clusters picked so far: connected or isolated?)
   threshold: 'max' / 'min' when the question moves the importance score, else leave empty.
 - feature_lookup: where does this id / gene fall (the filter slots already hold the ids).
@@ -228,7 +228,7 @@ Examples
 "Which clusters follow the same curve as cluster 3?" -> given clusters=[3], then pattern compare tool=similar between=clusters
 "In which clusters do the two cheeses drift apart over ripening?" -> pattern compare tool=diverging between=subjects a={subject: A} b={subject: C}
 "Given Pseudomonadota, which cluster has the most features and what is its pattern?" -> feature_number top_n=1
-"Which clusters have a similar shape to the cluster most enriched for Actinomycetota?" -> feature_number top_n=1, then network neighbours
+"Which clusters have a similar shape to the cluster most enriched for Actinomycetota?" -> feature_number top_n=1, then pattern compare tool=similar between=clusters
 "Which cluster contains contig 10747, and what are its neighbours?" -> feature_lookup, then network neighbours
 "For Actinomycetota, are its most enriched clusters connected to the rest of the network or isolated?" -> feature_number, then network connectivity
 "Which cluster pairs remain connected when the importance score is raised to its maximum?" -> network connected_pairs threshold=max
@@ -371,6 +371,11 @@ R: status (data only)
 H: shape (data only)
 - evidence_chain: a claim that needs an argument: "is X associated with Y", "following an independent
   succession", any "why" or causal wording.
+- multi_step: asks which OTHER clusters relate to a cluster that a rule has to find first ("similar
+  shape to the cluster most enriched for X", "the neighbours of the largest cluster"), or asks a
+  second thing about clusters the first half picks ("which clusters ..., and are those connected?").
+  Picking clusters by one rule and reading something from them ("the pattern of the largest
+  cluster", "are its most enriched clusters connected or isolated") is direct, not multi_step.
 - direct: a lookup (which / how many / what / rank / does X change / do two things peak at different
   weeks). The normal case: a yes-or-no question that one table of numbers settles is direct.
 
@@ -391,9 +396,9 @@ mentions: the specific terms that may name something in the data, each with its 
   of X features" does limit the data to X: condition.
 
 target (A, then E): the rule(s) that pick clusters, in order. pattern (increase, decrease, peak,
-opposite shape, colour lines disagree) | ribbon (tight / wide ribbon, features follow the same
+opposite shape, similar shape to another cluster, colour lines disagree) | ribbon (tight / wide ribbon, features follow the same
 trajectory) | feature_number (most features, most enriched, largest, dominant) | network (edges,
-connected, isolated, strongest edge, neighbours, similar shape to) | feature_lookup (where does this
+connected, isolated, strongest edge, neighbours) | feature_lookup (where does this
 id / gene fall) | example (two or more classes compared without naming clusters) | given (cluster ids
 written by the user, or the selected clusters) | all (each cluster, rank, a count over the network).
 measure (B): what is read from the picked clusters: pattern | level2 (class mix) | level3 (ids,
@@ -412,7 +417,7 @@ Examples (K/R/H; mentions as text:role; target; measure; compare)
 "Which clusters increase steadily in cheese A, and which decrease?" -> data/ok/direct; A:condition; pattern
 "Are there clusters whose cheese A and cheese C halves have opposite shapes?" -> data/ok/direct; A:compare, C:compare; pattern; -; curves
 "At which week does each cluster reach its maximum in cheese A, and is it the same week in cheese C?" -> data/ok/direct; A:compare, C:compare; all; pattern
-"Which clusters have a similar shape to the cluster most enriched for Actinomycetota?" -> data/ok/direct; Actinomycetota:condition; feature_number, network; pattern
+"Which clusters have a similar shape to the cluster most enriched for Actinomycetota?" -> data/ok/multi_step; Actinomycetota:condition; feature_number, pattern; pattern; curves
 "Given Pseudomonadota and Gammaproteobacteria, which contigs carry KEGG ID K11901?" -> data/ok/direct; Pseudomonadota:condition, Gammaproteobacteria:condition, K11901:condition; feature_lookup
 "Given Actinomycetota and Actinomycetes, how many contigs have a GO annotation at all?" -> data/ok/direct; Actinomycetota:condition, Actinomycetes:condition, GO annotation:condition; feature_number; level3
 "Which individual contigs in the most Actinomycetota-enriched cluster have KEGG annotations?" -> data/ok/direct; Actinomycetota:condition, KEGG annotations:measure; feature_number; level3
@@ -428,35 +433,38 @@ Examples (K/R/H; mentions as text:role; target; measure; compare)
 "Does switching to the circle layout make it easier to see which clusters form a connected component?" -> design, control=layout, value=circle
 "Using the grid layout, brush the top row of nodes: what do those clusters have in common?" -> out_of_scope"""
 
-BREAKDOWN = """A hypothesis about the data cannot be answered in one lookup. Split it into 2 to 4 direct
-sub-questions that, together, argue for or against it. Each sub-question must be answerable from the
-dashboard data by itself: it names its own conditions (level 1 / level 2 / level 3 values, sample
-group), says how clusters are picked (by pattern, ribbon, feature number, network edges, looking up
-ids) and what is read from them. Do not refer to "the clusters above"; repeat the condition. Order
-them as steps of the argument, and prefer the angles the data can actually test.
+BREAKDOWN = """The question cannot be answered in one lookup. Split it into 2 to 4 direct sub-questions,
+in the order they have to be answered. KIND says what the split is for:
+- multi_step: the question needs the answer of one lookup before it can ask the next ("similar to the
+  cluster that ..."). The sub-questions are the steps that find the answer.
+- evidence_chain: a hypothesis. The sub-questions, together, argue for or against it; prefer the
+  angles the data can actually test.
 
-Every sub-question must add a new angle. Do not ask twice for the same clusters picked the same
+Each sub-question must be answerable from the dashboard data: it says how clusters are picked (by
+pattern, ribbon, feature number, network edges, looking up ids) and what is read from them.
+- A sub-question that picks its own clusters names its own conditions (level 1 / level 2 / level 3
+  values, sample group). Do not refer to "the clusters above"; repeat the condition.
+- A sub-question that continues with the clusters an earlier one found sets `uses` to the number of
+  that sub-question (1 for the first) and calls them "that cluster" or "those clusters". Its target
+  starts with `given`.
+
+Every sub-question must add something new. Do not ask twice for the same clusters picked the same
 way, and do not repeat an earlier sub-question with one more condition. Give each sub-question a
-`reason`: one sentence for the user that says why this step comes here in the argument and what
-result would support or weaken the hypothesis. The reason is shown in the chat before the step.
+`reason`: one sentence for the user that says why this step comes here and, for a hypothesis, what
+result would support or weaken it. The reason is shown in the chat before the step.
 
 For each sub-question fill its roles the way they are described below: mentions (text copied from
 the sub-question, role condition / compare / measure / target), target, measure, compare,
-outside_concept and outside_ids. Use only data values listed below in mentions.
+outside_concept and outside_ids. Use only data values listed below in mentions, written as the data
+names them: a sample group by its name ("cheese A" -> "A"), not by the words of the question. A
+sample group the curves are read in is a condition when there is one ("in cheese A") and a compare
+when there are several ("in either cheese" -> A:compare, C:compare).
 
 Roles
 - target: pattern | ribbon | feature_number | network | feature_lookup | example | given | all
+  ("similar shape to" is pattern with compare = curves; network is for edges and neighbours)
 - measure: pattern | level2 | level3 | weight | feature_number
-- compare: none | level1 | level2 | with_and_without_level2 | curves
-
-Example
-Hypothesis: "Are the Actinomycetota features that peak late in cheese A following an independent succession?"
-- "For Actinomycetota, which clusters peak late in cheese A?" -> Actinomycetota:condition, A:condition; pattern
-  reason: First locate the late-peaking Actinomycetota features; without such clusters there is no succession to test.
-- "For Actinomycetota, which clusters hold most of its features?" -> Actinomycetota:condition; feature_number
-  reason: If most Actinomycetota features sit in the late-peaking clusters, the late peak describes the phylum and not a small subset.
-- "For Bacillota, which clusters hold most of its features and what is their pattern in cheese A?" -> Bacillota:condition, A:condition; feature_number; pattern
-  reason: A contrast phylum: if its main clusters are different or stay flat in cheese A, the Actinomycetota trajectory is its own."""
+- compare: none | level1 | level2 | with_and_without_level2 | curves"""
 
 
 def parse_context(ds):

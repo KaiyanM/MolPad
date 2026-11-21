@@ -24,7 +24,7 @@ def play(units, needs_focus=True, network_area=False, grouping="together"):
 
 def commands(steps):
     return [s["command"] if s["kind"] == "dashboard" else "MESSAGE" for s in steps
-            if s["kind"] not in ("data", "reasoning")]
+            if s["kind"] not in ("data", "reasoning", "unit")]
 
 
 def check_order(steps):
@@ -274,16 +274,59 @@ def test_chain_does_not_brush_the_same_clusters_twice():
     assert "seen_before" not in abouts[0] and abouts[1]["seen_before"] is True
 
 
-def test_chain_prints_the_reasoning_before_each_step():
+def test_chain_opens_a_unit_before_each_step():
     a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
     b = unit("claim b", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
     _, steps = chain(a, b)
     played = [s for s in steps if s["kind"] != "data"]
-    reasons = [s for s in played if s["kind"] == "reasoning"]
-    assert [r["text"] for r in reasons] == ["Step 1 of 2: claim a reason 1", "Step 2 of 2: claim b reason 2"]
-    assert played[0] is reasons[0]                            # before the first filter
-    assert played[played.index(reasons[1]) + 1]["command"] == "set filter1:Bacillota"
+    heads = [s for s in played if s["kind"] == "unit"]
+    assert [(h["unit"], h["of"], h["question"], h["reason"]) for h in heads] == [
+        (0, 2, "claim a", "reason 1"), (1, 2, "claim b", "reason 2")]
+    assert played[0] is heads[0]                              # before the first filter
+    assert played[played.index(heads[1]) + 1]["command"] == "set filter1:Bacillota"
+    # every action and message of a step carries its unit; the conclusion stands outside
+    assert [s["unit"] for s in played] == [0] * played.index(heads[1]) + [1] * (len(played) - played.index(heads[1]) - 1) + [None]
     assert steps[-1]["about"]["role"] == "conclusion"
+    assert not [s for s in played if s["kind"] == "reasoning"]
+
+
+def test_unit_overview_names_the_actions_in_order():
+    a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
+    b = unit("claim b", steps=[{"kind": "given", "clusters": ["Group_5"]},
+                               {"kind": "pattern", "criterion": "compare", "tool": "similar",
+                                "between": "clusters", "a": {"subject": "A"}}])
+    _, steps = chain(a, b)
+    heads = [s for s in steps if s["kind"] == "unit"]
+    assert heads[0]["overview"] == ("First set filter 1 to Actinomycetota, then brush Group_5 "
+                                    "(top 1 by feature count).")
+    # the second step read every level-1 value, so the filter the first step set is cleared
+    assert heads[1]["overview"] == "First clear filter 1, then brush Group_3 (similar to Group_5 in A)."
+    assert "set filter1:all" in commands(steps)
+
+
+def test_single_question_is_one_unit_with_the_display_reason():
+    u = unit("which is largest?", filters={"level1": ["Pseudomonadota"]},
+             steps=[{"kind": "feature_number", "top_n": 1}])
+    display = {"needs_focus": True, "network_area": False, "grouping": "together", "reason": "the largest one"}
+    steps = leaves.assemble("L5", [u], display)
+    played = [s for s in steps if s["kind"] != "data"]
+    assert played[0]["kind"] == "unit" and (played[0]["of"], played[0]["reason"]) == (1, "the largest one")
+    assert {s["unit"] for s in played} == {0}
+
+
+def test_missing_similarity_scope_is_assumed_and_stated():
+    u = unit("similar to 5?", steps=[{"kind": "given", "clusters": ["Group_5"]},
+                                      {"kind": "pattern", "criterion": "compare", "tool": "similar",
+                                       "between": "clusters"}])
+    assert [(a["field"], a["used"]) for a in u["assumed"]] == [("match", "all")]
+    _, steps = play([u])
+    head = next(s for s in steps if s["kind"] == "unit")
+    assert len(head["assumed"]) == 1 and "every sample group (A and C)" in head["assumed"][0]
+    # a question that names the sample group leaves nothing to assume
+    named = unit("similar to 5 in A?", steps=[{"kind": "given", "clusters": ["Group_5"]},
+                                               {"kind": "pattern", "criterion": "compare", "tool": "similar",
+                                                "between": "clusters", "a": {"subject": "A"}}])
+    assert named["assumed"] == [] and named["runs"][0]["targets"] == ["Group_3"]
 
 
 def test_writer_never_drops_a_slot(monkeypatch):
@@ -338,7 +381,10 @@ def test_writer_sends_the_playback_first_and_every_text_once(monkeypatch):
     # a step is written from its own findings; the conclusion reads all of them
     step_a = next(f for f in seen_findings[:2] if "Actinomycetota" in f)
     assert "Bacillota" not in step_a and "Bacillota" in seen_findings[2] and "Actinomycetota" in seen_findings[2]
-    assert [s["kind"] for s in out if s["kind"] == "reasoning"] == ["reasoning"] * 2
+    assert [s["kind"] for s in out if s["kind"] == "unit"] == ["unit"] * 2
+    # the client can tell which step a message belongs to, and which one is the conclusion
+    assert [(s["unit"], s.get("role")) for s in played if s["kind"] == "message"] == [
+        (0, None), (1, None), (None, "conclusion")]
 
 
 def test_contrast_shows_a_shared_group_once_and_each_side_speaks():

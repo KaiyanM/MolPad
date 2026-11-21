@@ -47,6 +47,12 @@ def main():
             print(f"{i:2d}. dashboard  {s['command']}" + ("" if s["supported"] else "   [not supported yet]"))
         elif s["kind"] == "reasoning":
             print(f"{i:2d}. reasoning  {s['text']}")
+        elif s["kind"] == "unit":
+            print(f"{i:2d}. unit       step {s['unit'] + 1} of {s['of']}: {s['question']}")
+            for label, text in [("why", s["reason"])] + [("assumed", a) for a in s["assumed"]] \
+                    + [("actions", s["overview"])]:
+                if text:
+                    print(f"               {label}: {text}")
         else:
             ev = s.get("evidence") or []
             print(f"{i:2d}. message    {s['text']}" + (f"   [evidence: {', '.join(ev)}]" if ev else ""))

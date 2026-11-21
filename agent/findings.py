@@ -124,6 +124,20 @@ def _select_by_comparison(args, r):
     return lines
 
 
+def _select_by_similarity(args, r):
+    base, names = ", ".join(r["base"]), r["subjects"]
+    lines = [f"metric: {r['metric']}"]
+    if len(names) > 1:
+        lines.append(f"similar to {base} in {'every one of' if r['match'] == 'all' else 'at least one of'} "
+                     f"{', '.join(names)}: {_list(r['clusters'])}")
+    pairs = r["value_per_cluster"]
+    for s in names:
+        hits = r["similar_per_subject"].get(s) or []
+        lines.append(f"similar to {base} in {s}: "
+                     + (", ".join(f"{c} ({pairs[c][s]['note']})" for c in _order(hits)) or "none"))
+    return lines
+
+
 def _select_by_feature_number(args, r):
     if not r.get("total"):
         return ["no features left after the filters"]
@@ -281,7 +295,8 @@ RULES = {
     "filter_cols": _filter_cols, "filter_level1": _filter_level1, "filter_level2": _filter_level2,
     "filter_level3": _filter_level3, "llm_search": _llm_search,
     "select_by_pattern": _select_by_pattern, "select_by_ribbon": _select_by_ribbon,
-    "select_by_comparison": _select_by_comparison, "select_by_feature_number": _select_by_feature_number,
+    "select_by_comparison": _select_by_comparison, "select_by_similarity": _select_by_similarity,
+    "select_by_feature_number": _select_by_feature_number,
     "select_by_network": _select_by_network, "select_by_feature_lookup": _select_by_feature_lookup,
     "select_given": _select_given, "select_all": _select_all, "select_examples": _select_examples,
     "describe_pattern": _describe_pattern, "describe_level2": _describe_level2,

@@ -82,6 +82,10 @@ class SelectorStep(BaseModel):
         None, description="compare: what the two curves are")
     a: Optional[CurveSlice] = Field(None, description="compare: first curve")
     b: Optional[CurveSlice] = Field(None, description="compare: second curve")
+    match: Optional[Literal["all", "any"]] = Field(
+        None, description="compare tool=similar between=clusters, over several sample groups: 'all' when "
+                          "the question says the curves agree in every sample group, 'any' when in at "
+                          "least one; leave empty when the question does not say")
     top_n: Optional[int] = Field(None, description="how many clusters to keep, when the question says")
     threshold: Optional[str] = Field(
         None, description="network: 'current', 'max', 'min' or a number for the importance score")
@@ -162,19 +166,22 @@ class Frame(FrameCore):
     value: Optional[str] = Field(None, description="design only: the setting to showcase, e.g. 'circle'")
     status: Literal["ask", "assume_default", "use_current_selection", "ok"] = "ok"
     note: str = Field("", description="what to ask, or the assumption made; empty for ok")
-    shape: Literal["direct", "evidence_chain"] = "direct"
+    shape: Literal["direct", "multi_step", "evidence_chain"] = "direct"
     reason: str = Field(description="one short sentence")
 
 
 class SubFrame(FrameCore):
     question: str = Field(description="the sub-question, answerable from the data alone")
-    reason: str = Field("", description="one sentence for the user: why this step comes here in the argument "
-                                        "and what result would support or weaken the hypothesis")
+    reason: str = Field("", description="one sentence for the user: why this step comes here and, for a "
+                                        "hypothesis, what result would support or weaken it")
+    uses: Optional[int] = Field(
+        None, description="the number (1 for the first) of an earlier sub-question whose clusters this one "
+                          "starts from; empty when it picks its clusters by itself")
 
 
 class SubFrames(BaseModel):
-    """breakdown: a hypothesis split into direct sub-questions with their roles filled."""
-    sub_frames: list[SubFrame] = Field(description="2 to 4, in the order of the argument")
+    """breakdown: a question split into direct sub-questions with their roles filled."""
+    sub_frames: list[SubFrame] = Field(description="2 to 4, in the order they are answered")
 
 
 class PlanUnit(BaseModel):

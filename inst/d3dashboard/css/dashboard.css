@@ -643,6 +643,40 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
   font-style: italic;
 }
 .mp-chat-msg.reason b { display: block; font-style: normal; font-size: 0.8em; letter-spacing: .04em; text-transform: uppercase; }
+/* one unit of the answer: a sub-question, why, what was assumed, its actions; then the lines */
+.mp-chat-unit {
+  margin: 10px 0 8px;
+  padding: 4px 0 2px 8px;
+  border-left: 3px solid var(--mp-accent);
+  background: rgba(0, 0, 0, .03);
+}
+.mp-unit-head b, .mp-unit-line b, .mp-chat-msg.answer b {
+  font-size: 0.8em; letter-spacing: .04em; text-transform: uppercase; color: var(--mp-muted);
+}
+.mp-unit-head b { display: block; }
+.mp-unit-q { font-weight: 600; overflow-wrap: anywhere; }
+.mp-unit-line { margin-top: 3px; color: var(--mp-muted); font-size: 0.92em; overflow-wrap: anywhere; }
+.mp-unit-line b { margin-right: 6px; }
+.mp-unit-line.why { font-style: italic; }
+.mp-unit-line.why b { font-style: normal; }
+.mp-unit-line.assumed { color: #8a5a1c; }
+.mp-unit-body { margin-top: 6px; padding-right: 4px; }
+.mp-chat-msg.answer {
+  margin-top: 10px;
+  padding: 4px 8px;
+  border-left: 3px solid var(--mp-accent-dark);
+  background: rgba(0, 0, 0, .04);
+}
+.mp-chat-msg.answer b { display: block; }
+/* one Replay button per round, on its closing line; the lines of the step being replayed */
+.mp-chat-replay {
+  margin-left: 8px; padding: 1px 8px; border: 1px solid var(--mp-accent); border-radius: 3px;
+  background: none; color: var(--mp-accent-dark); font: inherit; font-size: 0.9em; cursor: pointer;
+}
+.mp-chat-replay:hover:not(:disabled) { background: rgba(0, 0, 0, .06); }
+.mp-chat-replay:disabled { opacity: .45; cursor: default; }
+.mp-chat-replay-note { margin-left: 8px; font-size: 0.85em; color: #a23b3b; }
+.mp-replaying { outline: 2px solid var(--mp-accent); outline-offset: 1px; background: rgba(0, 0, 0, .07); }
 .mp-chat-status {
   margin-left: auto; margin-right: 6px; border: 0; background: none; padding: 0;
   font-size: 0.8em; cursor: pointer; color: var(--mp-logo);
@@ -684,4 +718,19 @@ body.mp-chat-collapsed > .mp-header { margin-left: calc(-1 * var(--mp-chat-w-col
 }
 .mp-cursor path { fill: var(--mp-brush-stroke); stroke: #fff; stroke-width: 1.2; }
 .mp-cursor.down { transform: scale(.78); }
+/* three jumping balls beside the pointer while the playback pauses or waits */
+.mp-cursor-wait { position: absolute; left: 20px; top: 12px; display: none; white-space: nowrap; }
+.mp-cursor.waiting .mp-cursor-wait { display: block; }
+.mp-cursor-wait i {
+  display: inline-block; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%;
+  background: var(--mp-brush-stroke); box-shadow: 0 0 0 1px #fff;
+  animation: mp-jump .9s ease-in-out infinite;
+}
+.mp-cursor-wait i:nth-child(2) { animation-delay: .15s; }
+.mp-cursor-wait i:nth-child(3) { animation-delay: .3s; }
+@keyframes mp-jump {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-7px); }
+}
+@media (prefers-reduced-motion: reduce) { .mp-cursor-wait i { animation: none; } }
 .mp-cursor.down path { fill: var(--mp-accent-dark); }

@@ -3,6 +3,10 @@
     START -> parse -> leaf_L0 | leaf_L1 | leaf_L2 | breakdown | plan
     breakdown -> plan -> run_frame -> leaf_frame -> compose_messages -> END
 
+breakdown runs only for a question that parse marks as multi_step (one lookup needs the answer
+of another) or evidence_chain (a hypothesis). It splits the question into sub-questions; each
+becomes one unit of the answer, and one may start from the clusters an earlier one found.
+
 parse fills the roles of the question in one LLM call (K=N0, R=N1, H=N2, mentions, A/E targets,
 B measures, D comparison). Code looks every mention up in the data and builds the N3 filters.
 plan fills N4 + N5 for each (sub-)question and N6 once, reading only the skill cards the roles
@@ -23,6 +27,9 @@ from .data_tools import load_dataset
 from .nodes import (MAX_SUB_CLAIMS, AgentState, _debug, _emit, _filled, _route, clean_filters,
                     compose_messages, leaf_L0, leaf_L1, leaf_L2, log_unit, run_unit)
 from .schemas import Frame, Plans, SubFrames
+
+
+SPLIT = ("multi_step", "evidence_chain")   # shapes that go through breakdown
 
 
 class FrameState(AgentState, total=False):
@@ -130,6 +137,9 @@ def resolve(frame, ds):
     if frame.get("compare") in ("level1", "level2", "with_and_without_level2"):
         f["contrast"] = frame["compare"]
     f, dropped = clean_filters(f, ds)
+    for level in ("level1", "level2"):   # one value has nothing to be set against
+        if f["contrast"] == level and len(f[level]) < 2:
+            f["contrast"] = "none"
     for d in dropped:
         kmap["notes"].append(f"ignored, not in the data: {d}")
     return kmap, f, roles
@@ -162,8 +172,8 @@ def parse(state: FrameState):
            + (f" outside={out['outside_concept']} {out['outside_ids']}" if out["outside_concept"] else ""))
     frame = {**out, "question": state["question"], "filters": filters, "roles": roles}
     if out["kind"] == "data" and out["status"] != "ask":
-        chain = out["shape"] == "evidence_chain"
-        _emit("status", text="Splitting the question into steps" if chain else "Planning what to look at")
+        split = out["shape"] in SPLIT
+        _emit("status", text="Splitting the question into steps" if split else "Planning what to look at")
     notes = [out["note"]] if out["status"] == "assume_default" and out["note"] else []
     return {
         "keyword_map": kmap,
@@ -185,48 +195,77 @@ def route_parse(state: FrameState):
         return _route("parse route", "leaf_L1", "kind is design")
     if status == "ask":
         return _route("parse route", "leaf_L2", "status is ask")
-    return _route("parse route", "breakdown" if shape == "evidence_chain" else "plan", f"shape is {shape}")
+    return _route("parse route", "breakdown" if shape in SPLIT else "plan", f"shape is {shape}")
 
 
 def breakdown(state: FrameState):
-    """An independent LLM splits a hypothesis into direct sub-questions with their roles filled."""
+    """An independent LLM splits the question into direct sub-questions with their roles filled.
+
+    A hypothesis (evidence_chain) becomes the steps of an argument; a question that needs one
+    lookup before the next (multi_step) becomes those lookups. A sub-question may start from the
+    clusters an earlier one found (`uses`); the templates are in skills/breakdown.md.
+    """
     ds = load_dataset()
-    system = prompts.BREAKDOWN + "\n\n" + prompts.parse_context(ds)
-    subs = _ask(SubFrames, system, state["question"], "breakdown")["sub_frames"][:MAX_SUB_CLAIMS]
+    system = prompts.BREAKDOWN + "\n\n" + skills.card("breakdown") + "\n\n" + prompts.parse_context(ds)
+    user = f"KIND: {state['shape']}\nQUESTION: {state['question']}"
+    subs = _ask(SubFrames, system, user, "breakdown")["sub_frames"][:MAX_SUB_CLAIMS]
     frames, maps, notes = [], [state["keyword_map"]], []
-    for sub in subs:
+    kept = {}   # number of a sub-question as the LLM wrote it -> its number among the kept ones
+    for n, sub in enumerate(subs, 1):
         kmap, filters, roles = resolve(sub, ds)
-        tried = [m for m in sub.get("mentions") or [] if m["role"] in ("condition", "compare")]
-        if tried and not any(v for k, v in filters.items() if k != "contrast"):
+        # dropped when none of its conditions names something in the data. A sample group that is
+        # compared ("in either cheese") is found in the data without becoming a filter.
+        tried = [line for m, line in zip(sub.get("mentions") or [], roles)
+                 if m["role"] in ("condition", "compare")]
+        if tried and all(line.endswith("not in the data") for line in tried) and not sub.get("uses"):
             notes.append(f"sub-question dropped, its conditions are not in the data: {sub['question']}")
             _debug("breakdown", f"dropped: {sub['question']}")
             continue
+        if sub.get("uses") and sub["uses"] not in kept:
+            # it starts from the clusters of a sub-question that is not there: nothing to start from
+            _debug("breakdown", f"dropped, the step it starts from is missing: {sub['question']}")
+            continue
+        sub = {**sub, "uses": kept.get(sub.get("uses"))}
+        kept[n] = len(frames) + 1
         frames.append({**sub, "filters": filters, "roles": roles})
         # the words of a sub-question are the breakdown's, not the user's: a word of it that is
         # not a data value is no assumption about the question, so it is not reported
         maps.append({**kmap, "notes": [n for n in kmap["notes"] if " is not a " not in n]})
-    if not frames:   # nothing testable: answer the question as one direct pass
+    if not frames or (state["shape"] == "multi_step" and len(frames) < len(subs)):
+        # nothing testable, or a step of the lookup is missing: half an answer would look like a
+        # whole one, so the question is answered as one direct pass
         frames = state["frames"]
     for i, fr in enumerate(frames, 1):
         _debug("breakdown", f"{i}/{len(frames)} {fr['question']}"
+               + (f"   uses {fr['uses']}" if fr.get("uses") else "")
                + (f"   because: {fr['reason']}" if fr.get("reason") else ""))
         for line in fr["roles"]:
             _debug("  mention", line)
     if len(frames) > 1:
-        _emit("plan", text="This needs an argument in " + str(len(frames)) + " steps:\n"
+        lead = "This needs an argument in " if state["shape"] == "evidence_chain" else "This takes "
+        _emit("plan", text=lead + str(len(frames)) + " steps:\n"
               + "\n".join(f"{i}. {fr['question']}" for i, fr in enumerate(frames, 1)))
         _emit("status", text="Planning what to look at")
     kmap = _merge_kmaps(maps)
     kmap["notes"] += notes
-    return {"frames": frames, "sub_questions": [fr["question"] for fr in frames], "keyword_map": kmap}
+    out = {"frames": frames, "sub_questions": [fr["question"] for fr in frames], "keyword_map": kmap}
+    if len(frames) == 1:
+        out["shape"] = "direct"   # answered in one pass after all; the trace says how it was answered
+    return out
 
 
-def _frame_text(i, fr):
+def _frame_text(i, fr, later=()):
+    """`later`: the numbers of the sub-questions that start from the clusters this one finds."""
     roles = {k: fr.get(k) for k in ("target", "measure", "compare") if fr.get(k) not in (None, [], "none")}
     return (f"[{i}] Question: {fr['question']}\n"
             f"    Roles: {json.dumps(roles)}\n"
             f"    Mentions: {'; '.join(fr['roles']) or '(none)'}\n"
-            f"    Filters already set (N3): {_filled(fr['filters'])}")
+            f"    Filters already set (N3): {_filled(fr['filters'])}"
+            + (f"\n    Starts from the clusters found by [{fr['uses']}]: the first step is kind=given "
+               "with no cluster names (code fills them in), then the step that works on them."
+               if fr.get("uses") else "")
+            + (f"\n    Its clusters are the starting point of [{', '.join(map(str, later))}]: plan only "
+               "what this question asks; the step that works on them belongs there." if later else ""))
 
 
 def plan(state: FrameState):
@@ -235,11 +274,12 @@ def plan(state: FrameState):
     names = skills.pick_skills(frames, status, state.get("keyword_map"))
     _debug("plan skills", ", ".join(names) or "(core only)")
     system = skills.plan_prompt(names) + "\n\n" + prompts.plan_context(ds, state["dash_state"], status)
-    user = "\n".join(_frame_text(i, fr) for i, fr in enumerate(frames, 1))
+    user = "\n".join(_frame_text(i, fr, [k for k, x in enumerate(frames, 1) if x.get("uses") == i])
+                     for i, fr in enumerate(frames, 1))
     if status == "use_current_selection":
         user += "\nThe question refers to the clusters selected now: use kind=given."
     if len(frames) > 1:
-        user += f"\nOriginal hypothesis: {state['question']}\nGive exactly {len(frames)} plans, one per question."
+        user += f"\nOriginal question: {state['question']}\nGive exactly {len(frames)} plans, one per question."
     out = _ask(Plans, system, user, "plan")
     plans = out["plans"][:len(frames)]
     if len(plans) < len(frames):
@@ -256,13 +296,47 @@ def plan(state: FrameState):
     return {"plans": plans, "display": d, "skills": names}
 
 
+THOSE = re.compile(r"\b(?:that|those|the same|these|this) clusters?\b", re.I)
+
+
+def _from_earlier(fr, steps, units):
+    """A sub-question that `uses` an earlier one: its question and steps with those clusters named.
+
+    Returns (question, steps, note). The first `given` step gets the clusters the earlier unit
+    picked (one is put in front when the plan has none). When the earlier unit picked nothing
+    there is nothing to start from: the steps are dropped and `note` says so.
+    """
+    n = fr["uses"]
+    base = []
+    for run in units[n - 1]["runs"]:
+        base += [c for c in run["targets"] if c not in base]
+    picked = len(base) < len(load_dataset().clusters)   # "all clusters" is not a pick
+    if not base or not picked:
+        return fr["question"], [{"kind": "all"}], f"Step {n} picked no cluster, so this step has nothing to start from."
+    steps = [dict(st) for st in steps]
+    given = next((st for st in steps if st["kind"] == "given"), None)
+    if given is None:
+        given = {"kind": "given"}
+        steps.insert(0, given)
+    given["clusters"] = list(base)
+    names = ", ".join(base)
+    question = THOSE.sub(names, fr["question"]) if THOSE.search(fr["question"]) \
+        else f"{fr['question'].rstrip()} (starting from {names})"
+    return question, steps, None
+
+
 def run_frame(state: FrameState):
     units = []
     for i, (fr, p) in enumerate(zip(state["frames"], state["plans"])):
         if len(state["frames"]) > 1:
             _debug("sub-question", f"{i + 1}/{len(state['frames'])} {fr['question']}")
-        unit = run_unit(fr["question"], fr["filters"], {"steps": p["steps"]}, p["descriptor"],
+        question, steps, note = fr["question"], p["steps"], None
+        if fr.get("uses") and fr["uses"] <= len(units):
+            question, steps, note = _from_earlier(fr, steps, units)
+        unit = run_unit(question, fr["filters"], {"steps": steps}, p["descriptor"] if not note else {},
                         state["dash_state"])
+        if note:
+            unit["assumed"].append({"field": "uses", "used": None, "options": [], "text": note})
         if len(state["frames"]) > 1:
             unit["reason"] = fr.get("reason") or ""
         log_unit(unit)
@@ -274,7 +348,7 @@ def leaf_frame(state: FrameState):
     units, display = state["units"], state["display"]
     leaf = leaves.choose_leaf(units, display)
     _debug("leaf", f"{leaf}   (computed from the plan's display, {len(units)} sub-question(s))")
-    return {"leaf": leaf, "steps": leaves.assemble(leaf, units, display)}
+    return {"leaf": leaf, "steps": leaves.assemble(leaf, units, display, state.get("shape") or "evidence_chain")}
 
 
 @lru_cache(maxsize=1)

@@ -18,7 +18,8 @@
     el = document.createElement("div");
     el.className = "mp-cursor";
     el.innerHTML = '<svg viewBox="0 0 22 22" width="22" height="22">' +
-      '<path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.3 L10 13 L16 13 Z"/></svg>';
+      '<path d="M3 2 L3 18 L7.5 14 L10.5 20.5 L13 19.3 L10 13 L16 13 Z"/></svg>' +
+      '<span class="mp-cursor-wait"><i></i><i></i><i></i></span>';
     document.body.appendChild(el);
     place(window.innerWidth - 60, window.innerHeight - 60);
   }
@@ -77,8 +78,17 @@
     return new Promise(function (resolve) { setTimeout(resolve, ms); });
   }
 
+  /* Three small balls jump next to the pointer while the playback pauses on purpose (time to
+     read a message or to look at the dashboard) or waits for a text: it is still running.
+     waiting(true) and waiting(false) come in pairs; the balls stay while any pair is open. */
+  var open = 0;
+  function waiting(on) {
+    open = Math.max(0, open + (on ? 1 : -1));
+    if (el) el.classList.toggle("waiting", open > 0);
+  }
+
   MP.cursor = {
     init: init, moveTo: moveTo, toElement: toElement,
-    press: press, release: release, wait: wait
+    press: press, release: release, wait: wait, waiting: waiting
   };
 })(window.MolPad = window.MolPad || {});

@@ -17,6 +17,7 @@ import pandas as pd
 
 from . import patterns
 from .config import CONFIG, LevelConfig
+from .ribbon import MissingInput, Ribbon, similar_clusters
 
 TREND_RHO = patterns.Thresholds().trend_rho   # |Spearman rho| at or above this is a steady trend
 COVER_SHARE = 0.5    # "most of its features": smallest set of clusters covering this share
@@ -219,7 +220,8 @@ class Session:
 
     OPS = (
         "filter_cols", "filter_level1", "filter_level2", "filter_level3",
-        "select_by_pattern", "select_by_ribbon", "select_by_comparison", "select_by_feature_number", "select_by_network",
+        "select_by_pattern", "select_by_ribbon", "select_by_comparison", "select_by_similarity",
+        "select_by_feature_number", "select_by_network",
         "select_by_feature_lookup", "select_given", "select_all", "select_examples",
         "describe_pattern", "describe_level2", "describe_level3", "describe_weight",
         "describe_feature_number",
@@ -244,6 +246,8 @@ class Session:
             return {"error": f"unknown data action '{op}'"}
         try:
             return _py(getattr(self, op)(**args))
+        except MissingInput:      # the caller decides: assume the default, or ask
+            raise
         except Exception as exc:  # a bad argument must not stop the graph
             return {"error": f"{type(exc).__name__}: {exc}"}
 
@@ -276,6 +280,18 @@ class Session:
         for cl, row in means.iterrows():
             out[cl] = {s: self._shape(row[cols].values, cols) for s, cols in subjects.items() if cols}
         return out
+
+    def _ribbons(self, df, clusters=None, subjects=None):
+        """{cluster: {sample group: Ribbon}} for the rows of df (agent/ribbon.py)."""
+        all_times = sorted({self.ds.time_of(c) for c in self.ds.timepoints})
+        if clusters is not None:
+            df = df[df["cluster"].isin(clusters)]
+        out = {}
+        for cl, g in df.groupby("cluster"):
+            out[cl] = {s: Ribbon.from_values(cl, s, g[cols].values, cols, times=self.ds.axis(cols).times,
+                                             groups=g[self.cfg.color].values, expected_times=all_times)
+                       for s, cols in self._subjects().items() if cols and (not subjects or s in subjects)}
+        return {c: out[c] for c in self.ds.clusters if c in out}
 
     def _counts(self, df=None):
         df = self.df if df is None else df
@@ -542,6 +558,8 @@ class Session:
                 return f"r = {r['lag']['r']:.2f} after a shift of {r['lag']['by']:.2g}"
             if tool in ("diverging", "converging"):
                 return f"gap {r['gap']['start']:.2f} -> {r['gap']['end']:.2f}"
+            if r["r"] is None:      # two flat curves count as similar and have no r
+                return "both flat" if all(r["flat"]) else f"{r['fit_a']['shape']} vs {r['fit_b']['shape']}"
             return f"{r['fit_a']['shape']} vs {r['fit_b']['shape']}, r = {r['r']:.2f}"
 
         def span(side):
@@ -615,6 +633,38 @@ class Session:
             "converging": f"{base}; converging when the gap between the two functions shrinks steadily "
                           f"(Spearman rho of the gap against time <= -{th.trend_rho})",
         }[tool]
+
+    def select_by_similarity(self, subjects=None, match=None, top_n=None):
+        """Pick the clusters whose ribbons follow the same curve as the cluster(s) picked so far.
+
+        subjects  sample groups the curves are read in; default: the one the filters kept, else all
+        match     all (similar in every sample group read) | any (in at least one). Needed when
+                  several sample groups are read: MissingInput is raised when it is left out.
+        """
+        base = [c for c in self.targets if c in self.ds.clusters]
+        if not base or len(base) >= len(self.ds.clusters):
+            raise ValueError("similarity needs the cluster to compare with: pick it first")
+        names = [s for s in (subjects or []) if s in self.ds.subjects] or None
+        out = similar_clusters(self._ribbons(self.df, subjects=names), base, names, match, top_n)
+        where = " and ".join(out["subjects"]) if out["match"] == "all" else " or ".join(out["subjects"])
+        pairs = out["value_per_cluster"]
+        why = "; ".join(
+            f"{c} (" + ", ".join(f"{s}: {pairs[c][s]['note']}" for s in out["subjects"]
+                                 if pairs[c][s]["similar"]) + ")" for c in out["clusters"])
+        label = f"similar to {', '.join(base)} in {where}"
+        groups = [{"label": label, "clusters": out["clusters"], "why": f"{label}: {why}"}]
+        if not out["clusters"] and out["match"] == "all" and len(out["subjects"]) > 1:
+            # nothing agrees in every sample group: show where the curves do agree, one sample
+            # group at a time, so the answer is "none in all, but ..." and not an empty view
+            out["none_in_all"] = True
+            for s in out["subjects"]:
+                hits = out["similar_per_subject"][s]
+                label = f"similar to {', '.join(base)} in {s} only"
+                groups.append({"label": label, "clusters": hits, "why": f"{label}: " + "; ".join(
+                    f"{c} ({pairs[c][s]['note']})" for c in hits)})
+        self._set(groups)
+        out["groups"] = self.groups
+        return out
 
     def select_by_feature_number(self, top_n=None):
         counts = self._counts()
@@ -724,31 +774,10 @@ class Session:
         base = self.ds.features
         if self.level2:
             base = base[base[self.cfg.level2].isin(self.level2)]
-        all_times = sorted({self.ds.time_of(c) for c in self.ds.timepoints})
 
         def part(df):
-            out = {}
-            for cl, g in self._target_rows(df).groupby("cluster"):
-                out[cl] = {}
-                for subject, cols in self._subjects().items():
-                    d = patterns.describe(g[cols].values, cols, times=self.ds.axis(cols).times,
-                                          groups=g[self.cfg.color].values,
-                                          expected_times=all_times)
-                    out[cl][subject] = {
-                        "shape": d["shape"],
-                        "peak": None if d["shape"] == "even" else d["peaks"]["highest"]["at"],
-                        "n_peaks": d["peaks"]["n_peaks"],
-                        "fitted_shape": d["fit"]["shape"],      # the simple function that fits the mean
-                        "fit_r2": d["fit"]["r2"],
-                        "mean": [round(v, 2) for v in d["mean"].values()],
-                        "ribbon_width": d["spread"]["ribbon_width"]["mean"],
-                        "ribbon_max_width": (d["ribbon"] or {}).get("width", {}).get("max"),
-                        "ribbon_area": (d["ribbon"] or {}).get("width", {}).get("area"),
-                        "ribbon_trend": (d["ribbon"] or {}).get("trend", {}).get("direction"),
-                        "fraction_constant_features": d["missingness"]["fraction_constant"],
-                        "text": d["text"],
-                    }
-            return out
+            return {cl: {s: r.describe() for s, r in by.items()}
+                    for cl, by in self._ribbons(self._target_rows(df)).items()}
 
         out = {"cluster": part(base)}
         if len(self.df) != len(base):

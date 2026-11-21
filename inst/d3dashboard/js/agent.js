@@ -456,6 +456,7 @@
      ?pace=0.5 in the page address plays twice as fast, ?pace=0 without pauses. */
   var PAUSE_BEFORE_CMD = 800;     // ms before the pointer moves to the next control
   var PAUSE_AFTER_CMD = 1200;     // ms to look at the dashboard after a command
+  var WAIT_SIGN_MIN = 400;        // ms: shorter pauses do not show the waiting balls
   var READ_BASE = 1200, READ_PER_WORD = 250, READ_MIN = 2500, READ_MAX = 9000;
 
   function pace() {
@@ -466,7 +467,10 @@
 
   function pause(ms) {
     var t = Math.round(ms * pace());
-    return t > 0 ? MP.cursor.wait(t) : Promise.resolve();
+    if (t <= 0) return Promise.resolve();
+    if (t < WAIT_SIGN_MIN) return MP.cursor.wait(t);
+    MP.cursor.waiting(true);   // the balls next to the pointer: paused on purpose, still running
+    return MP.cursor.wait(t).then(function () { MP.cursor.waiting(false); });
   }
 
   /* Time to read a message: grows with its length, within READ_MIN..READ_MAX. */
@@ -487,12 +491,20 @@
      Dashboard steps run as commands, message steps are printed, reasoning steps are printed
      before the actions they explain, data steps are not played: they hold the evidence
      (findings and numbers) that a message lists by id. `say(text, kind, evidence)` receives
-     each line; a failed step is reported and the rest go on. When the next step is a message
+     each line; a failed step is reported and the rest go on. A unit step opens one unit of
+     the answer (a sub-question with its reason and an overview of its actions): `unit(step)`
+     is called with it, and `unit(null)` when the lines that follow belong to no unit (the
+     conclusion, kind "answer", and the end). `say` and `unit` may return the page elements
+     they made; `record(entry)` is then called once per played step with
+     {kind, nodes, command | text}, so the round can be replayed later (see replay). When the
+     next step is a message
      whose text has not come yet, the player waits for that text only; `writing(true)` and
      `writing(false)` are called around the wait, so the page can say so. */
   function player(say, options) {
     say = say || function () {};
     var writing = (options && options.writing) || function () {};
+    var unit = (options && options.unit) || function () {};
+    var record = (options && options.record) || function () {};
     var queue = [], byId = {}, texts = {};
     var ended = false, running = false, done = 0, wake = null, finish;
     var finished = new Promise(function (resolve) { finish = resolve; });
@@ -504,11 +516,11 @@
         (function check() {
           var ready = Object.prototype.hasOwnProperty.call(texts, step.slot);
           if (!ready && !ended) {
-            if (!waited) { waited = true; writing(true); }
+            if (!waited) { waited = true; writing(true); MP.cursor.waiting(true); }
             wake = check;
             return;
           }
-          if (waited) writing(false);
+          if (waited) { writing(false); MP.cursor.waiting(false); }
           resolve(ready ? String(texts[step.slot]) : "");
         })();
       });
@@ -520,31 +532,44 @@
           if (!text.trim()) return null;   // never print an empty message
           var evidence = (step.evidence || []).map(function (id) { return byId[id]; })
             .filter(function (d) { return d; });
-          say(text, "bot", evidence);
+          var concluding = step.role === "conclusion";
+          if (concluding) unit(null);
+          record({ kind: "message", text: text, nodes: [say(text, concluding ? "answer" : "bot", evidence)] });
           done += 1;
           return pause(readingTime(text));
         });
       }
       if (step.kind === "reasoning") {
-        say(String(step.text), "reason");
+        record({ kind: "message", text: String(step.text), nodes: [say(String(step.text), "reason")] });
         return pause(readingTime(step.text));
       }
+      if (step.kind === "unit") {
+        var heading = [step.of > 1 ? step.question : "", step.reason || "",
+          (step.assumed || []).join(" "), step.overview || ""].join(" ");
+        var shown = unit(step) || [];
+        if (shown.length) record({ kind: "unit", text: heading, nodes: shown });
+        return pause(readingTime(heading));
+      }
       if (step.kind !== "dashboard" && !step.command) return Promise.resolve();   // a kind this page does not know
+      var entry = { kind: "dashboard", command: String(step.command), nodes: [] };
       return pause(PAUSE_BEFORE_CMD).then(function () {
-        say(String(step.command), "user");
+        entry.nodes.push(say(entry.command, "user"));
         return run(step.command);
       }).then(function (report) {
-        say(report, "bot");
+        entry.nodes.push(say(report, "bot"));
         done += 1;
       }, function (err) {
-        say(err && err.message ? err.message : String(err), "error");
-      }).then(function () { return pause(PAUSE_AFTER_CMD); });
+        entry.nodes.push(say(err && err.message ? err.message : String(err), "error"));
+      }).then(function () {
+        record(entry);   // a failed command is kept too: the replay runs the same list
+        return pause(PAUSE_AFTER_CMD);
+      });
     }
 
     function next() {
       if (!queue.length) {
         running = false;
-        if (ended) finish("Played " + done + " steps.");
+        if (ended) { unit(null); finish("Played " + done + " steps."); }
         return;
       }
       one(queue.shift()).then(next, next);
@@ -579,15 +604,70 @@
 
   /* Play a finished step list: an array of steps, or an object with a `steps` array (JSON
      text is parsed). */
-  function play(input, say) {
+  function play(input, say, options) {
     var steps = typeof input === "string" ? JSON.parse(input) : input;
     if (steps && !Array.isArray(steps)) steps = steps.steps;
     if (!Array.isArray(steps)) throw new Error("Expected a list of steps, or an object with \"steps\".");
-    var p = player(say);
+    var p = player(say, options);
     p.push(steps);
     p.end();
     return p.finished;
   }
 
-  MP.agent = { commands: commands, parse: parse, run: run, play: play, player: player, usage: usage };
+  /* The dashboard as it is now: the shared state plus the table's own settings. */
+  function snapshot() {
+    var S = MP.state.get();
+    return {
+      state: { level1: S.level1.slice(), level2: S.level2.slice(), scope: S.scope, colourBy: S.colourBy,
+               ribbonExpand: S.ribbonExpand, layout: S.layout, minWeight: S.minWeight,
+               selectedClusters: S.selectedClusters.slice() },
+      table: MP.table && MP.table.getState ? MP.table.getState() : null
+    };
+  }
+
+  /* Put the dashboard back to a snapshot, at once and without the pointer. The layout list and
+     the importance slider do not follow a state change by themselves, so they are set here. */
+  function restore(snap) {
+    MP.app.showTab("main");
+    MP.network.clearBrush();
+    MP.state.set(snap.state, "agent");
+    var layout = document.getElementById("s_layout");
+    if (layout) layout.value = snap.state.layout;
+    var slider = document.getElementById("obs"), label = document.getElementById("obs_value");
+    if (slider) slider.value = snap.state.minWeight;
+    if (label) label.textContent = MP.utils.fmt(snap.state.minWeight, 1);
+    if (snap.table && MP.table && MP.table.setState) MP.table.setState(snap.table);
+  }
+
+  /* Run the recorded entries of a round again, in order, without printing anything:
+
+       var r = replay(entries, { on: fn, off: fn, error: fn });
+       r.stop();        // stops after the step that is running
+       r.finished       // a promise: "done" or "stopped"
+
+     `on(nodes, entry)` and `off(nodes, entry)` are called around each step, so the page can
+     mark the lines it belongs to; `error(err, entry)` when a command fails (the rest go on).
+     The caller restores the dashboard to the start of the round first (see restore). */
+  function replay(entries, hooks) {
+    hooks = hooks || {};
+    var stopped = false, i = 0;
+    var finished = new Promise(function (resolve) {
+      (function step() {
+        if (stopped || i >= entries.length) { resolve(stopped ? "stopped" : "done"); return; }
+        var e = entries[i++], nodes = (e.nodes || []).filter(function (n) { return n; });
+        if (hooks.on) hooks.on(nodes, e);
+        var job = e.kind === "dashboard"
+          ? pause(PAUSE_BEFORE_CMD).then(function () { return run(e.command); })
+              .then(null, function (err) { if (hooks.error) hooks.error(err, e); })
+              .then(function () { return pause(PAUSE_AFTER_CMD); })
+          : pause(readingTime(e.text || ""));
+        function after() { if (hooks.off) hooks.off(nodes, e); step(); }
+        job.then(after, after);
+      })();
+    });
+    return { finished: finished, stop: function () { stopped = true; } };
+  }
+
+  MP.agent = { commands: commands, parse: parse, run: run, play: play, player: player, usage: usage,
+               snapshot: snapshot, restore: restore, replay: replay };
 })(window.MolPad = window.MolPad || {});

@@ -65,8 +65,9 @@ def answer(question: str, dash_state: dict | None = None, debug: bool | None = N
 
     on_event(dict) is called while the answer is built, so a client need not wait for the end:
         {"event": "status", "text"}          what the agent is doing now
-        {"event": "plan",   "text"}          the steps of the argument (a hypothesis only)
-        {"event": "steps",  "steps"}         the whole playback; a message is {"slot", "text": None}
+        {"event": "plan",   "text"}          the sub-questions (a question that was split only)
+        {"event": "steps",  "steps"}         the whole playback: one "unit" step opens each
+                                             (sub-)question; a message is {"slot", "text": None}
         {"event": "text",   "slot", "text"}  the text of one message, as soon as it is written
         {"event": "done",   "trace"}
     The times of the first event, of "steps" (the first dashboard action can start) and of the

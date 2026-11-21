@@ -138,3 +138,36 @@ def test_comparison_rejects_empty_windows_and_unknown_tools(ds):
     assert "error" in s.run("select_by_comparison", tool="mirror")
     pat = s.run("describe_pattern")["cluster"]["Group_9"]["A"]
     assert pat["fitted_shape"] == "L" and pat["fit_r2"] > 0.9
+
+
+def test_similar_to_group_5_is_read_on_the_curves():
+    """Group_3 follows Group_5 in A; Group_2 (its network neighbour) does not, in A or in C."""
+    def run(**args):
+        s = Session(load_dataset())
+        s.run("select_given", clusters=["Group_5"])
+        return s, s.run("select_by_similarity", **args)
+
+    s, in_a = run(subjects=["A"])
+    assert in_a["clusters"] == ["Group_3"] and s.targets == ["Group_3"]
+    assert s.groups[0]["why"] == "similar to Group_5 in A: Group_3 (A: J vs J, r = 1.00)"
+    s, both = run(match="all")
+    assert both["clusters"] == [] and both["none_in_all"] is True
+    assert "Group_2" not in both["similar_per_subject"]["A"] + both["similar_per_subject"]["C"]
+    # nothing agrees in both sample groups: the groups say where the curves do agree
+    assert [g["label"] for g in s.groups] == ["similar to Group_5 in A only", "similar to Group_5 in C only"]
+    assert s.groups[0]["clusters"] == ["Group_3"]
+
+
+def test_similarity_without_a_scope_raises_missing_input():
+    from agent.ribbon import MissingInput
+    s = Session(load_dataset())
+    s.run("select_given", clusters=["Group_5"])
+    with pytest.raises(MissingInput):
+        s.run("select_by_similarity")
+    assert "error" in Session(load_dataset()).run("select_by_similarity", match="all")   # no cluster picked
+
+
+def test_similar_pairs_of_flat_curves_do_not_crash():
+    out = Session(load_dataset()).run("select_by_comparison", tool="similar", between="clusters")
+    assert "error" not in out
+
