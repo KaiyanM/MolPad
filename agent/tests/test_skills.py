@@ -1,6 +1,6 @@
 """Skill cards picked from the roles of a question. No LLM."""
 
-from agent.skills import CARDS, card, pick_skills, plan_prompt
+from agent.core.skills import CARDS, card, pick_skills, plan_prompt
 
 
 def test_every_card_exists():
@@ -12,7 +12,7 @@ def test_q04_similar_shape_reads_curves_not_the_network():
     # step 1 finds the cluster, step 2 starts from it and compares curves
     frames = [{"target": ["feature_number"], "measure": ["pattern"]},
               {"target": ["given", "pattern"], "measure": ["pattern"], "compare": "curves", "uses": 1}]
-    assert pick_skills(frames) == ["pattern", "compare", "feature_number", "given"]
+    assert pick_skills(frames) == ["feature_number", "given", "pattern", "compare"]
 
 
 def test_breakdown_card_has_the_templates():

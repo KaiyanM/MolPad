@@ -2,8 +2,8 @@
 
 import pytest
 
-from agent.data_tools import load_dataset
-from agent.frame import resolve
+from agent.core.data_tools import load_dataset
+from agent.core.frame import resolve
 
 
 @pytest.fixture(scope="module")

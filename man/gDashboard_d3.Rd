@@ -12,6 +12,7 @@ gDashboard_d3(
   dashboardtitle = "MolPad Dashboard",
   id_colname = NULL,
   id_type = NULL,
+  study = NULL,
   output_dir = tempfile("molpad_d3_"),
   file_name = "index.html",
   self_contained = TRUE,
@@ -36,6 +37,14 @@ one column per time point, and \code{type} last.}
 \code{NULL} for no links.}
 
 \item{id_type}{Database for each column in \code{id_colname}: \code{"GO"} or \code{"KEGG"}.}
+
+\item{study}{The output of \code{\link[=gStudy]{gStudy()}}: what the data is, in words. It is
+written into the page, where it gives the labels of the filters and legends
+and tells the MolPad agent what it is looking at. By default the study given
+to \code{pre_process()} or \code{gAnnotation()} is used; its \code{ids} also stand in for
+\code{id_colname} and \code{id_type}. Read from the data and added: whether level 2 is
+nested in level 1 or is another kind of tag, whether \code{type} repeats a level,
+and an example of each id.}
 
 \item{output_dir}{Directory the page is written to. Created if missing.
 Defaults to a fresh folder under \code{\link[=tempdir]{tempdir()}}.}

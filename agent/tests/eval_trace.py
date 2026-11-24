@@ -1,9 +1,8 @@
 """Compare the agent with the trace table of the decision tree (section 5).
 
     python -m agent.tests.eval_trace [--only Q15,Q22] [--workers 4] [--out results.json]
-                                     [--pipeline tree|frame]
 
-Needs an API key and makes about eight LLM calls per question. This is a
+Needs an API key and makes about three LLM calls per question. This is a
 report of where the node prompts disagree with the tree, not a pass/fail test.
 The node prompts quote some of these questions as examples, so agreement here
 is an upper bound.
@@ -12,12 +11,13 @@ is an upper bound.
 import argparse
 import csv
 import json
-import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from agent.graph import answer
+from agent.core.dataset import use_dataset
+from agent.core.graph import answer
+from agent.tests.cheese import cheese
 
 QUESTIONS = Path(__file__).resolve().parents[2] / "development" / "questions"
 
@@ -104,10 +104,9 @@ def main():
     p.add_argument("--only", help="comma-separated question ids")
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--out", help="write full outputs to this JSON file")
-    p.add_argument("--pipeline", choices=("tree", "frame"), help="sets AGENT_PIPELINE for this run")
+    p.add_argument("--pipeline", choices=("frame",), help="kept so older commands still run; there is one pipeline")
     a = p.parse_args()
-    if a.pipeline:
-        os.environ["AGENT_PIPELINE"] = a.pipeline
+    use_dataset(cheese())
 
     table = expected_rows()
     with open(QUESTIONS / "cheese_questions.csv", encoding="utf-8", errors="replace") as fh:

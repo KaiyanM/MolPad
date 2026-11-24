@@ -7,7 +7,7 @@ For the live link with the dashboard chat, run `python -m agent.serve` instead.
 import argparse
 import json
 
-from .graph import answer
+from .core.graph import answer
 
 
 def main():
@@ -18,17 +18,15 @@ def main():
     p.add_argument("--brief", action="store_true", help="one line per step instead of JSON")
     p.add_argument("--play", action="store_true", help="one line of JSON to paste into the dashboard "
                    "chat box (data steps are kept: their numbers fill the Evidence dropdowns)")
-    p.add_argument("--dashboard", help="index.html written by gDashboard_d3(): read the data from it "
-                   "instead of the CSVs named in agent/config.py")
+    p.add_argument("--dashboard", required=True, help="index.html written by gDashboard_d3()")
     p.add_argument("--context", help="JSON file describing the data for the LLM (agent/contexts/)")
     p.add_argument("--debug", action="store_true", help="print each LLM decision, route and data "
                    "action as a [debug] line on stderr")
     a = p.parse_args()
-    if a.dashboard:
-        from .data_tools import use_dataset
-        from .payload import load
+    from .core.data_tools import use_dataset
+    from .core.payload import load
 
-        use_dataset(load(a.dashboard, a.context))
+    use_dataset(load(a.dashboard, a.context))
 
     out = answer(a.question, json.loads(a.state) if a.state else None, debug=a.debug or None)
     if a.play:

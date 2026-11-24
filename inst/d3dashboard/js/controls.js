@@ -24,9 +24,9 @@
 
   /* Ribbon colour choices; `type` only when it is not just level 1 again. */
   function colourChoices() {
-    var out = [{ value: "level1", label: "Functional Annotation" },
-               { value: "level2", label: "Taxonomic Scope" }];
-    if (MP.D.hasDistinctType) out.push({ value: "type", label: "type" });
+    var out = [{ value: "level1", label: MP.D.labels.level1 },
+               { value: "level2", label: MP.D.labels.level2 }];
+    if (MP.D.offerType) out.push({ value: "type", label: MP.D.labels.type });
     out.push({ value: "none", label: "None (one ribbon per cluster)" });
     return out;
   }
@@ -48,6 +48,10 @@
     });
 
     // ---- shared level filters ------------------------------------------------
+    [["f_level1_label", D.labels.level1], ["f_level2_label", D.labels.level2]].forEach(function (p) {
+      var span = document.getElementById(p[0]);
+      if (span) span.textContent = p[1] + ":";
+    });
     MP.filters = {
       level1: MP.multiselect.create({
         mount: el.f_level1, id: "ms_level1", values: D.pathways,

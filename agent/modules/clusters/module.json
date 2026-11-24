@@ -1,0 +1,86 @@
+{
+  "name": "clusters",
+  "title": "Clusters",
+  "kind": "shared",
+  "about": "The unit every view is about. A cluster is a group of features with a similar course over time; it is one node, one bar, one ribbon panel and a value of the table's cluster column.",
+  "method": {
+    "by": "gClusters() in R",
+    "how": "k-means on the scaled values of the features (one row per feature, one column per timepoint); the number of clusters is chosen by the user, with an elbow plot as a guide",
+    "note": "values are z-scores per feature, within each sample group when sample groups are given, so clusters group features by shape and not by abundance"
+  },
+  "shows": {},
+  "reads": {},
+  "writes": {},
+  "features": [
+    {
+      "name": "feature_number",
+      "of": "cluster",
+      "words": [
+        "largest",
+        "biggest",
+        "most features",
+        "most enriched",
+        "size",
+        "how many"
+      ],
+      "how": "number of features of the cluster that pass the filters",
+      "select": "select_by_feature_number",
+      "describe": "describe_feature_number"
+    },
+    {
+      "name": "given",
+      "of": "cluster",
+      "words": [
+        "Group_3",
+        "cluster 3",
+        "the selected clusters",
+        "these clusters"
+      ],
+      "how": "clusters named in the question, or the ones selected on the page now",
+      "select": "select_given"
+    },
+    {
+      "name": "all",
+      "of": "cluster",
+      "words": [
+        "each cluster",
+        "all clusters",
+        "overall"
+      ],
+      "how": "no choice: the answer covers every cluster",
+      "select": "select_all"
+    }
+  ],
+  "ops": [
+    "select_by_feature_number",
+    "select_given",
+    "select_all",
+    "describe_feature_number"
+  ],
+  "selectors": {
+    "feature_number": "select_by_feature_number",
+    "given": "select_given",
+    "all": "select_all"
+  },
+  "measures": {
+    "feature_number": "describe_feature_number"
+  },
+  "cards": {
+    "feature_number": "feature_number.md",
+    "given": "given.md"
+  },
+  "actions": [],
+  "hints": {
+    "target": {
+      "feature_number": "most features, most enriched, largest, dominant; also \"the common / typical / main patterns of X\": the patterns of the clusters that hold most of X (measure pattern)",
+      "given": "cluster ids written by the user, or the selected clusters",
+      "all": "each cluster, rank, a count over the network"
+    },
+    "measure": {
+      "feature_number": "counts"
+    },
+    "descriptor": {
+      "feature_number": "\"how many features does each cluster contain\", \"rank the clusters by number of ...\",\n  \"is there a single dominant pattern or are its features spread across many clusters\"."
+    }
+  }
+}

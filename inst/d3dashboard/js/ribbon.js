@@ -31,10 +31,10 @@
     if (by === "level2") {
       return { key: function (f) { return MP.data.levelOf(f, 2) || MISSING; },
                domain: D.taxa.concat([MISSING]), color: function (t) { return t === MISSING ? "#999" : D.taxaColor(t); },
-               title: "taxonomic.scope" };
+               title: D.labels.legend2 };
     }
     if (by === "type") {
-      return { key: function (f) { return f.type; }, domain: D.types, color: D.typeColor, title: "type" };
+      return { key: function (f) { return f.type; }, domain: D.types, color: D.typeColor, title: D.labels.type };
     }
     if (by === "none") {
       return { key: function () { return NONE; }, domain: [NONE],
@@ -42,7 +42,7 @@
     }
     return { key: function (f) { return MP.data.levelOf(f, 1) || MISSING; },
              domain: D.pathways.concat([MISSING]), color: function (t) { return t === MISSING ? "#999" : D.level1Color(t); },
-             title: "Pathway" };
+             title: D.labels.legend1 };
   }
 
   /* Per cluster, subject and colour group: min/mean/max at every time point. */

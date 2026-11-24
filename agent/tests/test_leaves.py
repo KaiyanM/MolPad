@@ -2,9 +2,9 @@
 
 import pytest
 
-from agent import leaves
-from agent.data_tools import load_dataset
-from agent.nodes import run_unit
+from agent.core import leaves
+from agent.core.data_tools import load_dataset
+from agent.core.nodes import run_unit
 
 NONE = {"cols": None, "level1": [], "level2": [], "level3_column": None, "level3_values": [],
         "level3_has_annotation": False, "external_concept": None, "contrast": "none"}
@@ -220,7 +220,7 @@ def test_one_kept_class_has_no_class_mix():
 
 
 def test_absence_claims_are_caught():
-    from agent.nodes import ABSENCE
+    from agent.core.nodes import ABSENCE
     assert ABSENCE.search("This cluster contains only Bacilli (2,126) and no Clostridia")
     assert ABSENCE.search("Group_2 is 100% Betaproteobacteria")
     assert ABSENCE.search("it does not include Bacilli")
@@ -331,7 +331,7 @@ def test_missing_similarity_scope_is_assumed_and_stated():
 
 def test_writer_never_drops_a_slot(monkeypatch):
     """A reply that leaves slots out is asked again for those slots; what is still empty is filled."""
-    from agent import nodes
+    from agent.core import nodes
     a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
     b = unit("claim b", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
     _, steps = chain(a, b)
@@ -352,7 +352,7 @@ def test_writer_never_drops_a_slot(monkeypatch):
 
 
 def test_writer_sends_the_playback_first_and_every_text_once(monkeypatch):
-    from agent import nodes
+    from agent.core import nodes
     a = unit("claim a", filters={"level1": ["Actinomycetota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
     b = unit("claim b", filters={"level1": ["Bacillota"]}, steps=[{"kind": "feature_number", "top_n": 1}])
     _, steps = chain(a, b)
@@ -398,3 +398,56 @@ def test_contrast_shows_a_shared_group_once_and_each_side_speaks():
     abouts = [s["about"] for s in steps if s["kind"] == "message"][:2]
     assert [a["run"] for a in abouts] == [0, 1] and abouts[1]["seen_before"] is True
 
+
+
+def test_connectivity_without_a_picking_step_does_not_walk_over_every_cluster():
+    """'Are the Alphaproteobacteria clusters connected to one another?' planned as all + connectivity."""
+    from agent.core import nodes
+    from agent.core.dataset import load_dataset
+    ds = load_dataset()
+    f = {"level1": [], "level2": ["Alphaproteobacteria"], "contrast": "none"}
+    for steps in ([{"kind": "network", "criterion": "connectivity"}],
+                  [{"kind": "all"}, {"kind": "network", "criterion": "connectivity"}]):
+        u = nodes.run_unit("q", f, {"steps": steps}, {}, ds.default_state(), ds)
+        run = u["runs"][0]
+        assert 1 <= len(run["targets"]) <= 4, run["targets"]          # the clusters holding most of it
+        assert len(run["groups"]) == 1 and run["groups"][0].get("via") != "network"
+        ops = [s["op"] for s in run["steps"]]
+        assert ops.index("select_by_feature_number") < ops.index("select_by_network")
+        net = next(s for s in run["steps"] if s["op"] == "select_by_network")
+        assert any(line.startswith(("links among", "no link among")) for line in net["findings"])
+        cmds = [s["command"] for s in play([u])[1] if s["kind"] == "dashboard"]
+        assert len([c for c in cmds if c.startswith(("brush node", "select node"))]) == 1   # shown together, once
+    # no filter and nothing picked: a question about the whole network, nothing is brushed
+    u = nodes.run_unit("q", {"level1": [], "level2": [], "contrast": "none"},
+                       {"steps": [{"kind": "network", "criterion": "connectivity"}]}, {}, ds.default_state(), ds)
+    assert u["runs"][0]["targets"] == [] and "connected components" in str(u["runs"][0]["steps"][-1]["findings"])
+
+
+def test_a_long_group_is_never_put_in_focus_cluster_by_cluster():
+    group = {"label": "x", "clusters": [f"Group_{i}" for i in range(1, 11)], "via": "network"}
+    assert leaves._groups({"groups": [group]}) == [group]
+    short = {"label": "x", "clusters": ["Group_1", "Group_2"], "via": "network"}
+    assert [g["clusters"] for g in leaves._groups({"groups": [short]})] == [["Group_1"], ["Group_2"]]
+
+
+def test_common_patterns_under_a_filter_are_those_of_the_main_clusters_not_every_similar_pair():
+    """'Which clusters show the common patterns of Alphaproteobacteria' planned as similar between clusters."""
+    u = unit(filters={"level2": ["Alphaproteobacteria"]},
+             steps=[{"kind": "pattern", "criterion": "compare", "tool": "similar", "between": "clusters"}],
+             descriptor={"pattern": True})
+    run = u["runs"][0]
+    ops = [s["op"] for s in run["steps"]]
+    assert "select_by_feature_number" in ops and "select_by_comparison" not in ops and "select_by_similarity" not in ops
+    assert ops.count("describe_pattern") == 1 and 1 <= len(run["targets"]) <= 4
+    assert '"Common patterns" was read as the patterns of the clusters that hold most' in u["assumed"][0]["text"]
+    cmds = [c for c in commands(play([u])[1]) if c.startswith(("brush node", "select node"))]
+    assert len(cmds) == 1
+    # with no filter the question is about all clusters, and pairs that look alike are the answer
+    v = unit(steps=[{"kind": "pattern", "criterion": "compare", "tool": "similar", "between": "clusters"}])
+    assert "select_by_comparison" in [s["op"] for s in v["runs"][0]["steps"]] and not v["assumed"]
+
+
+def test_the_network_step_says_which_clusters_it_took():
+    u = unit(filters={"level2": ["Alphaproteobacteria"]}, steps=[{"kind": "network", "criterion": "connectivity"}])
+    assert "read as the clusters that hold most of the filtered features" in u["assumed"][0]["text"]

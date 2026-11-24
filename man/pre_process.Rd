@@ -11,7 +11,8 @@ pre_process(
   replaceNA = TRUE,
   scale = TRUE,
   autoColName = "Sec_",
-  subject_sep = NULL
+  subject_sep = NULL,
+  study = NULL
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ This parameter is only applicable when the input of \code{data} is a list of dat
 \item{subject_sep}{Optional. Describes which time columns belong to which subject when the data holds several time series side by side (for example two cheeses measured over the same weeks).
 Either a named list of column names, such as \code{list(A = c("A_1", "A_2", "A_3"), C = c("C_1", "C_2", "C_3"))}, or a string such as \code{"A:A_1-A_3;C:C_1-C_3"}, where \code{x-y} means every column from \code{x} to \code{y} and several columns or ranges can be joined with commas.
 Every time column must belong to exactly one subject. By default (\code{NULL}) all time columns form a single series.}
+
+\item{study}{Optional. The output of \code{\link[=gStudy]{gStudy()}}. Its \code{colour} column becomes \code{type} when the data has no \code{type} column yet. When \code{subject_sep} is not given, the sample groups come from \code{samples$columns} of the study, or else from the column names: \verb{A_1, A_2, C_1, C_2} is read as the groups \code{A} and \code{C}. The study travels on with the result, so the later steps do not need it again.}
 }
 \value{
 The function returns a long data.frame with columns \code{ID}, \code{value on time_1}, ..., \code{value on time_k}, and \code{type}.

@@ -38,6 +38,13 @@
 #' @param id_colname Names of annotation columns holding database ids, or
 #'   `NULL` for no links.
 #' @param id_type Database for each column in `id_colname`: `"GO"` or `"KEGG"`.
+#' @param study The output of [gStudy()]: what the data is, in words. It is
+#'   written into the page, where it gives the labels of the filters and legends
+#'   and tells the MolPad agent what it is looking at. By default the study given
+#'   to `pre_process()` or `gAnnotation()` is used; its `ids` also stand in for
+#'   `id_colname` and `id_type`. Read from the data and added: whether level 2 is
+#'   nested in level 1 or is another kind of tag, whether `type` repeats a level,
+#'   and an example of each id.
 #' @param output_dir Directory the page is written to. Created if missing.
 #'   Defaults to a fresh folder under [tempdir()].
 #' @param file_name Name of the HTML file inside `output_dir`.
@@ -66,13 +73,14 @@
 gDashboard_d3 <- function(data, cluster, annotation, networkres,
                           dashboardtitle = "MolPad Dashboard",
                           id_colname = NULL, id_type = NULL,
+                          study = NULL,
                           output_dir = tempfile("molpad_d3_"),
                           file_name = "index.html",
                           self_contained = TRUE,
                           open = interactive(),
                           viewer = getOption("viewer", utils::browseURL)) {
   payload <- d3_payload(data, cluster, annotation, networkres,
-                        dashboardtitle, id_colname, id_type)
+                        dashboardtitle, id_colname, id_type, study)
   path <- d3_render_html(payload, output_dir, file_name, self_contained)
   if (isTRUE(open)) {
     if (!is.function(viewer)) viewer <- utils::browseURL

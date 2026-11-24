@@ -75,6 +75,39 @@ The page reads the data with
     "KEGG_ID": { "type": "KEGG", "pattern": "K\\d{5}",   "url": "https://www.kegg.jp/entry/{id}" }
   },
 
+  // Optional. What the data is, in words: the study (gStudy() in R). The page takes the labels of the
+  // filters and legends from it, and the agent takes its wording from it.
+  // Every entry is optional; a page without "dataset" shows the fixed labels
+  // "Functional Annotation" and "Taxonomic Scope".
+  //   level1, level2  "column" is the fixed name in "features"; "source" what the
+  //                   column was called before gAnnotation() renamed it; "name"
+  //                   what people call it (the label); "about" a sentence.
+  //   level2.relation "nested": every level-2 value sits under one level-1 value
+  //                   (phylum > class). "crossed": level 2 is another kind of tag
+  //                   (function x taxonomy). R computes it from the data.
+  //   colour          the "type" column; "same_as" when it repeats a level.
+  //   ids             one entry per "id_links" column: an example taken from the
+  //                   data and the prefix the ids carry there ("ko:K03196").
+  //   samples         how the value columns relate: "groups" (one sentence on the
+  //                   groups of "subjects", or an object with a note per group),
+  //                   "time" (one sentence on the time points; "unit" if any).
+  //                   For the agent; the plots label the facets with the group names.
+  //   missing         the text that stands for "no annotation" in id columns.
+  "dataset": {
+    "background": "Metagenomic data from two cheeses sampled over ripening.",
+    "feature": { "name": "contig" },
+    "level1": { "column": "Pathway", "source": "phylum", "name": "phylum",
+                "about": "the phylum a contig is assigned to" },
+    "level2": { "column": "taxonomic.scope", "source": "class", "name": "class",
+                "relation": "nested" },
+    "colour": { "column": "type", "name": "phylum", "same_as": "level1" },
+    "ids": { "KEGG_ID": { "type": "KEGG", "name": "KEGG ortholog id",
+                          "example": "K03196", "prefix": "ko:" } },
+    "samples": { "groups": "Two kinds of cheese, A and C.",
+                 "time": { "about": "Sampling time points during ripening." } },
+    "missing": "-"
+  },
+
   // One object per feature (row of the processed data).
   "features": [
     {
@@ -108,7 +141,8 @@ The page reads the data with
 ## What the page derives from this
 
 Two shared filters sit in the filter bar: **level 1** (`Pathway`) and **level 2**
-(`taxonomic.scope`). Each is a checkbox list that allows several values and has
+(`taxonomic.scope`), labelled with `dataset.level1.name` and `dataset.level2.name`
+when the page has them. Each is a checkbox list that allows several values and has
 "All" (the default). Each option shows its feature count under the other filter;
 options with 0 are greyed out. A feature with no value at a level passes only
 while that level is on All.
@@ -126,7 +160,7 @@ The rule: **the network shows where, the other views show what.**
 * **Ribbon plot**: for each selected cluster, subject and colour group, the
   minimum, mean and maximum of `values` at each time point (nulls ignored). The
   colour group is level 1, level 2, `type` (offered only when it differs from
-  level 1) or none (one ribbon per cluster). The facets of one cluster share the
+  level 1 and `dataset.colour.same_as` is not set) or none (one ribbon per cluster). The facets of one cluster share the
   time axis and the value axis.
 * **Table**: the same features, searchable and sortable, with a sort and filter
   menu on every column header.
@@ -167,9 +201,9 @@ POST /ask     {"question": "...", "state": {"pathway", "min_weight",
 ```
 
 The server listens on 127.0.0.1 only and answers pages opened from a file or
-from localhost. The context file (JSON) describes the data for the LLM:
-`background`, `level1_name`, `level2_name`, `missing`; see
-`agent/contexts/cheese.json`.
+from localhost. The agent reads what the data is from `dataset` in the page.
+The optional context file (JSON) overrules it, entry by entry: it is a study
+as `write_study()` writes it; see `agent/contexts/cheese.json`.
 
 ## Agent step list
 

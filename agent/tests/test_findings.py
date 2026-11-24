@@ -2,9 +2,9 @@
 
 import pytest
 
-from agent import findings as F
-from agent import leaves
-from agent.data_tools import Session, load_dataset
+from agent.core import findings as F
+from agent.core import leaves
+from agent.core.data_tools import Session, load_dataset
 from agent.tests.test_leaves import play, unit
 
 

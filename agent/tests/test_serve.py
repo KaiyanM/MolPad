@@ -8,8 +8,9 @@ import urllib.request
 
 import pytest
 
-from agent import graph, payload, serve
-from agent.data_tools import Dataset, Session, load_dataset
+from agent import serve
+from agent.core import graph, payload
+from agent.core.data_tools import Dataset, Session, load_dataset
 
 
 @pytest.fixture()

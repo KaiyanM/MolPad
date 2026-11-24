@@ -26,6 +26,23 @@
       features: raw.features
     };
 
+    // What the levels are called in this dataset (`dataset` in SCHEMA.md). A page without
+    // it keeps the fixed labels.
+    var ds = raw.dataset || {};
+    function named(x) { return x && x.name ? String(x.name) : ""; }
+    function capital(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+    var n1 = named(ds.level1), n2 = named(ds.level2), nc = named(ds.colour);
+    D.dataset = ds;
+    D.labels = {
+      level1: n1 ? capital(n1) : "Functional Annotation",     // filter label, colour choice
+      level2: n2 ? capital(n2) : "Taxonomic Scope",
+      legend1: n1 || "Pathway",                               // legend titles
+      legend2: n2 || "taxonomic.scope",
+      noun1: n1 || "annotation",                              // in messages of the agent commands
+      noun2: n2 || "taxonomic scope",
+      type: "type" + (nc ? " (" + nc + ")" : "")
+    };
+
     // Subjects: groups of time points drawn as separate ribbon facets. Without
     // any, all time points form one unnamed subject.
     D.subjects = (raw.subjects || []).map(function (s) {
@@ -117,6 +134,9 @@
 
     // The ribbon may colour by `type` too, but only when it says more than level 1 does.
     D.hasDistinctType = raw.features.some(function (f) { return f.type !== levelOf(f, 1); });
+    // ... and not when the page says that  repeats a level (they can still differ in
+    // how a missing value is written: "Other" against "Unknown").
+    D.offerType = D.hasDistinctType && !(ds.colour && ds.colour.same_as);
 
     // Colour scales fixed for the whole session.
     D.typeColor = MP.palettes.ordinal(D.types, "darkwarm");

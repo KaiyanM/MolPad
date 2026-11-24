@@ -2,8 +2,8 @@
 
 import pytest
 
-from agent import keywords as kw
-from agent.data_tools import load_dataset
+from agent.core import keywords as kw
+from agent.core.data_tools import load_dataset
 
 
 @pytest.fixture(scope="module")

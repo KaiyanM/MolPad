@@ -1,0 +1,92 @@
+{
+  "name": "table",
+  "title": "Feature table",
+  "kind": "view",
+  "js": "table.js",
+  "about": "Shows the features themselves (level 3): one row per feature of the selected clusters, with its ids and every annotation column.",
+  "shows": {
+    "row": "feature of a selected cluster",
+    "columns": "ID, cluster, type and every annotation column, level 1 and level 2 among them",
+    "links": "id columns open the entry of the id in its database",
+    "own controls": "search, sort, a value filter on every column, page size; these stay inside the table and do not reach the other views"
+  },
+  "reads": {
+    "selectedClusters": "rows of the selected clusters",
+    "level1": "only the passing features (when the scope is filtered); level 1 is also a column",
+    "level2": "only the passing features (when the scope is filtered); level 2 is also a column",
+    "scope": "filtered features, or every feature of the selected clusters"
+  },
+  "writes": {},
+  "features": [
+    {
+      "name": "level3_ids",
+      "of": "feature",
+      "words": [
+        "an id",
+        "<<FEATURE>>",
+        "which features",
+        "which genes",
+        "annotated with"
+      ],
+      "how": "features found by an id in a level-3 column (the feature id or a linked id column)",
+      "select": "select_by_feature_lookup",
+      "describe": "describe_level3"
+    },
+    {
+      "name": "level3_summary",
+      "of": "cluster",
+      "words": [
+        "most common ids",
+        "how many are annotated",
+        "coverage",
+        "list the ids"
+      ],
+      "how": "the ids of a level-3 column in a cluster: the most frequent, the share of features that have one, or the list",
+      "describe": "describe_level3"
+    }
+  ],
+  "ops": [
+    "filter_level3",
+    "select_by_feature_lookup",
+    "describe_level3"
+  ],
+  "selectors": {
+    "feature_lookup": "select_by_feature_lookup"
+  },
+  "measures": {
+    "level3": "describe_level3"
+  },
+  "cards": {
+    "feature_lookup": "lookup.md"
+  },
+  "actions": [
+    {
+      "command": "search table",
+      "param": "terms",
+      "words": "search the table for {param}",
+      "control": "table",
+      "control_words": "feature table"
+    },
+    {
+      "command": "sort table",
+      "param": "column [asc | desc]",
+      "words": "sort the table by {param}"
+    },
+    {
+      "command": "clear table",
+      "param": "",
+      "words": "clear the table filters"
+    }
+  ],
+  "hints": {
+    "target": {
+      "feature_lookup": "where does this id / gene fall"
+    },
+    "measure": {
+      "level3": "ids, annotations"
+    },
+    "descriptor": {
+      "level3_column + level3_mode": "see the lookup card when loaded."
+    }
+  }
+}

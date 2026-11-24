@@ -1,0 +1,192 @@
+{
+  "name": "ribbon",
+  "title": "Ribbon plot",
+  "kind": "view",
+  "js": "ribbon.js",
+  "about": "Shows how the selected clusters change over time: per cluster and sample group, a mean line inside a band from the lowest to the highest feature.",
+  "shows": {
+    "panel": "cluster; every cluster is drawn and the unselected ones are faded, or only the selected ones when expanded",
+    "facet": "sample group, stacked inside the panel on a shared time axis",
+    "line": "mean of the features at each timepoint",
+    "band": "lowest to highest feature at each timepoint",
+    "colour": "one line and band per colour group: level 1 (default), level 2, type, or none",
+    "y axis": "shared by the sample groups of a cluster, separate for each cluster"
+  },
+  "reads": {
+    "selectedClusters": "which panels are highlighted (or shown, when expanded)",
+    "level1": "line and band are computed from the passing features only (when the scope is filtered); also the colour groups by default",
+    "level2": "line and band are computed from the passing features only (when the scope is filtered); the colour groups when chosen",
+    "scope": "filtered features, or every feature of the cluster",
+    "colourBy": "regroups the lines and bands",
+    "ribbonExpand": "all clusters with the unselected faded, or only the selected ones, larger"
+  },
+  "writes": {
+    "colourBy": "the list 'Colour lines by'",
+    "ribbonExpand": "the button 'Expand trajectories'"
+  },
+  "features": [
+    {
+      "name": "shape",
+      "of": "cluster x sample group",
+      "words": [
+        "increases",
+        "decreases",
+        "rises then falls",
+        "hump",
+        "dip",
+        "flat",
+        "trend"
+      ],
+      "how": "course of the mean line: even, increase, decrease, hump, dip, multi-peak or mixed",
+      "select": "select_by_pattern",
+      "describe": "describe_pattern"
+    },
+    {
+      "name": "peak",
+      "of": "cluster x sample group",
+      "words": [
+        "peaks at",
+        "highest at time point",
+        "early",
+        "mid",
+        "late"
+      ],
+      "how": "timepoint of the highest mean; early, mid or late by its position on the time axis",
+      "select": "select_by_pattern",
+      "describe": "describe_pattern"
+    },
+    {
+      "name": "fitted_shape",
+      "of": "cluster x sample group",
+      "words": [
+        "J-shaped",
+        "L-shaped",
+        "U-shaped",
+        "linear",
+        "step"
+      ],
+      "how": "the simple function (line, U / n, L / J, peak / valley, step) that fits the mean line best",
+      "describe": "describe_pattern"
+    },
+    {
+      "name": "band_width",
+      "of": "cluster x sample group",
+      "words": [
+        "tight",
+        "narrow",
+        "wide",
+        "consistent",
+        "variable",
+        "spread"
+      ],
+      "how": "highest minus lowest feature at each timepoint; summarised as mean width, largest width or area",
+      "select": "select_by_ribbon",
+      "describe": "describe_pattern"
+    },
+    {
+      "name": "width_trend",
+      "of": "cluster x sample group",
+      "words": [
+        "expanding",
+        "contracting",
+        "fans out",
+        "narrows"
+      ],
+      "how": "whether the band gets wider or narrower over time",
+      "select": "select_by_ribbon",
+      "describe": "describe_pattern"
+    },
+    {
+      "name": "colour_divergence",
+      "of": "cluster",
+      "words": [
+        "colour lines disagree",
+        "the lines split",
+        "differ by colour"
+      ],
+      "how": "gap between the mean lines of the colour groups of one cluster",
+      "select": "select_by_pattern"
+    },
+    {
+      "name": "comparison",
+      "of": "two curves",
+      "words": [
+        "opposite",
+        "mirror",
+        "shifted",
+        "lags",
+        "diverging",
+        "converging",
+        "differs between A and C"
+      ],
+      "how": "relation of two mean curves (two sample groups, two time windows or two clusters), judged on their fitted functions",
+      "select": "select_by_comparison"
+    },
+    {
+      "name": "similarity",
+      "of": "two clusters",
+      "words": [
+        "similar shape",
+        "same course",
+        "looks like",
+        "resembles"
+      ],
+      "how": "two clusters are similar in a sample group when the Pearson r of their fitted functions is high enough, or both are flat; with several sample groups the question must say in all of them or in any",
+      "select": "select_by_similarity"
+    }
+  ],
+  "ops": [
+    "select_by_pattern",
+    "select_by_ribbon",
+    "select_by_comparison",
+    "select_by_similarity",
+    "describe_pattern"
+  ],
+  "selectors": {
+    "pattern": "select_by_pattern",
+    "ribbon": "select_by_ribbon"
+  },
+  "measures": {
+    "pattern": "describe_pattern"
+  },
+  "cards": {
+    "pattern": "pattern.md",
+    "compare": "compare.md",
+    "ribbon": "ribbon.md"
+  },
+  "actions": [
+    {
+      "command": "set colour",
+      "param": "level1 | level2 | type | none",
+      "words": "colour the lines by {param}"
+    }
+  ],
+  "criteria": {
+    "pattern": [
+      "increase",
+      "decrease",
+      "increase_and_decrease",
+      "peak_at",
+      "compare",
+      "color_divergence"
+    ],
+    "ribbon": [
+      "tightest_ribbon",
+      "widest_ribbon",
+      "expanding_ribbon",
+      "contracting_ribbon"
+    ]
+  },
+  "hints": {
+    "target": {
+      "pattern": "increase, decrease, peak, opposite shape, similar shape to another cluster, colour lines disagree",
+      "ribbon": "tight / wide ribbon, features follow the same trajectory"
+    },
+    "measure": {
+      "pattern": ""
+    },
+    "descriptor": {
+      "pattern": "\"what is its pattern\", \"do they decline\", \"how do their shapes relate\", \"at which time point\n  does each cluster peak\"."
+    }
+  }
+}

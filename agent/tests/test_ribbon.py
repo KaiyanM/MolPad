@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from agent.data_tools import Session, load_dataset
+from agent.core.data_tools import Session, load_dataset
 from agent.ribbon import MissingInput, Ribbon, similar_clusters
 
 LABELS = ["A_1", "A_2", "A_3", "A_4", "A_5"]

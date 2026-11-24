@@ -1,0 +1,85 @@
+{
+  "name": "filters",
+  "title": "Filter bar",
+  "kind": "shared",
+  "js": "controls.js",
+  "about": "Two shared filters on the features: level 1 and level 2. Every view follows them, each in its own way.",
+  "shows": {
+    "filter 1": "level-1 values as a checkbox list; none ticked means All",
+    "filter 2": "level-2 values as a checkbox list; none ticked means All",
+    "option count": "features with that value under the other filter; a value with 0 cannot be ticked",
+    "scope toggle": "whether the views of the selected clusters show the filtered features or all their features"
+  },
+  "reads": {
+    "level1": "refreshes the counts of both lists",
+    "level2": "refreshes the counts of both lists",
+    "scope": "shows which side of the toggle is on"
+  },
+  "writes": {
+    "level1": "ticking values in filter 1",
+    "level2": "ticking values in filter 2",
+    "scope": "the toggle 'Selected clusters show'"
+  },
+  "features": [
+    {
+      "name": "level1",
+      "of": "feature",
+      "words": [
+        "only",
+        "within",
+        "for",
+        "among"
+      ],
+      "how": "keeps the features whose level-1 value is ticked; a feature with no value passes only on All"
+    },
+    {
+      "name": "level2",
+      "of": "feature",
+      "words": [
+        "only",
+        "within",
+        "for",
+        "among"
+      ],
+      "how": "keeps the features whose level-2 value is ticked; a feature with no value passes only on All"
+    },
+    {
+      "name": "sample_group",
+      "of": "timepoint",
+      "words": [
+        "in A",
+        "in the other group",
+        "in either"
+      ],
+      "how": "reads the timepoint columns of one sample group only; this is a choice of the analysis, the page has no control for it"
+    }
+  ],
+  "ops": [
+    "filter_cols",
+    "filter_level1",
+    "filter_level2"
+  ],
+  "actions": [
+    {
+      "command": "set filter1",
+      "param": "level-1 values, or all",
+      "words": "set filter 1 to {param}",
+      "words_all": "clear filter 1",
+      "control": "level1",
+      "control_words": "level-1 drop-down"
+    },
+    {
+      "command": "set filter2",
+      "param": "level-2 values, or all",
+      "words": "set filter 2 to {param}",
+      "words_all": "clear filter 2",
+      "control": "level2",
+      "control_words": "level-2 multi-select"
+    },
+    {
+      "command": "set view",
+      "param": "filtered | all",
+      "words": "show {param} features of the selected clusters"
+    }
+  ]
+}

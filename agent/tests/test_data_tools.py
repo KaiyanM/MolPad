@@ -2,7 +2,7 @@
 
 import pytest
 
-from agent.data_tools import Session, load_dataset
+from agent.core.data_tools import Session, load_dataset
 
 
 @pytest.fixture(scope="module")

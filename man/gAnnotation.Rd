@@ -5,7 +5,7 @@
 \alias{gAnnotation}
 \title{Generate processed annotation}
 \usage{
-gAnnotation(data, first_order, second_order)
+gAnnotation(data, first_order, second_order, study = NULL)
 }
 \arguments{
 \item{data}{A data.frame containing annotations that should be used for describing the features we measured at each time point. It is also required to include \code{ID} and at least two categorical variables.}
@@ -13,6 +13,8 @@ gAnnotation(data, first_order, second_order)
 \item{first_order}{A string. The name of one column of categorical variable in \code{data}.}
 
 \item{second_order}{A string. The name of another column of categorical variable in \code{data}.}
+
+\item{study}{Optional. The output of \code{\link[=gStudy]{gStudy()}}: when \code{first_order} or \code{second_order} is left out, the \code{level1} and \code{level2} columns of the study are used.}
 }
 \description{
 \code{gAnnotation()} provides the standard input format for the dashboard, allowing users to select two columns as the primary factors they wish to visualize and describe in the data.
@@ -22,6 +24,7 @@ Guidelines for Selecting Annotations:
 \itemize{
 \item The first-order annotation is recommended to be functional, such as a pathway or functional system. This parameter will primarily serve the purpose of filtering out one network at a time when displaying the dashboard.
 \item The second-order annotation is utilized to illustrate the composition of a first-order annotation using a bar plot. Therefore, it is better to set it as taxon, class label, etc.
+\item The two columns are renamed to \code{Pathway} and \code{taxonomic.scope}. Their original names are kept in the attribute \code{molpad_levels}, which \code{gDashboard_d3()} writes into the page.
 }
 }
 \examples{

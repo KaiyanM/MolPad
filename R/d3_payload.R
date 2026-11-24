@@ -13,14 +13,23 @@
 #' @param dashboardtitle Title shown in the page header.
 #' @param id_colname,id_type Annotation columns holding database ids and
 #'   their database type (`"GO"` or `"KEGG"`), as in `gDashboard()`.
+#' @param study The output of [gStudy()]; by default the one given to
+#'   `pre_process()` or `gAnnotation()`.
 #'
 #' @return A named list ready for [d3_payload_json()].
 #' @keywords internal
 #' @noRd
 d3_payload <- function(data, cluster, annotation, networkres,
                        dashboardtitle = "MolPad Dashboard",
-                       id_colname = NULL, id_type = NULL) {
+                       id_colname = NULL, id_type = NULL, study = NULL) {
   subject_map <- get_subject_map__(data)
+  level_sources <- attr(annotation, "molpad_levels")
+  study <- as_study__(study)
+  if (is.null(study)) study <- get_study__(data, annotation)
+  if (is.null(id_colname) && is.null(id_type) && length(study$ids)) {
+    id_colname <- names(study$ids)
+    id_type <- vapply(study$ids, function(i) as.character(i$type), character(1), USE.NAMES = FALSE)
+  }
   data <- as.data.frame(data)
   annotation <- as.data.frame(annotation)
   networkres <- as.data.frame(networkres)
@@ -104,6 +113,10 @@ d3_payload <- function(data, cluster, annotation, networkres,
   if (!is.finite(weight_slider$value)) weight_slider$value <- 0
   weight_slider$max <- max(weight_slider$max, weight_slider$step)
 
+  id_links <- d3_link_templates(id_colname, id_type)
+  dataset <- d3_dataset(study, features, id_links, level_sources,
+                        vapply(subjects, function(s) s$name, character(1)))
+
   list(
     schema_version = 2L,
     title = as.character(dashboardtitle)[1],
@@ -115,11 +128,102 @@ d3_payload <- function(data, cluster, annotation, networkres,
     pathways = I(d3_unique_chr(annotation$Pathway)),
     clusters = I(clusters),
     annotation_columns = I(annotation_columns),
-    id_links = d3_link_templates(id_colname, id_type),
+    id_links = id_links,
+    dataset = dataset,
     features = features,
     edges = edges,
     weight_slider = weight_slider
   )
+}
+
+#' The description of the dataset written into the page (`dataset` in SCHEMA.md)
+#'
+#' The study says what cannot be computed; the rest is read from the data: how
+#' level 2 relates to level 1, whether the colour column repeats a level, and
+#' what the ids look like.
+#' @keywords internal
+#' @noRd
+d3_dataset <- function(study, features, id_links, level_sources = NULL,
+                       subject_names = character(0)) {
+  study <- as_study__(study)
+  compact <- function(x) x[!vapply(x, is.null, logical(1))]
+  first <- function(...) {
+    for (v in list(...)) if (!is.null(v) && !is.na(v) && nzchar(v)) return(v)
+    NULL
+  }
+
+  placeholders <- c("Unknown", "Other", "-", "", NA)   # written by gAnnotation() / pre_process()
+  l1 <- as.character(features$Pathway)
+  l2 <- as.character(features$taxonomic.scope)
+  ty <- as.character(features$type)
+
+  # "column" is the fixed name in the page; "source" what the user's column was called
+  level <- function(key, column) {
+    x <- study[[key]]
+    source <- first(x$column, level_sources[[key]])
+    compact(c(list(column = column, source = source, name = first(x$name, source)),
+              x[setdiff(names(x), c("column", "source", "name"))]))
+  }
+  level1 <- level("level1", "Pathway")
+  level2 <- level("level2", "taxonomic.scope")
+  if (is.null(level2$relation)) {
+    # nested: every level-2 value sits under one level-1 value; crossed: another kind of tag
+    keep <- !(l1 %in% placeholders) & !(l2 %in% placeholders)
+    parents <- tapply(l1[keep], l2[keep], function(v) length(unique(v)))
+    level2$relation <- if (length(parents) && all(parents == 1)) "nested" else "crossed"
+  } else if (!level2$relation %in% c("nested", "crossed")) {
+    stop("`level2$relation` of the study must be \"nested\" or \"crossed\".")
+  }
+
+  colour <- level("colour", "type")
+  if (is.null(colour$same_as)) {
+    same <- function(v) {
+      keep <- !(ty %in% placeholders) & !(v %in% placeholders)
+      any(keep) && all(ty[keep] == v[keep])
+    }
+    colour$same_as <- if (same(l1)) "level1" else if (same(l2)) "level2" else NULL
+  }
+  if (is.null(colour$name) && !is.null(colour$same_as)) {
+    colour$name <- list(level1 = level1, level2 = level2)[[colour$same_as]]$name
+  }
+
+  id_names <- c(KEGG = "KEGG ortholog id", GO = "GO term id")
+  ids <- lapply(names(id_links), function(col) {
+    link <- id_links[[col]]
+    cells <- as.character(features[[col]])
+    hit <- regmatches(cells, regexpr(paste0("[^,;[:space:]]*", link$pattern), cells, perl = TRUE))
+    example <- if (length(hit)) regmatches(hit[1], regexpr(link$pattern, hit[1], perl = TRUE)) else NULL
+    prefix <- if (length(hit)) sub(example, "", hit[1], fixed = TRUE) else ""
+    x <- study$ids[[col]]
+    compact(c(list(type = link$type, name = first(x$name, unname(id_names[link$type])),
+                   example = example, prefix = if (nzchar(prefix)) prefix else NULL),
+              x[setdiff(names(x), c("type", "name", "example", "prefix"))]))
+  })
+  ids <- stats::setNames(ids, names(id_links))
+
+  samples <- study$samples[setdiff(names(study$samples), "columns")]   # the columns are in "subjects"
+  unknown <- if (is.list(samples$groups)) setdiff(names(samples$groups), subject_names) else character(0)
+  if (length(unknown)) {
+    stop("`samples$groups` of the study names sample groups that are not in the data: ",
+         paste(unknown, collapse = ", "), ". The data has: ",
+         if (length(subject_names)) paste(subject_names, collapse = ", ") else "no sample groups", ".")
+  }
+  missing <- study$missing
+  if (is.null(missing)) {
+    cells <- unlist(lapply(names(id_links), function(col) as.character(features[[col]])))
+    if (any(cells == "-", na.rm = TRUE)) missing <- "-"
+  }
+
+  compact(list(
+    background = study$background,
+    feature = study$feature,
+    level1 = level1,
+    level2 = level2,
+    colour = colour,
+    ids = if (length(ids)) ids else NULL,
+    samples = if (length(samples)) samples else NULL,
+    missing = missing
+  ))
 }
 
 #' Link templates for database id columns

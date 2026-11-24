@@ -1,0 +1,165 @@
+{
+  "name": "network",
+  "title": "Network",
+  "kind": "view",
+  "js": "network.js",
+  "about": "Shows where: one node per cluster, coloured by how many of its features pass the filters, with edges between clusters whose courses predict each other.",
+  "method": {
+    "by": "gNetwork() in R",
+    "how": "for each cluster, a random forest predicts its centre (mean course over the timepoints) from the centres of all other clusters; the weight of an edge is the importance of the predictor (% increase in mean squared error when it is permuted), and the strongest predictors of each cluster are kept (ntop in gNetwork(), 10 by default)",
+    "note": "the page draws an edge between two clusters once (the larger of the two directions) when its weight is above the importance score; an edge means the two courses are related, not that the curves look alike, and not that one cluster causes the other; the weight is a ranking, not a test (see method.md in this folder)"
+  },
+  "shows": {
+    "node": "cluster",
+    "node colour": "number of features of the cluster that pass both filters, grey (0) to green (most); every feature when both filters are on All",
+    "edge": "a pair of clusters with weight above the importance score",
+    "edge opacity": "weight, rescaled over the edges drawn",
+    "outline": "selected clusters; the others are faded when only some are selected"
+  },
+  "reads": {
+    "level1": "recolours the nodes by the count of passing features; nodes and edges stay",
+    "level2": "recolours the nodes by the count of passing features; nodes and edges stay",
+    "minWeight": "redraws the edges with weight above it",
+    "layout": "moves the nodes (force, circle, grid) and clears the brush",
+    "selectedClusters": "outlines the selected nodes and fades the others"
+  },
+  "writes": {
+    "selectedClusters": "brushing a rectangle, clicking a node, clicking the empty canvas (all), the buttons Select all and Clear all",
+    "minWeight": "the slider 'Importance Score'",
+    "layout": "the list 'Graph Layout'"
+  },
+  "features": [
+    {
+      "name": "edges",
+      "of": "cluster",
+      "words": [
+        "connected",
+        "linked",
+        "hub",
+        "most edges",
+        "degree",
+        "isolated"
+      ],
+      "how": "number of edges of a cluster at the importance score in use",
+      "select": "select_by_network",
+      "describe": "describe_weight"
+    },
+    {
+      "name": "neighbours",
+      "of": "cluster",
+      "words": [
+        "neighbours",
+        "connected to",
+        "linked to",
+        "around"
+      ],
+      "how": "the clusters that share an edge with a cluster at the importance score in use",
+      "select": "select_by_network",
+      "describe": "describe_weight"
+    },
+    {
+      "name": "strongest_edge",
+      "of": "edge",
+      "words": [
+        "strongest edge",
+        "strongest link",
+        "most related pair"
+      ],
+      "how": "the pair of clusters with the highest weight",
+      "select": "select_by_network"
+    },
+    {
+      "name": "components",
+      "of": "network",
+      "words": [
+        "groups of connected clusters",
+        "falls apart",
+        "stays connected",
+        "connectivity"
+      ],
+      "how": "sets of clusters joined by edges at the importance score in use",
+      "select": "select_by_network",
+      "describe": "describe_weight"
+    }
+  ],
+  "ops": [
+    "select_by_network",
+    "describe_weight"
+  ],
+  "selectors": {
+    "network": "select_by_network"
+  },
+  "measures": {
+    "weight": "describe_weight"
+  },
+  "cards": {
+    "network": "network.md"
+  },
+  "knowledge": {
+    "file": "method.md",
+    "writer": "How the agent should word it",
+    "avoid": [
+      "regulat",
+      "caus",
+      "driv",
+      "significan",
+      "interact",
+      "influenc"
+    ]
+  },
+  "actions": [
+    {
+      "command": "brush node",
+      "param": "cluster names",
+      "words": "brush {param}",
+      "list": true
+    },
+    {
+      "command": "select node",
+      "param": "cluster names",
+      "words": "select {param}",
+      "list": true
+    },
+    {
+      "command": "select all",
+      "param": "",
+      "words": "select all clusters"
+    },
+    {
+      "command": "set importance",
+      "param": "number | min | max | default",
+      "words": "move the importance score to {param}",
+      "control": "importance",
+      "control_words": "importance score slider"
+    },
+    {
+      "command": "set layout",
+      "param": "force | circle | grid",
+      "words": "set the layout to {param}",
+      "control": "layout",
+      "control_words": "layout (force, circle, grid)"
+    }
+  ],
+  "criteria": {
+    "network": [
+      "most_edges",
+      "strongest_edge",
+      "isolated",
+      "connected_pairs",
+      "neighbours",
+      "connectivity",
+      "components"
+    ]
+  },
+  "hints": {
+    "target": {
+      "network": "edges, connected, isolated, strongest edge, neighbours"
+    },
+    "measure": {
+      "weight": "neighbours, edges per cluster, components"
+    },
+    "descriptor": {
+      "weight": "see the network card when loaded."
+    }
+  }
+}

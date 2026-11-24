@@ -22,6 +22,7 @@
 #' @param subject_sep Optional. Describes which time columns belong to which subject when the data holds several time series side by side (for example two cheeses measured over the same weeks).
 #' Either a named list of column names, such as `list(A = c("A_1", "A_2", "A_3"), C = c("C_1", "C_2", "C_3"))`, or a string such as `"A:A_1-A_3;C:C_1-C_3"`, where `x-y` means every column from `x` to `y` and several columns or ranges can be joined with commas.
 #' Every time column must belong to exactly one subject. By default (`NULL`) all time columns form a single series.
+#' @param study Optional. The output of [gStudy()]. Its `colour` column becomes `type` when the data has no `type` column yet. When `subject_sep` is not given, the sample groups come from `samples$columns` of the study, or else from the column names: `A_1, A_2, C_1, C_2` is read as the groups `A` and `C`. The study travels on with the result, so the later steps do not need it again.
 #'
 #' @details
 #' We consider two distinct scenarios for this application:
@@ -48,8 +49,22 @@
 #' @importFrom dplyr bind_rows
 #' @export
 pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
-                        scale = TRUE, autoColName = "Sec_", subject_sep = NULL) {
+                        scale = TRUE, autoColName = "Sec_", subject_sep = NULL, study = NULL) {
   subject_map <- NULL
+  study <- as_study__(study)
+  if (!is.null(study) && is.data.frame(data)) {
+    data <- as.data.frame(data)
+    colour <- study$colour$column
+    if (!"type" %in% colnames(data) && !is.null(colour) && colour %in% colnames(data)) {
+      # the colour column is called `type` from here on, and is the last column
+      data <- data[, c(setdiff(colnames(data), colour), colour), drop = FALSE]
+      colnames(data)[ncol(data)] <- "type"
+    }
+    if (is.null(subject_sep)) {
+      subject_sep <- study$samples$columns
+      if (is.null(subject_sep)) subject_sep <- detect_subjects__(setdiff(colnames(data), c("ID", "type")))
+    }
+  }
   if(is.data.frame(data)==FALSE){
     print("Reformat a list of datasets:")
     # set default type names
@@ -107,6 +122,9 @@ pre_process <- function(data, typenameList = NULL, replaceNA = TRUE,
   # log which columns belong to which subject for the plotting functions
   if (!is.null(subject_map)) {
     attr(data, "subject_sep") <- subject_map
+  }
+  if (!is.null(study)) {
+    attr(data, "molpad_study") <- study
   }
 
   return(data)

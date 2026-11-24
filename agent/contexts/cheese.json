@@ -1,6 +1,12 @@
 {
-  "background": "This is metagenomic data from two cheeses (sample groups A and C) sampled over ripening. Each feature is a contig. The data takes phylum as level 1 and class as level 2; level 3 is the contig itself with its KEGG and GO ids. Features are grouped into clusters by the shape of their trajectory.",
-  "level1_name": "phylum",
-  "level2_name": "class",
-  "missing": "-"
+  "background": "Metagenomic data from the surface of two washed-rind cheeses, sampled over ripening.",
+  "feature": "contig",
+  "samples": {
+    "groups": "Two kinds of cheese, A and C.",
+    "time": "Sampling time points during ripening, aligned between the cheeses but with missing ones."
+  },
+  "level1": {"column": "phylum", "about": "the phylum a contig is assigned to"},
+  "level2": {"column": "class", "about": "the class within that phylum"},
+  "colour": "phylum",
+  "ids": {"GO_ID": "GO", "KEGG_ID": "KEGG"}
 }

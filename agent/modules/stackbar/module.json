@@ -1,0 +1,62 @@
+{
+  "name": "stackbar",
+  "title": "Stacked bar plot",
+  "kind": "view",
+  "js": "stackbar.js",
+  "about": "Shows what the selected clusters are made of: one bar per cluster, split by level 2.",
+  "shows": {
+    "bar": "selected cluster",
+    "segment": "level-2 value",
+    "segment length": "number of features with that value",
+    "not drawn": "level-1 values; level 1 only filters"
+  },
+  "reads": {
+    "selectedClusters": "one bar per selected cluster",
+    "level1": "counts only the passing features (when the scope is filtered); level-1 values are not drawn",
+    "level2": "counts only the passing features (when the scope is filtered), so only the ticked segments remain",
+    "scope": "filtered features, or every feature of the selected clusters"
+  },
+  "writes": {},
+  "features": [
+    {
+      "name": "level2_composition",
+      "of": "cluster",
+      "words": [
+        "<<L2>> mix",
+        "composition",
+        "made of",
+        "dominated by",
+        "mostly",
+        "share"
+      ],
+      "how": "number of features per level-2 value in the cluster, as the bar shows them",
+      "select": "select_examples",
+      "describe": "describe_level2"
+    }
+  ],
+  "ops": [
+    "select_examples",
+    "describe_level2"
+  ],
+  "selectors": {
+    "example": "select_examples"
+  },
+  "measures": {
+    "level2": "describe_level2"
+  },
+  "cards": {
+    "example": "example.md"
+  },
+  "actions": [],
+  "hints": {
+    "target": {
+      "example": "two or more <<L2>> values compared without naming clusters"
+    },
+    "measure": {
+      "level2": "<<L2>> mix"
+    },
+    "descriptor": {
+      "level2": "\"which <<L2>> values make up\", \"split\", \"fraction\", \"<<L2>> composition\", level-2 counts per cluster."
+    }
+  }
+}

@@ -30,7 +30,7 @@
   function setLevel(level, param) {
     var D = MP.D;
     var values = level === 1 ? D.pathways : D.taxa;
-    var noun = level === 1 ? "annotation" : "taxonomic scope";
+    var noun = level === 1 ? D.labels.noun1 : D.labels.noun2;
     var widget = MP.filters["level" + level];
     var parts = listOf(param);
     var clearAll = parts.length === 1 && parts[0].toLowerCase() === "all";
@@ -104,6 +104,8 @@
     var alias = { "level 1": "level1", annotation: "level1", pathway: "level1",
                   "level 2": "level2", scope: "level2", "taxonomic scope": "level2", taxa: "level2",
                   off: "none", nothing: "none" };
+    alias[MP.D.labels.noun1.toLowerCase()] = "level1";   // the names of the levels in this dataset
+    alias[MP.D.labels.noun2.toLowerCase()] = "level2";
     var value = match(offered, alias[key] || key);
     if (value === null) throw new Error('No colour grouping "' + param + '". Choose one of: ' + offered.join(", "));
     MP.app.showTab("main");
@@ -507,7 +509,14 @@
     var record = (options && options.record) || function () {};
     var queue = [], byId = {}, texts = {};
     var ended = false, running = false, done = 0, wake = null, finish;
+    var last = null;   // kind of the step played before this one
     var finished = new Promise(function (resolve) { finish = resolve; });
+
+    /* Pauses are for the time between two things to follow. None before the first command of
+       a unit (the reader has just been told what will happen), none after a command unless
+       another command follows (its message can come at once), none after the last line. */
+    function isCommand(step) { return !!step && (step.kind === "dashboard" || (!!step.command && !step.kind)); }
+    function nothingLeft() { return !queue.length && ended; }
 
     function textOf(step) {
       if (step.text !== null && step.text !== undefined) return Promise.resolve(String(step.text));
@@ -536,23 +545,28 @@
           if (concluding) unit(null);
           record({ kind: "message", text: text, nodes: [say(text, concluding ? "answer" : "bot", evidence)] });
           done += 1;
-          return pause(readingTime(text));
+          last = "message";
+          return nothingLeft() ? null : pause(readingTime(text));
         });
       }
       if (step.kind === "reasoning") {
         record({ kind: "message", text: String(step.text), nodes: [say(String(step.text), "reason")] });
-        return pause(readingTime(step.text));
+        last = "message";
+        return nothingLeft() ? Promise.resolve() : pause(readingTime(step.text));
       }
       if (step.kind === "unit") {
         var heading = [step.of > 1 ? step.question : "", step.reason || "",
           (step.assumed || []).join(" "), step.overview || ""].join(" ");
         var shown = unit(step) || [];
         if (shown.length) record({ kind: "unit", text: heading, nodes: shown });
-        return pause(readingTime(heading));
+        last = "unit";
+        return Promise.resolve();   // the first action starts at once
       }
       if (step.kind !== "dashboard" && !step.command) return Promise.resolve();   // a kind this page does not know
       var entry = { kind: "dashboard", command: String(step.command), nodes: [] };
-      return pause(PAUSE_BEFORE_CMD).then(function () {
+      var first = last === null || last === "unit";
+      last = "dashboard";
+      return pause(first ? 0 : PAUSE_BEFORE_CMD).then(function () {
         entry.nodes.push(say(entry.command, "user"));
         return run(step.command);
       }).then(function (report) {
@@ -562,7 +576,7 @@
         entry.nodes.push(say(err && err.message ? err.message : String(err), "error"));
       }).then(function () {
         record(entry);   // a failed command is kept too: the replay runs the same list
-        return pause(PAUSE_AFTER_CMD);
+        return isCommand(queue[0]) ? pause(PAUSE_AFTER_CMD) : null;
       });
     }
 
@@ -654,13 +668,16 @@
     var finished = new Promise(function (resolve) {
       (function step() {
         if (stopped || i >= entries.length) { resolve(stopped ? "stopped" : "done"); return; }
-        var e = entries[i++], nodes = (e.nodes || []).filter(function (n) { return n; });
+        var before = entries[i - 1], e = entries[i++], after_ = entries[i];
+        var nodes = (e.nodes || []).filter(function (n) { return n; });
         if (hooks.on) hooks.on(nodes, e);
+        // the same pauses as the first play (see player)
+        var first = !before || before.kind === "unit";
         var job = e.kind === "dashboard"
-          ? pause(PAUSE_BEFORE_CMD).then(function () { return run(e.command); })
+          ? pause(first ? 0 : PAUSE_BEFORE_CMD).then(function () { return run(e.command); })
               .then(null, function (err) { if (hooks.error) hooks.error(err, e); })
-              .then(function () { return pause(PAUSE_AFTER_CMD); })
-          : pause(readingTime(e.text || ""));
+              .then(function () { return after_ && after_.kind === "dashboard" ? pause(PAUSE_AFTER_CMD) : null; })
+          : (e.kind === "unit" || !after_) ? Promise.resolve() : pause(readingTime(e.text || ""));
         function after() { if (hooks.off) hooks.off(nodes, e); step(); }
         job.then(after, after);
       })();

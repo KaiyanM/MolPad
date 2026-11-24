@@ -12,7 +12,7 @@ test_that("payload has every key of the JSON contract", {
   expect_named(payload, c("schema_version", "title", "timepoints", "subjects", "time_labels",
                           "types", "taxa",
                           "pathways", "clusters", "annotation_columns", "id_links",
-                          "features", "edges", "weight_slider"))
+                          "dataset", "features", "edges", "weight_slider"))
   expect_equal(payload$title, "Test")
   expect_equal(payload$schema_version, 2L)
   expect_length(payload$subjects, 0)
@@ -151,4 +151,73 @@ test_that("the dialogue and virtual mouse scripts are shipped before app.js", {
   expect_true(all(added %in% js))
   expect_true(all(match(added, js) < match("js/app.js", js)))
   expect_true(all(file.exists(file.path(d3_asset_dir(), added))))
+})
+
+test_that("the page says what the levels, the colour column and the ids are", {
+  d <- payload$dataset
+  expect_equal(d$level1$column, "Pathway")
+  expect_equal(d$level2$column, "taxonomic.scope")
+  expect_equal(d$colour$column, "type")
+  expect_true(d$level2$relation %in% c("nested", "crossed"))
+  expect_equal(d$ids$GO_ID$type, "GO")
+  expect_match(d$ids$GO_ID$example, "^GO:\\d{7}$")
+  expect_match(d$ids$KEGG_ID$example, "^K\\d{5}$")
+  expect_null(d$background)
+  expect_true(grepl('"dataset":\\{', d3_payload_json(payload)))
+})
+
+test_that("the names given to gAnnotation() and the words of the study reach the page", {
+  ann <- gAnnotation(test_annotations, system, class)
+  study <- gStudy(background = "A made-up study.", feature = "protein",
+                  level2 = list(column = "class", name = "taxon class", about = "who carries it"),
+                  samples = list(groups = "One series of ten days.", time = list(unit = "day")))
+  p <- d3_payload(test_data_processed, test_cluster, ann, test_network, study = study)
+  d <- p$dataset
+  expect_equal(d$background, "A made-up study.")
+  expect_equal(d$feature$name, "protein")
+  expect_equal(d$level1$source, "system")
+  expect_equal(d$level1$name, "system")
+  expect_equal(d$level2$source, "class")
+  expect_equal(d$level2$name, "taxon class")
+  expect_equal(d$level2$about, "who carries it")
+  expect_equal(d$samples$groups, "One series of ten days.")
+  expect_equal(d$samples$time$unit, "day")
+  expect_null(d$ids)
+
+  file <- tempfile(fileext = ".json")
+  write_study(gStudy(feature = "gene", level2 = list(column = "class", relation = "nested")), file)
+  from_file <- d3_payload(test_data_processed, test_cluster, ann, test_network, study = file)
+  expect_equal(from_file$dataset$feature$name, "gene")
+  expect_equal(from_file$dataset$level2$relation, "nested")
+})
+
+test_that("how level 2 relates to level 1, and what the colour column repeats, is read from the data", {
+  f <- data.frame(Pathway = c("p1", "p1", "p2", "Unknown"), taxonomic.scope = c("a", "b", "c", "a"),
+                  type = c("p1", "p1", "p2", "Other"), stringsAsFactors = FALSE)
+  d <- d3_dataset(NULL, f, list())
+  expect_equal(d$level2$relation, "nested")
+  expect_equal(d$colour$same_as, "level1")
+
+  f$taxonomic.scope[3] <- "a"       # the same level-2 value under two level-1 values
+  f$type <- c("x", "y", "x", "y")
+  d <- d3_dataset(gStudy(level1 = "function", colour = list(column = "batch", about = "the run")), f, list())
+  expect_equal(d$level2$relation, "crossed")
+  expect_null(d$colour$same_as)
+  expect_equal(d$level1$name, "function")
+  expect_equal(d$colour[c("column", "source", "name", "about")],
+               list(column = "type", source = "batch", name = "batch", about = "the run"))
+
+  f$KEGG_ID <- c("-", "ko:K00001,ko:K00002", "-", "-")
+  d <- d3_dataset(NULL, f, d3_link_templates("KEGG_ID", "KEGG"))
+  expect_equal(d$ids$KEGG_ID$example, "K00001")
+  expect_equal(d$ids$KEGG_ID$prefix, "ko:")
+  expect_equal(d$missing, "-")
+})
+
+test_that("a study that does not fit the data is refused", {
+  f <- data.frame(Pathway = "p", taxonomic.scope = "a", type = "x", stringsAsFactors = FALSE)
+  expect_error(d3_dataset(list(levle1 = "x"), f, list()), "levle1")
+  expect_error(d3_dataset("no list", f, list()), "gStudy")
+  expect_error(d3_dataset(list(level2 = list(relation = "below")), f, list()), "nested")
+  expect_error(d3_dataset(list(samples = list(groups = list(Z = "?"))), f, list(), NULL, "A"), "Z")
 })

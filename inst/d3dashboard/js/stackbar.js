@@ -35,7 +35,7 @@
     var t = document.getElementById("stackbar_title");
     if (!t) return;
     var S = MP.state.get();
-    t.textContent = "Taxonomic Scope of Selected Groups" +
+    t.textContent = MP.D.labels.level2 + " of Selected Groups" +
       (S.scope === "all" || !MP.state.isFiltered() ? " (all features)" : " (filtered features)");
   }
 
@@ -48,7 +48,7 @@
     });
 
     legendDiv.selectAll("*").remove();
-    legendDiv.append("span").attr("class", "mp-swatch-title").text("taxonomic.scope");
+    legendDiv.append("span").attr("class", "mp-swatch-title").text(D.labels.legend2);
     present.forEach(function (t) {
       var s = legendDiv.append("span").attr("class", "mp-swatch");
       s.append("i").style("background", D.taxaColor(t));

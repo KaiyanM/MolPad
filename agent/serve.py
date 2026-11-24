@@ -28,8 +28,8 @@ import time
 import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from . import graph
-from .data_tools import load_dataset, use_dataset
+from .core import graph
+from .core.data_tools import load_dataset, use_dataset
 
 DEFAULT_PORT = 8765
 MAX_BODY = 1_000_000
@@ -75,7 +75,7 @@ def clean_state(raw, ds):
 
 
 def health():
-    from .llm import JUDGE_TIER, _MODELS, llm_source
+    from .core.llm import JUDGE_TIER, _MODELS, llm_source
 
     ds = load_dataset()
     return {"ok": True, "model": _MODELS.get(llm_source()), "judge_tier": JUDGE_TIER,
@@ -208,7 +208,7 @@ def warm_up():
     """
     t0 = time.time()
     try:
-        from .llm import _EFFORT_DEFAULTS, effort_for, get_llm
+        from .core.llm import _EFFORT_DEFAULTS, effort_for, get_llm
 
         graph._graph()
         get_llm(False, "")
@@ -225,23 +225,23 @@ def make_server(port=DEFAULT_PORT):
 
 def main():
     p = argparse.ArgumentParser(description="Link the MolPad dashboard chat to the agent.")
-    p.add_argument("--dashboard", help="index.html written by gDashboard_d3() (or its JSON payload); "
-                   "default: the CSVs named in agent/config.py")
-    p.add_argument("--context", help="JSON file with background, level1_name, level2_name, missing "
+    p.add_argument("--dashboard", required=True,
+                   help="index.html written by gDashboard_d3() (or its JSON payload)")
+    p.add_argument("--context", help="JSON file that overrules the page's own description of the data: "
+                   "background, feature, samples, level1, level2, colour, ids, missing; write_study() in R writes one "
                    "(see agent/contexts/cheese.json)")
     p.add_argument("--port", type=int, default=DEFAULT_PORT)
     p.add_argument("--debug", action="store_true", help="print each LLM decision as a [debug] line")
     a = p.parse_args()
 
-    from . import nodes
+    from .core import nodes
 
     nodes.DEBUG = a.debug or nodes.DEBUG
-    if a.dashboard:
-        from .payload import load
+    from .core.payload import load
 
-        use_dataset(load(a.dashboard, a.context))
+    use_dataset(load(a.dashboard, a.context))
     ds = load_dataset()
-    print(f"[serve] data: {a.dashboard or 'CSV files of agent/config.py'}; {len(ds.features):,} features, "
+    print(f"[serve] data: {a.dashboard}; {len(ds.features):,} features, "
           f"{len(ds.clusters)} clusters, sample groups {', '.join(ds.subjects)}", file=sys.stderr)
     server = make_server(a.port)
     threading.Thread(target=warm_up, daemon=True).start()

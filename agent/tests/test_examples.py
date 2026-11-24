@@ -2,9 +2,9 @@
 
 import pytest
 
-from agent.data_tools import Session, load_dataset
+from agent.core.data_tools import Session, load_dataset
 from agent.examples import examples_by_level2_composition
-from agent.findings import conclude
+from agent.core.findings import conclude
 
 
 @pytest.fixture(scope="module")
